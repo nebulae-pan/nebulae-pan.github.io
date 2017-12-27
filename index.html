@@ -334,68 +334,16 @@
       
         
           
-            <h2 id="hotfix比较成熟的原理"><a href="#hotfix比较成熟的原理" class="headerlink" title="hotfix比较成熟的原理"></a>hotfix比较成熟的原理</h2><p>热修复需要完成的功能：代码修复，资源修复，so修复<br>代码修复大体分为两类，对Java层的修改，和对native层的修改。<br>已有的方向：</p>
-<h3 id="Dexposed"><a href="#Dexposed" class="headerlink" title="Dexposed"></a>Dexposed</h3><p>在native层中找到需要修复的Java函数对应的mothed对象，修改为native方法，再将nativeFunc指向框架的native回调方法，再使用该方法回调Java层已经修复的方法。<br>最大的问题：不支持ART虚拟机</p>
-<h3 id="Native-Hook"><a href="#Native-Hook" class="headerlink" title="Native Hook"></a>Native Hook</h3><p>在JNI层对方法进行替换<br>优点：即时生效<br>缺点：无法在类中替换和删减字段，无法增加方法  </p>
-<h3 id="ClassLoader替换"><a href="#ClassLoader替换" class="headerlink" title="ClassLoader替换"></a>ClassLoader替换</h3><p>将修复过的类打包到dex中，插入到类加载器加载队列的最前面<br>优点：以类的粒度进行修复，新增方法和字段都可以支持<br>缺点：因为要加载dex才能生效，所以必须重启</p>
-<h3 id="类似Instant-run"><a href="#类似Instant-run" class="headerlink" title="类似Instant run"></a>类似Instant run</h3><p>编译阶段给每个类都注入了代理变量，在执行方法时，先根据补丁包里的内容判断这个变量是否为空，如果不为空，则执行代理里的方法，为空，执行原来的逻辑<br>优点：实时生效<br>缺点：so和资源无法替换，侵入编译过程，对方法数，包体积都有影响，proguard的优化，对补丁的修复效果也有影响 </p>
-<h2 id="一些具体的实现"><a href="#一些具体的实现" class="headerlink" title="一些具体的实现"></a>一些具体的实现</h2><h3 id="阿里AndFix"><a href="#阿里AndFix" class="headerlink" title="阿里AndFix"></a>阿里AndFix</h3><p>使用Native Hook的方式实现，获取被修复方法在native层的方法指针，将patch方法的所有native层的数据结构替换被修复方法的数据结构，以此实现方法的修复。由于这些数据结构没有缓存，下次调用时会立即使用替换过的方法的成员，因此补丁可以立即生效。<br>优点：补丁应用立即生效<br>缺点：某些情况无法进行修复，不支持新增静态变量和方法</p>
-<h3 id="腾讯QQ空间"><a href="#腾讯QQ空间" class="headerlink" title="腾讯QQ空间"></a>腾讯QQ空间</h3><p>ClassLoader方式实现。<br>将修复的patch构成的Elements对象插入到pathList的第一位，ClassLoader会先加载已经修复的类，忽略被修复的类，以此完成修复。<br>在apk安装时，dalvik虚拟机会将dex优化成odex，优化过程中会对所有class进行校验，如果A类在static,private,构造方法，override方法中<strong>直接引用</strong>到B类，且A,B类在一个dex中，那么A类就会被打上CALSS_ISPERVERIFY标记。<br>缺点：需要插桩消去CLASS_ISPERVERIFY，影响运行效率</p>
-<h3 id="微信Tinker"><a href="#微信Tinker" class="headerlink" title="微信Tinker"></a>微信Tinker</h3><p>同QQ空间的方案类似，不同的是，Tinker下发的补丁通过自研的DexDiff算进行处理，体积很小。在本地后台与原应用的dex进行合并，生成全量dex，然后将dex通过hook插入到pathList中。<br>优点：补丁小<br>缺点：后台和成dex，如果数据包过大，会耗费很长时间，占用大量内存。  </p>
-<h3 id="美团Robust"><a href="#美团Robust" class="headerlink" title="美团Robust"></a>美团Robust</h3><p>在编译时在每个方法的开头注入一段逻辑，并在每一个类中通过注入增加一个字段，类型为一个需要补丁类实现的接口，通过判断该字段是否为空来决定是否需要加载补丁的逻辑。<br>补丁需要实现上述字段的接口类型，以及一个包含所有补丁内容和需要被修复内容的类。当补丁被应用时，将反射生成包含所有补丁内容的类的实例，通过该实例获取所有补丁内容，然后根据这些内容实例化补丁类，并通过反射将这些实例设置为被修复类的字段的值。当程序执行到被修复的逻辑时，此时注入的字段为空，走补丁内容的逻辑。<br>制作补丁需要额外的实现，并且，使用被修复类的成员函数或者成员变量只能通过反射来实现。</p>
-<p>优点：</p>
-<ol>
-<li>正常使用ClassLoader，不涉及对系统API的反射调用，不需要针对每个版本和系统机型进行适配  </li>
-<li>补丁应用立即生效  </li>
-</ol>
-<p>缺点：</p>
-<ol>
-<li>需要针对每一个修复的方法制作补丁，可以通过自动化制作补丁来完成，但是对开发不透明，需要通过注解或者方法调用告知自动化补丁插件，哪些方法需要添加。</li>
-</ol>
-<h3 id="饿了么Amigo"><a href="#饿了么Amigo" class="headerlink" title="饿了么Amigo"></a>饿了么Amigo</h3><p>在框架的Application中通过反射使用自己的ClassLoader替换掉LoadedApk类中的ClassLoader。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ActivityThread activityThread = ActivityThread.currentActivityThread();</span><br><span class="line">ArrayMap&lt;String, WeakReference&lt;LoadedApk&gt;&gt; packages = activity.mPackages;</span><br><span class="line">LoadedApk loadedApk = packages.get(s).get();<span class="comment">//获取第一个不为空对象</span></span><br><span class="line">loadedApk.mClassLoader = AmigoClassLoader.newInstance(<span class="comment">/*初始化参数*/</span>);</span><br></pre></td></tr></table></figure>
-<p>初始化AmigoClassLoader(extends DexClassLoader)的参数为patch的路径，Amigo接受的patch文件一般为.apk，.dex和.jar也可以。<br>实际上也是一种全量替换，dex的加载完全交给ClassLoader，无需hook dexPathList插入Element</p>
-<p>优点：可以新增Activity，替换so和资源文件，无需插桩<br>缺点：全量加载，patch文件较大</p>
-<h3 id="RocooFix-HotFix-Nuwa"><a href="#RocooFix-HotFix-Nuwa" class="headerlink" title="RocooFix/HotFix/Nuwa"></a>RocooFix/HotFix/Nuwa</h3><p>类似QQ空间的解决方案，含有gradle生成补丁包的插件，生成补丁没有实现完全自动化。</p>
-<h3 id="阿里Sophix"><a href="#阿里Sophix" class="headerlink" title="阿里Sophix"></a>阿里Sophix</h3><p>可以使用两种修复方式：<br>热启动：<br>类似Andfix，在native层修改方法所有的变量，指向被fix的方法，并且加强了兼容性<br>冷启动：<br>类全量技术，通过对dex文件的处理，把dex文件中需要patch的类文件的classRef移除，使虚拟机在处理时找不到旧dex的类文件，被patch的类都在patch.dex中，解决了dalvik虚拟机的CLASS_ISPREVERIFY的问题。</p>
-<h2 id="需要解决的问题"><a href="#需要解决的问题" class="headerlink" title="需要解决的问题"></a>需要解决的问题</h2><h3 id="什么时候插入dex-Element"><a href="#什么时候插入dex-Element" class="headerlink" title="什么时候插入dex(Element)"></a>什么时候插入dex(Element)</h3><p><code>attachBaseContext</code>。Application是app进程运行时第一个被加载的类，在attachBaseContext中，Application才真正被接入AMS中，因此在这个方法中替换dex，可以最大程度减少其他类的加载</p>
-<h3 id="Dlavik-and-ART"><a href="#Dlavik-and-ART" class="headerlink" title="Dlavik and ART"></a>Dlavik and ART</h3><p>Dlavik虚拟机中的pre-verify</p>
-<h3 id="完整性校验，签名校验"><a href="#完整性校验，签名校验" class="headerlink" title="完整性校验，签名校验"></a>完整性校验，签名校验</h3><h3 id="生成补丁包"><a href="#生成补丁包" class="headerlink" title="生成补丁包"></a>生成补丁包</h3><p>对开发透明：</p>
-<ol>
-<li>使用new.apk和old.apk进行dif，本地从服务器拉取差分文件，并在本地合并（全量）</li>
-<li>使用gradle插件，在打包时，对每个文件进行SHA1并保存，如果SHA1与上次不同，则认为是被改动了，将这个类的子类和引用该类的文件，都打包进patch中。</li>
-<li>使用new.apk和old.apk通过dex2jar进行反编译，通过解析得到的数据结构进行比较。由于是从数据结构上的比较，能够更准确地发现被改动的内容。在得到被改动的类之后，遍历所有class文件，找到直接调用他们的类，也打包进入patch。<br>对开发不透明：</li>
-<li>使用注解标记改动或新增的类或方法，编译时使用注解解析器将被改动的类拿出并打包进patch中。</li>
-<li>(Nuwa)把被改动的类手动提取出来，由插件检测相关联的类，并一起打包进入patch</li>
-</ol>
-<h3 id="Android-7-0-classtable-问题"><a href="#Android-7-0-classtable-问题" class="headerlink" title="Android 7.0+ classtable 问题"></a>Android 7.0+ classtable 问题</h3><p>在ART虚拟机中执行的是经过dex2aot转换后的oat文件，但是dex转成oat的过程导致APP安装时间变长，转换后的oat文件比原来的dex文件大了很多，占用了太多储存空间。<br>因此Android7.0+引入了<a href="https://github.com/WeMobileDev/article/blob/master/Android_N%E6%B7%B7%E5%90%88%E7%BC%96%E8%AF%91%E4%B8%8E%E5%AF%B9%E7%83%AD%E8%A1%A5%E4%B8%81%E5%BD%B1%E5%93%8D%E8%A7%A3%E6%9E%90.md" target="_blank" rel="noopener">混合编译</a>，安装的时候没有全部转换为机器码，而是根据运行时分析热区代码，将热区代码转换成机器码并缓存起来。在Android7.0中，每个APP都会有自己的art文件，用来缓存一些热区代码。Android7.0的ClassLoader类相比之前多了classtable属性，APP启动的时候就会将缓存的类注入到ClassLoader的classtable中，而classtable的加载是在dex之前的，要解决该问题的一个思路是替换整个ClassLoader，不走原本的缓存逻辑。</p>
-<h3 id="Instant-Run具体原理-gradle-2-0-0"><a href="#Instant-Run具体原理-gradle-2-0-0" class="headerlink" title="Instant Run具体原理(gradle 2.0.0)"></a>Instant Run具体原理(gradle 2.0.0)</h3><p>修改了AndroidMenifest.xml的字节码，将Application节点的android:name修改为Instant run相关的<code>BootstrapApplication</code>。<br>使用transform API修改类字节码，给所有的类加上$change字段，$change为IncrementalChange类型。如果$change不为空，则调用$change的access$dispatch方法，参数为方法签名字符串和方法参数数组。<br>在attachBaseContext中，通过反射，将现有ClassLoader的parent设置为<code>IncrementalClassLoader</code><br>在onCreate中，将realApplication替换回应用，并执行相应的生命周期。</p>
-<h2 id="方案选择："><a href="#方案选择：" class="headerlink" title="方案选择："></a>方案选择：</h2><h3 id="纯instant-run"><a href="#纯instant-run" class="headerlink" title="纯instant run"></a>纯instant run</h3><p>up: </p>
-<ul>
-<li>即时生效</li>
-<li>兼容性强（正常使用ClassLoader，不涉及反射调用系统api）</li>
-</ul>
-<p>down:</p>
-<ul>
-<li>生成补丁复杂（反射调用原有类的成员变量），自动化补丁方式困难</li>
-<li>会增加额外方法</li>
-<li>侵入开发过程</li>
-<li>影响编译时间</li>
-</ul>
-<h3 id="native-hook-classLoader-replace"><a href="#native-hook-classLoader-replace" class="headerlink" title="native hook+classLoader replace"></a>native hook+classLoader replace</h3><p>up:</p>
-<ul>
-<li>大多数情况及时生效</li>
-<li>重启生效的情况稳定性很强</li>
-</ul>
-<p>down:</p>
-<ul>
-<li>需要根据修改内容确定采取的方案</li>
-<li>动态生效需要考虑的情况非常多</li>
-<li>dex2jar的已知问题，可能需要在开发过程中打包</li>
-<li>插入代码需要根据版本源码适配</li>
-</ul>
-
-          
+          hotfix比较成熟的原理热修复需要完成的功能：代码修复，资源修复，so修复代码修复大体分为两类，对Java层的修改，和对native层的修改。已有的方向：
+Dexposed在native层中找到需要修复的Java函数对应的mothed对象，修改为native方法，再将nativeFunc指向框架的
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -524,39 +472,15 @@
       
         
           
-            <h3 id="Android-5-0-（API-21）以上"><a href="#Android-5-0-（API-21）以上" class="headerlink" title="Android 5.0 （API 21）以上"></a>Android 5.0 （API 21）以上</h3><p>提供双向认证接口：<code>WebViewClient#onReceivedClientCertRequest(WebView, ClientCerRequest)</code>.<br>其中<code>ClientCertRequest</code>提供了双向认证的方法:<br><code>ClientCerRequest#proceed(PrivateKey,X509Certificate)</code>.</p>
-<ol>
-<li>继承WebViewClient，并override方法onReceivedClientCertRequest</li>
-<li>override方法onReceivedSslError(WebView,SsLErrorHandler,SsLError)，调用handler.proceed()</li>
-</ol>
-<p><code>ClientCerRequest#proceed(PrivateKey,X509Certificate)</code>两个参数的获取方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">PrivateKey privateKey = <span class="keyword">null</span>;</span><br><span class="line">X509Certificate[] certificates = <span class="keyword">null</span>;</span><br><span class="line"><span class="comment">//读取证书</span></span><br><span class="line">InputStream certificateFileStream = getClass().getResourceAsStream(<span class="string">"fileName"</span>);</span><br><span class="line">KeyStore keyStore = KeyStore.getInstance(<span class="string">"PKCS12"</span>);</span><br><span class="line">String password = <span class="string">"password"</span>;</span><br><span class="line"><span class="comment">//将证书写入keyStore</span></span><br><span class="line">keyStore.load(certificateFileStream, password.toCharArray());</span><br><span class="line"></span><br><span class="line">Enumeration&lt;String&gt; aliases = keyStore.aliases();</span><br><span class="line">String alias = aliases.nextElement();</span><br><span class="line"></span><br><span class="line">Key key = keyStore.getKey(alias, password.toCharArray());</span><br><span class="line"><span class="keyword">if</span> (key <span class="keyword">instanceof</span> PrivateKey) &#123;</span><br><span class="line">    privateKey = (PrivateKey) key;</span><br><span class="line">    Certificate cert = keyStore.getCertificate(alias);</span><br><span class="line">    certificates = <span class="keyword">new</span> X509Certificate[<span class="number">1</span>];</span><br><span class="line">    certificates[<span class="number">0</span>] = (X509Certificate) cert;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">certificateFileStream.close();</span><br></pre></td></tr></table></figure>
-<p>原因：SSL可能在证书验证前就产生错误，如果不调用handler.proceed，那么这次请求会失败。<a href="https://stackoverflow.com/questions/35871350/not-getting-callback-for-onreceivedclientcertrequest-in-webview" target="_blank" rel="noopener">链接</a></p>
-<h3 id="Android-5-0-以下"><a href="#Android-5-0-以下" class="headerlink" title="Android 5.0 以下"></a>Android 5.0 以下</h3><p>没有提供能够进行直接双向认证的接口。</p>
-<ul>
-<li>4.0以下WebViewClient有<code>onReceivedClientCerRequest</code>方法，但被标记为@hide；</li>
-<li>4.0至4.3版本<code>onReceivedClientCerRequest</code>被移动至<code>WebViewClientClassicExt</code>类中，该类仍为@hide标记。</li>
-<li>4.4版本将所有webView双向认证相关的代码移除，暂时没有找到办法做4.4版本的双向认证。 </li>
-</ul>
-<p>目前有三种妥协的方法可以进行双向认证。<a href="https://stackoverflow.com/questions/15588851/android-webview-with-client-certificate" target="_blank" rel="noopener">链接</a></p>
-<ol>
-<li>编译去掉@hide标记后的类文件，使用得到的Jar。<br> 缺点：4.0-4.3，每个版本都需要编译，判断版本加载不同jar包，并且jar加入工程会影响到包的大小。4.4仍然无法双向验证。</li>
-<li>4.0以上加载证书<br> 缺点：加载证书后有很多机型的WebView仍然无法验证</li>
-<li>通过<code>WebViewClient#shouldInterceptRequest(WebView,String)</code>拦截所有webView发出的请求，并使用得到的url，通过能够完成认证的链接去获取数据，然后将结果交给WebView进行渲染。<br> 缺点：如果webView loadUrl的过程中，含有POST请求，或是需要在请求体携带参数，这种方法都无法取得需要发送的参数，因为低版本能够拦截到的只有url而已。</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//拦截示例</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> WebResourceResponse <span class="title">intercept</span><span class="params">(Uri uri)</span> </span>&#123;</span><br><span class="line">    Request request;</span><br><span class="line">    request = <span class="keyword">new</span> Request.Builder()</span><br><span class="line">            .url(<span class="keyword">new</span> URL(uri.toString()))</span><br><span class="line">            .removeHeader(<span class="string">"User-Agent"</span>)</span><br><span class="line">            .addHeader(<span class="string">"User-Agent"</span>, mUserAgent)</span><br><span class="line">            .build();</span><br><span class="line">    <span class="comment">//能够进行双向认证的链接,具体见下一部分：普通链接双向认证</span></span><br><span class="line">    Response response = mClient.newCall(request).execute();</span><br><span class="line">    ResponseBody responseBody = response.body();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (responseBody == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> Exception();</span><br><span class="line">    &#125;</span><br><span class="line">    InputStream is = responseBody.byteStream();</span><br><span class="line">    String contentType = response.header(<span class="string">"content-type"</span>);</span><br><span class="line">    String encoding = response.header(<span class="string">"content-encoding"</span>);</span><br><span class="line">    <span class="comment">//获取响应的相应参数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (contentType != <span class="keyword">null</span>) &#123;</span><br><span class="line">        String mimeType = contentType;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (contentType.contains(<span class="string">";"</span>)) &#123;</span><br><span class="line">            mimeType = contentType.split(<span class="string">";"</span>)[<span class="number">0</span>].trim();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//返回WebResourceResponse交由WebView渲染</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> WebResourceResponse(mimeType, encoding, is);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="普通链接双向认证"><a href="#普通链接双向认证" class="headerlink" title="普通链接双向认证"></a>普通链接双向认证</h3><p>为链接设置SSLContext</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SSLContext sslContext = SSLContext.getInstance(<span class="string">"TLS"</span>);</span><br><span class="line">sslContext.init(keyManager, trustManagers, <span class="keyword">new</span> SecureRandom());</span><br></pre></td></tr></table></figure>
-<ul>
-<li>KeyManager,使用客户端证书</li>
-<li>TrushManager,使用服务端证书<br>将SSLContext初始化完毕，设置给发出请求的链接，此处以Okhttp为示例</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> OkHttpClient <span class="title">getSSLClient</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    X509TrustManager manager = prepareSslPinning();</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> OkHttpClient.Builder()</span><br><span class="line">            .cookieJar(<span class="keyword">new</span> LoginCookieJar())</span><br><span class="line">            .sslSocketFactory(mSSLContext.getSocketFactory(), manager)</span><br><span class="line">            .addNetworkInterceptor(logging)</span><br><span class="line">            .build();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> X509TrustManager <span class="title">prepareSslPinning</span><span class="params">()</span> <span class="keyword">throws</span> NoSuchAlgorithmException, KeyManagementException, IOException </span>&#123;</span><br><span class="line">    InputStream[] certificates = <span class="keyword">new</span> InputStream[]&#123;mContext.getResources().getAssets().open(<span class="string">"server.cer"</span>)&#125;;</span><br><span class="line">    InputStream inputStream = mContext.getResources().getAssets().open(<span class="string">"client.p12"</span>);</span><br><span class="line"></span><br><span class="line">    TrustManager[] trustManagers = prepareTrustManager(certificates);</span><br><span class="line">    KeyManager[] keyManagers = prepareKeyManager(inputStream, <span class="string">"password"</span>);</span><br><span class="line"></span><br><span class="line">    mSSLContext = SSLContext.getInstance(<span class="string">"TLS"</span>);</span><br><span class="line">    mSSLContext.init(keyManagers, trustManagers, <span class="keyword">new</span> SecureRandom());</span><br><span class="line">    <span class="keyword">return</span> chooseTrustManager(trustManagers);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>获取keyManager和trustManager</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//省去了try-catch以及判空代码</span></span><br><span class="line"><span class="keyword">private</span> TrustManager[] prepareTrustManager(InputStream... certificates) &#123;</span><br><span class="line">    CertificateFactory certificateFactory = CertificateFactory.getInstance(<span class="string">"X.509"</span>);</span><br><span class="line">    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());</span><br><span class="line">    keyStore.load(<span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">int</span> index = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (InputStream certificate : certificates) &#123;</span><br><span class="line">        String certificateAlias = Integer.toString(index++);</span><br><span class="line">        keyStore.setCertificateEntry(certificateAlias, certificateFactory.generateCertificate(certificate));</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (certificate != <span class="keyword">null</span>)</span><br><span class="line">                certificate.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            LogUtils.e(<span class="string">"Certificate Exception"</span>, e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    TrustManagerFactory trustManagerFactory = TrustManagerFactory.</span><br><span class="line">            getInstance(TrustManagerFactory.getDefaultAlgorithm());</span><br><span class="line">    trustManagerFactory.init(keyStore);</span><br><span class="line">    <span class="keyword">return</span> trustManagerFactory.getTrustManagers();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> KeyManager[] prepareKeyManager(InputStream bksFile, String password) &#123;</span><br><span class="line">    KeyStore clientKeyStore = KeyStore.getInstance(<span class="string">"PKCS12"</span>);</span><br><span class="line">    clientKeyStore.load(bksFile, password.toCharArray());</span><br><span class="line">    KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());</span><br><span class="line">    keyManagerFactory.init(clientKeyStore, password.toCharArray());</span><br><span class="line">    <span class="keyword">return</span> keyManagerFactory.getKeyManagers();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> X509TrustManager <span class="title">chooseTrustManager</span><span class="params">(TrustManager[] trustManagers)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (TrustManager trustManager : trustManagers) &#123;</span><br><span class="line">        <span class="keyword">if</span> (trustManager <span class="keyword">instanceof</span> X509TrustManager) &#123;</span><br><span class="line">            <span class="keyword">return</span> (X509TrustManager) trustManager;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          
+          Android 5.0 （API 21）以上提供双向认证接口：WebViewClient#onReceivedClientCertRequest(WebView, ClientCerRequest).其中ClientCertRequest提供了双向认证的方法:ClientCerRequest#pro
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/12/20/webview-ssl-authenticate/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -685,17 +609,15 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-          
+          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in 
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/12/18/hello-world/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
