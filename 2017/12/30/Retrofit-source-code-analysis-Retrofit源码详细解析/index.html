@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Android,开源框架,Java,网络," />
+  <meta name="keywords" content="网络,Android,开源框架,Java," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="概述最近公司准备搞一个网络框架统一所有项目的网络请求，借此机会重新复习一下目前比较火的网络框架，顺便再进一步，写一写源码分析，所以这篇文章属于进阶类型，不会去介绍这个框架的用法，而是从简单的代码示例，一步步分析源码，走完整个框架的流程。之后可能会附上okio和okhttp的源码分析。简单说一下Retrofit，Retrofit是一个用于简化HTTP请求的库，官方网站。截止目前（2017-12-27">
-<meta name="keywords" content="Android,开源框架,Java,网络">
+<meta name="keywords" content="网络,Android,开源框架,Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Retrofit源码详细解析">
 <meta property="og:url" content="http://yoursite.com/2017/12/30/Retrofit-source-code-analysis-Retrofit源码详细解析/index.html">
@@ -88,7 +88,7 @@
 <meta property="og:description" content="概述最近公司准备搞一个网络框架统一所有项目的网络请求，借此机会重新复习一下目前比较火的网络框架，顺便再进一步，写一写源码分析，所以这篇文章属于进阶类型，不会去介绍这个框架的用法，而是从简单的代码示例，一步步分析源码，走完整个框架的流程。之后可能会附上okio和okhttp的源码分析。简单说一下Retrofit，Retrofit是一个用于简化HTTP请求的库，官方网站。截止目前（2017-12-27">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/Retrofit流程分析.png">
-<meta property="og:updated_time" content="2017-12-30T06:44:43.000Z">
+<meta property="og:updated_time" content="2018-01-03T14:46:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Retrofit源码详细解析">
 <meta name="twitter:description" content="概述最近公司准备搞一个网络框架统一所有项目的网络请求，借此机会重新复习一下目前比较火的网络框架，顺便再进一步，写一写源码分析，所以这篇文章属于进阶类型，不会去介绍这个框架的用法，而是从简单的代码示例，一步步分析源码，走完整个框架的流程。之后可能会附上okio和okhttp的源码分析。简单说一下Retrofit，Retrofit是一个用于简化HTTP请求的库，官方网站。截止目前（2017-12-27">
@@ -477,13 +477,13 @@
       
         <div class="post-tags">
           
+            <a href="/tags/网络/" rel="tag"># 网络</a>
+          
             <a href="/tags/Android/" rel="tag"># Android</a>
           
             <a href="/tags/开源框架/" rel="tag"># 开源框架</a>
           
             <a href="/tags/Java/" rel="tag"># Java</a>
-          
-            <a href="/tags/网络/" rel="tag"># 网络</a>
           
         </div>
       
@@ -662,7 +662,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x6982;&#x8FF0;" class="headerlink" title="&#x6982;&#x8FF0;"></a>&#x6982;&#x8FF0;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#示例"><span class="nav-number">2.</span> <span class="nav-text"><a href="#&#x793A;&#x4F8B;" class="headerlink" title="&#x793A;&#x4F8B;"></a>&#x793A;&#x4F8B;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程分析"><span class="nav-number">3.</span> <span class="nav-text"><a href="#&#x6D41;&#x7A0B;&#x5206;&#x6790;" class="headerlink" title="&#x6D41;&#x7A0B;&#x5206;&#x6790;"></a>&#x6D41;&#x7A0B;&#x5206;&#x6790;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建Retrofit实例"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#&#x521B;&#x5EFA;Retrofit&#x5B9E;&#x4F8B;" class="headerlink" title="&#x521B;&#x5EFA;Retrofit&#x5B9E;&#x4F8B;"></a>&#x521B;&#x5EFA;Retrofit&#x5B9E;&#x4F8B;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态代理接口-retrofit-create"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#&#x52A8;&#x6001;&#x4EE3;&#x7406;&#x63A5;&#x53E3;-retrofit-create" class="headerlink" title="&#x52A8;&#x6001;&#x4EE3;&#x7406;&#x63A5;&#x53E3; retrofit#create()"></a>&#x52A8;&#x6001;&#x4EE3;&#x7406;&#x63A5;&#x53E3; retrofit#create()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#调用声明的接口方法"><span class="nav-number">3.3.</span> <span class="nav-text"><a href="#&#x8C03;&#x7528;&#x58F0;&#x660E;&#x7684;&#x63A5;&#x53E3;&#x65B9;&#x6CD5;" class="headerlink" title="&#x8C03;&#x7528;&#x58F0;&#x660E;&#x7684;&#x63A5;&#x53E3;&#x65B9;&#x6CD5;"></a>&#x8C03;&#x7528;&#x58F0;&#x660E;&#x7684;&#x63A5;&#x53E3;&#x65B9;&#x6CD5;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SerivceMethod"><span class="nav-number">3.4.</span> <span class="nav-text"><a href="#SerivceMethod" class="headerlink" title="SerivceMethod"></a>SerivceMethod</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#serviceMehtod-callAdapter"><span class="nav-number">3.4.1.</span> <span class="nav-text"><a href="#serviceMehtod-callAdapter" class="headerlink" title="serviceMehtod#callAdapter"></a>serviceMehtod#callAdapter</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CallAdapter和CallAdapter-Factory"><span class="nav-number">3.5.</span> <span class="nav-text"><a href="#CallAdapter&#x548C;CallAdapter-Factory" class="headerlink" title="CallAdapter&#x548C;CallAdapter.Factory"></a>CallAdapter&#x548C;CallAdapter.Factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Converter和Converter-Factory"><span class="nav-number">3.6.</span> <span class="nav-text"><a href="#Converter&#x548C;Converter-Factory" class="headerlink" title="Converter&#x548C;Converter.Factory"></a>Converter&#x548C;Converter.Factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ServiceMethod的构建"><span class="nav-number">3.7.</span> <span class="nav-text"><a href="#ServiceMethod&#x7684;&#x6784;&#x5EFA;" class="headerlink" title="ServiceMethod&#x7684;&#x6784;&#x5EFA;"></a>ServiceMethod&#x7684;&#x6784;&#x5EFA;</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#parseMethodAnnotation"><span class="nav-number">3.7.1.</span> <span class="nav-text"><a href="#parseMethodAnnotation" class="headerlink" title="parseMethodAnnotation()"></a>parseMethodAnnotation()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#处理parameterAnnotationsArray"><span class="nav-number">3.7.2.</span> <span class="nav-text"><a href="#&#x5904;&#x7406;parameterAnnotationsArray" class="headerlink" title="&#x5904;&#x7406;parameterAnnotationsArray"></a>&#x5904;&#x7406;parameterAnnotationsArray</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程总结"><span class="nav-number">4.</span> <span class="nav-text"><a href="#&#x6D41;&#x7A0B;&#x603B;&#x7ED3;" class="headerlink" title="&#x6D41;&#x7A0B;&#x603B;&#x7ED3;"></a>&#x6D41;&#x7A0B;&#x603B;&#x7ED3;</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#示例"><span class="nav-number">2.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程分析"><span class="nav-number">3.</span> <span class="nav-text">流程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建Retrofit实例"><span class="nav-number">3.1.</span> <span class="nav-text">创建Retrofit实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态代理接口-retrofit-create"><span class="nav-number">3.2.</span> <span class="nav-text">动态代理接口 retrofit#create()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#调用声明的接口方法"><span class="nav-number">3.3.</span> <span class="nav-text">调用声明的接口方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SerivceMethod"><span class="nav-number">3.4.</span> <span class="nav-text">SerivceMethod</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#serviceMehtod-callAdapter"><span class="nav-number">3.4.1.</span> <span class="nav-text">serviceMehtod#callAdapter</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CallAdapter和CallAdapter-Factory"><span class="nav-number">3.5.</span> <span class="nav-text">CallAdapter和CallAdapter.Factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Converter和Converter-Factory"><span class="nav-number">3.6.</span> <span class="nav-text">Converter和Converter.Factory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ServiceMethod的构建"><span class="nav-number">3.7.</span> <span class="nav-text">ServiceMethod的构建</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#parseMethodAnnotation"><span class="nav-number">3.7.1.</span> <span class="nav-text">parseMethodAnnotation()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#处理parameterAnnotationsArray"><span class="nav-number">3.7.2.</span> <span class="nav-text">处理parameterAnnotationsArray</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程总结"><span class="nav-number">4.</span> <span class="nav-text">流程总结</span></a></li></ol></div>
             
 
           </div>
@@ -682,7 +682,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
