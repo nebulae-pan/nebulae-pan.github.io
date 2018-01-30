@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Android,开源框架,Java,网络," />
+  <meta name="keywords" content="开源框架,Java,Android,网络," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="概述okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。square官方是这样描述okio的  Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data">
-<meta name="keywords" content="Android,开源框架,Java,网络">
+<meta name="keywords" content="开源框架,Java,Android,网络">
 <meta property="og:type" content="article">
 <meta property="og:title" content="okio源码详细解析">
 <meta property="og:url" content="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio源码详细解析/index.html">
@@ -90,8 +90,8 @@
 <meta property="og:image" content="http://yoursite.com/images/okio-class.png">
 <meta property="og:image" content="http://yoursite.com/images/okio-init.jpg">
 <meta property="og:image" content="http://yoursite.com/images/okio-write.jpg">
-<meta property="og:image" content="http://yoursite.com/images/okio-init.jpg">
-<meta property="og:updated_time" content="2018-01-30T13:19:37.000Z">
+<meta property="og:image" content="http://yoursite.com/images/okio-read.jpg">
+<meta property="og:updated_time" content="2018-01-30T13:23:12.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="okio源码详细解析">
 <meta name="twitter:description" content="概述okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。square官方是这样描述okio的  Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data">
@@ -378,7 +378,7 @@
 </li>
 <li><p>向Segment中写入6个字节数据，limit后移六位，这时可读的数据长度为limit-pos = 6<br><img src="/images/okio-write.jpg" alt="write"></p>
 </li>
-<li><p>从Segment中读取5个字节数据，pos后移5位，这时仍然可读的数据长度为limit-pos = 1<br><img src="/images/okio-init.jpg" alt="read"></p>
+<li><p>从Segment中读取5个字节数据，pos后移5位，这时仍然可读的数据长度为limit-pos = 1<br><img src="/images/okio-read.jpg" alt="read"></p>
 </li>
 </ul>
 <p>当然，每个Segment实例能存储的数据都是有限的，如果写入的数据超过了segmentA的最大大小，那么较好的做法就是将余下的数据写入segmentB中，然后将segmentB放到segmentA的后面（segmentA.next = segmentB）。这时候问题就来了，这个segmentB是否可以任意生成？显然，如果每次加入新数据都要新生成一个Segment实例，开销有点高。在okio中，是通过SegmentPool来控制Segment实例的分配和回收的，下来一起详细分析一下这个类的代码。</p>
@@ -419,11 +419,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Android/" rel="tag"># Android</a>
-          
             <a href="/tags/开源框架/" rel="tag"># 开源框架</a>
           
             <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
           
             <a href="/tags/网络/" rel="tag"># 网络</a>
           
