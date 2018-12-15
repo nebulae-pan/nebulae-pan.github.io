@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="网络,开源框架,Java,Android," />
+  <meta name="keywords" content="Android,网络,开源框架,Java," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="概述okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。square官方是这样描述okio的  Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data">
-<meta name="keywords" content="网络,开源框架,Java,Android">
+<meta name="keywords" content="Android,网络,开源框架,Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="okio源码详细解析">
 <meta property="og:url" content="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio源码详细解析/index.html">
@@ -89,9 +89,9 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/okio-class.png">
 <meta property="og:image" content="http://yoursite.com/images/okio-init.jpg">
-<meta property="og:image" content="http://yoursite.com/images/okio-write.jpg">
-<meta property="og:image" content="http://yoursite.com/images/okio-read.jpg">
-<meta property="og:updated_time" content="2018-02-02T12:26:30.000Z">
+<meta property="og:image" content="http://yoursite.com/images/okio-write.png">
+<meta property="og:image" content="http://yoursite.com/images/okio-read.png">
+<meta property="og:updated_time" content="2018-12-15T04:01:15.279Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="okio源码详细解析">
 <meta name="twitter:description" content="概述okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。square官方是这样描述okio的  Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data">
@@ -358,7 +358,7 @@
 <p>hashCode同理</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> result = hashCode;</span><br><span class="line">  <span class="keyword">return</span> result != <span class="number">0</span> ? result : (hashCode = Arrays.hashCode(data));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>构造函数和几个静态工厂方法（删去了一些判空代码）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">ByteString(byte[] data) &#123;</span><br><span class="line">  this.data = data; // Trusted internal constructor doesn&apos;t clone data.</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static ByteString of(byte[] data, int offset, int byteCount) &#123;</span><br><span class="line">  checkOffsetAndCount(data.length, offset, byteCount);</span><br><span class="line">  byte[] copy = new byte[byteCount];</span><br><span class="line">  System.arraycopy(data, offset, copy, 0, byteCount);</span><br><span class="line">  return new ByteString(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static ByteString of(ByteBuffer data) &#123;</span><br><span class="line">  byte[] copy = new byte[data.remaining()];</span><br><span class="line">  data.get(copy);</span><br><span class="line">  return new ByteString(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static ByteString encodeUtf8(String s) &#123;</span><br><span class="line">  ByteString byteString = new ByteString(s.getBytes(Util.UTF_8));</span><br><span class="line">  byteString.utf8 = s;</span><br><span class="line">  return byteString;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static ByteString encodeString(String s, Charset charset) &#123;</span><br><span class="line">  return new ByteString(s.getBytes(charset));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">ByteString(<span class="keyword">byte</span>[] data) &#123;</span><br><span class="line">  <span class="keyword">this</span>.data = data; <span class="comment">// Trusted internal constructor doesn't clone data.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">of</span><span class="params">(<span class="keyword">byte</span>[] data, <span class="keyword">int</span> offset, <span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">  checkOffsetAndCount(data.length, offset, byteCount);</span><br><span class="line">  <span class="keyword">byte</span>[] copy = <span class="keyword">new</span> <span class="keyword">byte</span>[byteCount];</span><br><span class="line">  System.arraycopy(data, offset, copy, <span class="number">0</span>, byteCount);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ByteString(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">of</span><span class="params">(ByteBuffer data)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">byte</span>[] copy = <span class="keyword">new</span> <span class="keyword">byte</span>[data.remaining()];</span><br><span class="line">  data.get(copy);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ByteString(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">encodeUtf8</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">  ByteString byteString = <span class="keyword">new</span> ByteString(s.getBytes(Util.UTF_8));</span><br><span class="line">  byteString.utf8 = s;</span><br><span class="line">  <span class="keyword">return</span> byteString;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">encodeString</span><span class="params">(String s, Charset charset)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ByteString(s.getBytes(charset));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>构造方法很简单，就是简单的接收一个字节数组，向data成员赋值。静态工厂方法，也都是将传入的对象通过某种方法转换为byte数组，从上面的方法可看到，nio的支持也是有的。<br><code>encodeUtf8()</code>方法接收一个utf-8编码的字符串，这里ByteString会将这个字符串缓存起来，如果需要用到这个字符串，直接返回，而不需要通过重新编码获得一个utf-8字符串，一个空间换时间的例子。如果有其他编码的字符串，则调用<code>encodeString()</code>，仅仅将其解码转换为字节数组，赋值给data。<br>再看一下<code>ByteString</code>中的<code>toAsciiLowercase()</code>方法。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ByteString <span class="title">toAsciiLowercase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// Search for an uppercase character. If we don't find one, return this.</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; data.length; i++) &#123;</span><br><span class="line">    <span class="keyword">byte</span> c = data[i];</span><br><span class="line">    <span class="keyword">if</span> (c &lt; <span class="string">'A'</span> || c &gt; <span class="string">'Z'</span>) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If we reach this point, this string is not not lowercase. Create and</span></span><br><span class="line">    <span class="comment">// return a new byte string.</span></span><br><span class="line">    <span class="keyword">byte</span>[] lowercase = data.clone();</span><br><span class="line">    lowercase[i++] = (<span class="keyword">byte</span>) (c - (<span class="string">'A'</span> - <span class="string">'a'</span>));</span><br><span class="line">    <span class="keyword">for</span> (; i &lt; lowercase.length; i++) &#123;</span><br><span class="line">      c = lowercase[i];</span><br><span class="line">      <span class="keyword">if</span> (c &lt; <span class="string">'A'</span> || c &gt; <span class="string">'Z'</span>) <span class="keyword">continue</span>;</span><br><span class="line">      lowercase[i] = (<span class="keyword">byte</span>) (c - (<span class="string">'A'</span> - <span class="string">'a'</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> ByteString(lowercase);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>toAsciiLowercase()</code>方法，寻找位于ASCII码’A’到’Z’间的字节，第一次找到之后<code>clone()</code>data，将其变为小写，并继续遍历之后的字符串，转变大写为小写。如果没有大写，直接返回这个ByteString的实例。<code>toAsciiUppercase()</code>逻辑与此方法相同，不再赘述。</p>
@@ -382,9 +382,9 @@
 <ul>
 <li><p>初始时，data内没有数据，pos和limit指向0<br><img src="/images/okio-init.jpg" alt="init"></p>
 </li>
-<li><p>向Segment中写入6个字节数据，limit后移六位，这时可读的数据长度为limit-pos = 6<br><img src="/images/okio-write.jpg" alt="write"></p>
+<li><p>向Segment中写入6个字节数据，limit后移六位，这时可读的数据长度为limit-pos = 6<br><img src="/images/okio-write.png" alt="write"></p>
 </li>
-<li><p>从Segment中读取5个字节数据，pos后移5位，这时仍然可读的数据长度为limit-pos = 1<br><img src="/images/okio-read.jpg" alt="read"></p>
+<li><p>从Segment中读取5个字节数据，pos后移5位，这时仍然可读的数据长度为limit-pos = 1<br><img src="/images/okio-read.png" alt="read"></p>
 </li>
 </ul>
 <p>当然，每个Segment实例能存储的数据都是有限的，如果写入的数据超过了segmentA的最大大小，那么较好的做法就是将余下的数据写入segmentB中，然后将segmentB放到segmentA的后面（segmentA.next = segmentB）。这时候问题就来了，这个segmentB是否可以任意生成？显然，如果每次加入新数据都要新生成一个Segment实例，开销有点高。在okio中，是通过SegmentPool来控制Segment实例的分配和回收的，下来一起详细分析一下这个类的代码。</p>
@@ -434,13 +434,13 @@
       
         <div class="post-tags">
           
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
             <a href="/tags/网络/" rel="tag"># 网络</a>
           
             <a href="/tags/开源框架/" rel="tag"># 开源框架</a>
           
             <a href="/tags/Java/" rel="tag"># Java</a>
-          
-            <a href="/tags/Android/" rel="tag"># Android</a>
           
         </div>
       
