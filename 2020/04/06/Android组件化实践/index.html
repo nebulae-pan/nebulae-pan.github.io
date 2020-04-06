@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="随笔,杂谈," />
+  <meta name="keywords" content="Android,组件化,gradle,Android gradle plugin," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="总结疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。">
-<meta name="keywords" content="随笔,杂谈">
+<meta name="description" content="概述组件化算是大型项目的一种较好的组织方案，可以很好解藕逻辑，单独编译需求模块方便测试复用，减少维护成本，甚至良好组件化的项目可以无痛过度到插件化。但是其也有相应的缺点，比如模块间需要额外通信手段导致编写复杂效率降低，不同模块需要根据版本依赖并作额外管理。为了开发编译插件帮助项目达成解藕、复用、单独编译的目的，一般情况下需要提供以下几种功能：  单独运行（支持module作为App运行） 不同mo">
+<meta name="keywords" content="Android,组件化,gradle,Android gradle plugin">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2019年总结">
-<meta property="og:url" content="http://yoursite.com/2020/02/16/2019年总结/index.html">
+<meta property="og:title" content="基于AGP的Android组件化编译插件实践">
+<meta property="og:url" content="http://yoursite.com/2020/04/06/Android组件化实践/index.html">
 <meta property="og:site_name" content="nebula&#39;s nebulae">
-<meta property="og:description" content="总结疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。">
+<meta property="og:description" content="概述组件化算是大型项目的一种较好的组织方案，可以很好解藕逻辑，单独编译需求模块方便测试复用，减少维护成本，甚至良好组件化的项目可以无痛过度到插件化。但是其也有相应的缺点，比如模块间需要额外通信手段导致编写复杂效率降低，不同模块需要根据版本依赖并作额外管理。为了开发编译插件帮助项目达成解藕、复用、单独编译的目的，一般情况下需要提供以下几种功能：  单独运行（支持module作为App运行） 不同mo">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-02-23T09:27:25.714Z">
+<meta property="og:updated_time" content="2020-04-06T15:52:17.918Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="2019年总结">
-<meta name="twitter:description" content="总结疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。">
+<meta name="twitter:title" content="基于AGP的Android组件化编译插件实践">
+<meta name="twitter:description" content="概述组件化算是大型项目的一种较好的组织方案，可以很好解藕逻辑，单独编译需求模块方便测试复用，减少维护成本，甚至良好组件化的项目可以无痛过度到插件化。但是其也有相应的缺点，比如模块间需要额外通信手段导致编写复杂效率降低，不同模块需要根据版本依赖并作额外管理。为了开发编译插件帮助项目达成解藕、复用、单独编译的目的，一般情况下需要提供以下几种功能：  单独运行（支持module作为App运行） 不同mo">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/02/16/2019年总结/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/04/06/Android组件化实践/"/>
 
 
 
 
 
-  <title>2019年总结 | nebula's nebulae</title>
+  <title>基于AGP的Android组件化编译插件实践 | nebula's nebulae</title>
   
 
 
@@ -253,7 +253,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/16/2019年总结/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/06/Android组件化实践/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nebula">
@@ -270,7 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">2019年总结</h1>
+          <h1 class="post-title" itemprop="name headline">基于AGP的Android组件化编译插件实践</h1>
         
 
         <div class="post-meta">
@@ -282,8 +282,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-16T20:46:34+08:00">
-                2020-02-16
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-06T15:50:15+08:00">
+                2020-04-06
               </time>
             
 
@@ -301,8 +301,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/02/16/2019年总结/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count gitment-comments-count" data-xid="/2020/02/16/2019年总结/" itemprop="commentsCount"></span>
+                <a href="/2020/04/06/Android组件化实践/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2020/04/06/Android组件化实践/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -310,7 +310,7 @@
 
           
           
-             <span id="/2020/02/16/2019年总结/" class="leancloud_visitors" data-flag-title="2019年总结">
+             <span id="/2020/04/06/Android组件化实践/" class="leancloud_visitors" data-flag-title="基于AGP的Android组件化编译插件实践">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -341,31 +341,25 @@
       
 
       
-        <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。<br>19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。自18年9月底从第一家公司裸辞后，也是因为身体和精力问题，大部分时间都在家中休息，长时间的颓废也导致我停下了学习的脚步，和同龄人的差距一步步拉大，这也成了我之后很长一段时间焦虑的原因。<br>随后，2月底终于确定了手术流程，我也算是摆脱了先天疾病带来的阴影，还获得了ICU一日游的“成就”。修养恢复，4月开始在杭州开始找工作，近半年没有学习工作也确实令我有些落后于技术潮流，加上我和杭州实在相性不佳（16年在杭州实习就因为没有HC无法转正，找工作时小公司也不看重我曾经的工作方向），四处碰壁，最低落时甚至准备降薪5K去一家传统行业，然后来考虑了自己的未来规划，还是在入职当前去公司现场拒绝了offer。<br>再后来的事情就流水账一下吧，6月拿到上海创业公司offer，又回到一线城市打拼；被想去杭州的“原因”拒绝，再次体会到感情这种事可遇不可求；9月参加同学婚礼，觉得自己比同龄人慢了半拍；10月因为强度加班，休息不当开始持续耳鸣，身体小毛病越来越多，目前为止还没有好转；跨年时和相识多年朋友湖南旅游，又因性格问题闹的很僵不欢而散，反思之后觉得自己容易走极端的习惯和幼稚行为确实要改改了。<br>工作方面，在新公司自身的工作重心转到了业务上，繁忙的业务导致业余时间根本没有余裕去学习技术或者刷题。不管是技术能力，还是薪资水平，都没有达到预期。唯一让自己满意的就是在新公司做业务需求之余自发做了不少优化，封装，组件化开发相关的工作。<br>自我感觉19年的经历可以总结成一句话————经历的不少，却并没有做好。  </p>
-<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>春假，从繁忙的工作中抽离开，沉静下来思考的时候才会知道自己真的想要的是什么，我也很清楚自己目前还是太过年轻，对所谓的胜负有比较强的执念，这即是我倍感焦虑的原因。既然心境不是一思一考之间就可以改变，那还不如利用自己的执念让自己有所进步。<br>学习，我希望这能成为我20年的关键字，在此也立下几个目标，看来年能完成多少。  </p>
-<p>列出以下几项，希望至少能成体系的进行学习，括号当中选择一个即可<br>Android方面：</p>
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>组件化算是大型项目的一种较好的组织方案，可以很好解藕逻辑，单独编译需求模块方便测试复用，减少维护成本，甚至良好组件化的项目可以无痛过度到插件化。但是其也有相应的缺点，比如模块间需要额外通信手段导致编写复杂效率降低，不同模块需要根据版本依赖并作额外管理。<br>为了开发编译插件帮助项目达成解藕、复用、单独编译的目的，一般情况下需要提供以下几种功能：</p>
 <ul>
-<li>常见架构实践，最好有相关文章产出</li>
-<li>组件化技术沉淀</li>
-<li>性能优化，性能监控，相关demo或者项目中应用</li>
-<li>未涉猎区域（跨平台Flutter，音视频）</li>
-<li>native</li>
+<li>单独运行（支持module作为App运行）</li>
+<li>不同module代码资源隔离（或者仅仅暴露指定接口）</li>
+<li>资源增加前缀以减少冲突</li>
+<li>Application类处理（不同module的Application初始化）</li>
+<li>特殊属性处理</li>
 </ul>
-<p>计算机基础</p>
+<p>下面会根据上述几点，基于Google提供的agp，详细阐述下本人这半年来进行的组件化实践方案和技术细节。本文涉及的技术点主要有：gradle, agp, transform api, AOP。</p>
+<h2 id="单独运行"><a href="#单独运行" class="headerlink" title="单独运行"></a>单独运行</h2><p>众所周知，agp区分一个module（或者说project）的类型，依靠的是其依赖的编译插件类型，如果依赖的是com.android.application，则该module可以编译为一个apk文件，并安装运行。如果apply的插件为com.android.library，则agp会将该module编译为aar供其他module依赖。<br>为了实现单独运行，那么就需要让module直接依赖application plugin，并在某种条件下可以编译成aar文件，作为其它将要以app运行的module的一部分。<br>接触过的大部分框架所做的是以一个标记位来区分module apply哪个插件，但是这样会导致每次切换都需要重新sync项目才可以让IDE正确识别项目类型，并且需要准备两份build.gradle和AndroidManifest.xml用来打包进不同的环境内。<br>在我的实践中用了另一种方法，通过执行的task来判断apply哪个plugin，并且在打包中处理<code>build.gradle</code>中的配置和<code>AndroidManifest.xml</code>。<br>比如定义一个task，名字为<code>uploadComponent</code>，当执行该task的时候认为module需要打包成aar，apply library plugin，并新增task处理<code>AndroidManifest.xml</code>。这里要做的主要有以下两点：删除Application节点内所有属性（防止合并冲突，也可配置白名单保留某些属性），删除MainActivity的<code>intent-filter</code>节点，防止安装后出现多个入口Activity。除此之外，需要处理加载build.gradle内配置后agp的某些属性，比如剔除<code>applicationId</code>属性，将buildType内的<code>isShrinkResources</code>改为false（library不支持上述属性）。<br>这样处理过后便可以实现一般情况下单独运行，特殊情况下（执行<code>uploadComponent</code>）可以打包成为aar供其他module依赖。<br>一般情况下所有承载业务的module都是application，而agp是无法依赖application的module的，因此直接依赖是不可行的，需要将module打包为aar上传到公共仓库，再通过依赖仓库内包的形式进行依赖。因此这个方案需要额外一步手动upload，这也是目前发现的缺陷，不过计划中该操作可以通过脚本帮助简化。</p>
+<h2 id="代码资源隔离"><a href="#代码资源隔离" class="headerlink" title="代码资源隔离"></a>代码资源隔离</h2><p>代码资源隔离最主要的目的就是解除耦合，杜绝直接引用，方便模块插拔而不影响编译，理想情况下两个模块无任何耦合。实现隔离其实只需要在开发期无法调用依赖module的代码即可，非常简单，在执行打包task（如<code>assembleRelease</code>, <code>bundleReleaseResource</code>）时再进行依赖。<br>但是实际中，让同一个应用内的两个模块没有任何直接应用需要付出的维护代价还是比较大的，就以模块间通信来说，如果没有直接耦合，就需要通过base lib进行支持（Event或公有接口下沉），或者定义新的交互接口（类似网络交互）。前者需要在base lib维护所有需要通信的内容，会导致base lib过分冗余；后者太过复杂，无论是开发还是执行效率都会有一定损失。因此一般情况下还是需要在可控范围内暴露一定的接口，供module间直接交互，在解藕和开发效率间做一个平衡。<br>继续上面的思路。编译插件提供了注解供调用者自己决定该暴露哪个接口。插件所做的处理就是将被注解的类，和其内部所有引用的类都暴露给外部。<br>首先来看如何找到所有类的引用类，又是众所周知，class文件内的常量池有一项为<code>CONSTANT_Class_info</code>，该项表示的是类中对其他类或接口的符号引用，Code类型的<code>Attribute_info</code>内就会使用这些常量，但是仅仅如此还是不够的————返回类型，参数，注解和范型都会有对其他类进行引用的情况，因此还需要对这些进行处理。  如果使用Javassist做class结构的解析的话，<code>CtClass#getRefClassess()</code>方法已经处理了前几种情况，具体的实现可以参照Javassist源码，这里主要说下如何处理范型的引用类型。<br>可能在大部分人的印象中，范型类型会在运行时被虚拟机擦除成为Object，所以会认为从class文件中无法获取范型的类型，但某些情况下实际的范型类型都会被写入class文件中。这些情况如下：</p>
 <ul>
-<li>linux，相关工具</li>
-<li>（操作系统，计算机网络）</li>
+<li>Class声明的范型</li>
+<li>Field的范型</li>
+<li>方法返回值的范型</li>
+<li>方法参数的范型</li>
 </ul>
-<p>其他：</p>
-<ul>
-<li>前端入门</li>
-<li>了解一些常用后端框架</li>
-<li>读书，读书，读书</li>
-<li>锻炼身体（身体是一切的基础，小毛病频发让我更深刻认识到这点了）</li>
-<li>思考方法论</li>
-</ul>
-<p>希望不是FLAG，姑且对自己说一声加油。</p>
-
+<p>Class声明的范型可以通过<code>Class#getTypeParameters()</code>获取。其余情况的范型类型会被记录在Signature类型的AttributeInfo中，这些同样也可以通过class文件解析拿到对应类型，此处不再赘述，不过需要注意的是有可能出现范型嵌套的情况，要额外处理一下。</p>
+<h2 id="资源前缀"><a href="#资源前缀" class="headerlink" title="资源前缀"></a>资源前缀</h2>
       
     </div>
     
@@ -382,9 +376,13 @@
       
         <div class="post-tags">
           
-            <a href="/tags/随笔/" rel="tag"># 随笔</a>
+            <a href="/tags/Android/" rel="tag"># Android</a>
           
-            <a href="/tags/杂谈/" rel="tag"># 杂谈</a>
+            <a href="/tags/组件化/" rel="tag"># 组件化</a>
+          
+            <a href="/tags/gradle/" rel="tag"># gradle</a>
+          
+            <a href="/tags/Android-gradle-plugin/" rel="tag"># Android gradle plugin</a>
           
         </div>
       
@@ -397,8 +395,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/18/okio-source-code-anlysis-okio源码详细解析/" rel="next" title="okio源码详细解析">
-                <i class="fa fa-chevron-left"></i> okio源码详细解析
+              <a href="/2020/02/16/2019年总结/" rel="next" title="2019年总结">
+                <i class="fa fa-chevron-left"></i> 2019年总结
               </a>
             
           </div>
@@ -406,10 +404,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/04/06/Android组件化实践/" rel="prev" title="基于AGP的Android组件化编译插件实践">
-                基于AGP的Android组件化编译插件实践 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -567,7 +561,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#展望"><span class="nav-number">2.</span> <span class="nav-text">展望</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单独运行"><span class="nav-number">2.</span> <span class="nav-text">单独运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码资源隔离"><span class="nav-number">3.</span> <span class="nav-text">代码资源隔离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#资源前缀"><span class="nav-number">4.</span> <span class="nav-text">资源前缀</span></a></li></ol></div>
             
 
           </div>
