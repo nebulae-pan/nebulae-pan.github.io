@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="随笔,杂谈," />
+  <meta name="keywords" content="操作系统,读书笔记," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="总结疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。">
-<meta name="keywords" content="随笔,杂谈">
+<meta name="description" content="最近在学习性能优化相关的内容时，发现很多的性能指标（如/proc中的进程线程信息）、api实现机制（如mmap()底层实现方式）、改进方式等都与操作系统底层的实现密不可分，回想起工作以来就没有用过操作系统相关的知识了，正好从头复习一下。拜读了的虚拟化(virtualization)部分，这里记录为一篇文章，梳理一下内容，加深自己的理解。   虚拟化、并发和持久性为了让计算机易于使用，比如多个程序并">
+<meta name="keywords" content="操作系统,读书笔记">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2019年总结">
-<meta property="og:url" content="http://yoursite.com/2020/02/16/2019年总结/index.html">
+<meta property="og:title" content="操作系统入门——OSTEP读书笔记（虚拟化）">
+<meta property="og:url" content="http://yoursite.com/2020/05/17/操作系统入门——OSTEP读书笔记/index.html">
 <meta property="og:site_name" content="nebula&#39;s nebulae">
-<meta property="og:description" content="总结疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。">
+<meta property="og:description" content="最近在学习性能优化相关的内容时，发现很多的性能指标（如/proc中的进程线程信息）、api实现机制（如mmap()底层实现方式）、改进方式等都与操作系统底层的实现密不可分，回想起工作以来就没有用过操作系统相关的知识了，正好从头复习一下。拜读了的虚拟化(virtualization)部分，这里记录为一篇文章，梳理一下内容，加深自己的理解。   虚拟化、并发和持久性为了让计算机易于使用，比如多个程序并">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-02-23T09:27:25.714Z">
+<meta property="og:updated_time" content="2020-05-17T11:31:57.950Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="2019年总结">
-<meta name="twitter:description" content="总结疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。">
+<meta name="twitter:title" content="操作系统入门——OSTEP读书笔记（虚拟化）">
+<meta name="twitter:description" content="最近在学习性能优化相关的内容时，发现很多的性能指标（如/proc中的进程线程信息）、api实现机制（如mmap()底层实现方式）、改进方式等都与操作系统底层的实现密不可分，回想起工作以来就没有用过操作系统相关的知识了，正好从头复习一下。拜读了的虚拟化(virtualization)部分，这里记录为一篇文章，梳理一下内容，加深自己的理解。   虚拟化、并发和持久性为了让计算机易于使用，比如多个程序并">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/02/16/2019年总结/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/05/17/操作系统入门——OSTEP读书笔记/"/>
 
 
 
 
 
-  <title>2019年总结 | nebula's nebulae</title>
+  <title>操作系统入门——OSTEP读书笔记（虚拟化） | nebula's nebulae</title>
   
 
 
@@ -253,7 +253,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/16/2019年总结/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/17/操作系统入门——OSTEP读书笔记/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nebula">
@@ -270,7 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">2019年总结</h1>
+          <h1 class="post-title" itemprop="name headline">操作系统入门——OSTEP读书笔记（虚拟化）</h1>
         
 
         <div class="post-meta">
@@ -282,8 +282,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-16T20:46:34+08:00">
-                2020-02-16
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-17T12:02:26+08:00">
+                2020-05-17
               </time>
             
 
@@ -301,8 +301,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/02/16/2019年总结/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count gitment-comments-count" data-xid="/2020/02/16/2019年总结/" itemprop="commentsCount"></span>
+                <a href="/2020/05/17/操作系统入门——OSTEP读书笔记/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2020/05/17/操作系统入门——OSTEP读书笔记/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -310,7 +310,7 @@
 
           
           
-             <span id="/2020/02/16/2019年总结/" class="leancloud_visitors" data-flag-title="2019年总结">
+             <span id="/2020/05/17/操作系统入门——OSTEP读书笔记/" class="leancloud_visitors" data-flag-title="操作系统入门——OSTEP读书笔记（虚拟化）">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -341,30 +341,37 @@
       
 
       
-        <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>疫情赋闲在家，忽然想起荒废两年多的blog，当初凭一时热情写了几篇博文，随后便因为生活工作上各种各样的事导致更新搁浅，等到平静下来却又没继续下去的动力了。不过毕业后接近三年，心境早已和以往大不相同，个人的目标也渐渐明确，恰好一年伊始，总结一下过去动荡的19年，顺便展望下20年，也当是激励自己再起写技术博文的习惯吧。<br>19年于我而言也是颇为印象深刻的一年。“疲惫”应该算是比较适合我的19年关键词。自18年9月底从第一家公司裸辞后，也是因为身体和精力问题，大部分时间都在家中休息，长时间的颓废也导致我停下了学习的脚步，和同龄人的差距一步步拉大，这也成了我之后很长一段时间焦虑的原因。<br>随后，2月底终于确定了手术流程，我也算是摆脱了先天疾病带来的阴影，还获得了ICU一日游的“成就”。修养恢复，4月开始在杭州开始找工作，近半年没有学习工作也确实令我有些落后于技术潮流，加上我和杭州实在相性不佳（16年在杭州实习就因为没有HC无法转正，找工作时小公司也不看重我曾经的工作方向），四处碰壁，最低落时甚至准备降薪5K去一家传统行业，然后来考虑了自己的未来规划，还是在入职当前去公司现场拒绝了offer。<br>再后来的事情就流水账一下吧，6月拿到上海创业公司offer，又回到一线城市打拼；被想去杭州的“原因”拒绝，再次体会到感情这种事可遇不可求；9月参加同学婚礼，觉得自己比同龄人慢了半拍；10月因为强度加班，休息不当开始持续耳鸣，身体小毛病越来越多，目前为止还没有好转；跨年时和相识多年朋友湖南旅游，又因性格问题闹的很僵不欢而散，反思之后觉得自己容易走极端的习惯和幼稚行为确实要改改了。<br>工作方面，在新公司自身的工作重心转到了业务上，繁忙的业务导致业余时间根本没有余裕去学习技术或者刷题。不管是技术能力，还是薪资水平，都没有达到预期。唯一让自己满意的就是在新公司做业务需求之余自发做了不少优化，封装，组件化开发相关的工作。<br>自我感觉19年的经历可以总结成一句话————经历的不少，却并没有做好。  </p>
-<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>春假，从繁忙的工作中抽离开，沉静下来思考的时候才会知道自己真的想要的是什么，我也很清楚自己目前还是太过年轻，对所谓的胜负有比较强的执念，这即是我倍感焦虑的原因。既然心境不是一思一考之间就可以改变，那还不如利用自己的执念让自己有所进步。<br>学习，我希望这能成为我20年的关键字，在此也立下几个目标，看来年能完成多少。  </p>
-<p>列出以下几项，希望至少能成体系的进行学习，括号当中选择一个即可<br>Android方面：</p>
+        <p>最近在学习性能优化相关的内容时，发现很多的性能指标（如/proc中的进程线程信息）、api实现机制（如mmap()底层实现方式）、改进方式等都与操作系统底层的实现密不可分，回想起工作以来就没有用过操作系统相关的知识了，正好从头复习一下。拜读了<ostep>的虚拟化(virtualization)部分，这里记录为一篇文章，梳理一下内容，加深自己的理解。  </ostep></p>
+<h2 id="虚拟化、并发和持久性"><a href="#虚拟化、并发和持久性" class="headerlink" title="虚拟化、并发和持久性"></a>虚拟化、并发和持久性</h2><p>为了让计算机易于使用，比如多个程序并行执行（最简单的例子，同时运行用户界面和后台运算程序），操作系统需要为运行的程序提供一个假象：每个程序都单独占用着计算机的CPU和内存。这就是虚拟化技术。虚拟化又分为两个部分，CPU虚拟化和内存虚拟化。<br>而多程序运行，或是说程序进程内多个线程的执行，都会因为一些操作系统对运行程序提供切换支持时导致的一系列数据问题，这时就需要并发技术提供临界区的互斥手段。<br>另一方面，DRAM这种以易失方式储存数据非常不可靠，因此操作系统还需要在硬盘中持久化重要数据。管理这些储存数据的文件系统就是持久化的重要部分。  </p>
+<h2 id="CPU虚拟化"><a href="#CPU虚拟化" class="headerlink" title="CPU虚拟化"></a>CPU虚拟化</h2><p>操作系统需要提供正在同时运行许多程序的表象，但是实际上的CPU也只有一个，为了表现出这样的细节，就需要进程切换以及调度，操作系统将运行中的程序抽象为进程（Process），进程也作为操作系统用于调度程序的数据结构。  </p>
+<h3 id="进程调度"><a href="#进程调度" class="headerlink" title="进程调度"></a>进程调度</h3><p>这里为了便于理解，引入一个重要指标：周转时间，并且周转时间 = 完成时间-到达事件<br>在进行一个最简单的假设：<br>1．每一个工作运行相同的时间。<br>2．所有的工作同时到达。<br>3．一旦开始，每个工作保持运行直到完成。<br>4．所有的工作只是用 CPU（即它们不执行 IO 操作）。<br>5．每个工作的运行时间是已知的。</p>
+<h4 id="FIFO-First-In-First-Out"><a href="#FIFO-First-In-First-Out" class="headerlink" title="FIFO(First In First Out)"></a>FIFO(First In First Out)</h4><p>最简单的情况下，达到时间都为0，因此周转时间=完成时间<br>假设有三个任务 A:100 B:10 C:10(冒号后为他们需要的执行时间)<br>周转时间为(100 + 110 + 120)/3 = 110  </p>
+<h4 id="SJF-Shortest-Job-First"><a href="#SJF-Shortest-Job-First" class="headerlink" title="SJF(Shortest Job First)"></a>SJF(Shortest Job First)</h4><p>如果在全部任务都是同时到达的情况下，确实是最优解。但如果放宽条件2：B，C在10s才到达，在非抢占式系统中，要等到A执行完成才可以执行BC，这时周转时间=(100+(100-10)+(120-10))/3 = 103.33  </p>
+<h4 id="STCF-Shortest-Time-to-Compelte-First"><a href="#STCF-Shortest-Time-to-Compelte-First" class="headerlink" title="STCF(Shortest Time-to-Compelte First)"></a>STCF(Shortest Time-to-Compelte First)</h4><p>引入抢占机制。每当新工作进入系统时，它就会确定剩余工作和新工作中，谁的剩余时间最少，然后调度该工作。<br>上述例子(10 + 20 + 120)/3 = 50。</p>
+<p>更符合实际的程序运行情况，再引入一个新的指标：响应时间 = 首次运行 - 到达时间（如何构建对响应时间敏感的程序， 如果一个用户界面程序在提交很久后才得到运行，那么显然使用者的会体验非常糟糕）</p>
+<h4 id="轮转-Round-Robin"><a href="#轮转-Round-Robin" class="headerlink" title="轮转(Round-Robin)"></a>轮转(Round-Robin)</h4><p>在一个时间片内运行一个工作，然后切换到运行队列的下一个任务，而不是运行一个任务直到结束。如果响应时间是唯一指标，在合适的时间片定义下，RR是非常好的调度程序。但是对于周转时间来说，RR又是最糟糕的策略。</p>
+<h4 id="多级反馈队列-Multiple-Level-Feedback-Queue"><a href="#多级反馈队列-Multiple-Level-Feedback-Queue" class="headerlink" title="多级反馈队列 (Multiple Level Feedback Queue)"></a>多级反馈队列 (Multiple Level Feedback Queue)</h4><p>MLFQ中有许多拥有不同优先级的独立队列，每个队列有不同的优先级。任何时刻一个工作职能存在于一个队列中。队列中的多个工作使用轮转调度。<br>MLFQ根据观察到的行为调整其优先级。如果一个工作不断放弃CPU去等待键盘输入，这是交互型进程的可能行为，MLFQ因此会让他保持高优先级。相反如果一个工作长时间的占用CPU，MLFQ会降低其优先级。</p>
+<p>MLFQ优化的规则</p>
 <ul>
-<li>常见架构实践，最好有相关文章产出</li>
-<li>组件化技术沉淀</li>
-<li>性能优化，性能监控，相关demo或者项目中应用</li>
-<li>未涉猎区域（跨平台Flutter，音视频）</li>
-<li>native</li>
+<li>如果A的优先级 &gt; B的优先级，运行A</li>
+<li>如果A的优先级 = B的优先级，轮转运行A和B</li>
+<li>工作进入系统时，放在最高优先级（最上层队列）</li>
+<li>一旦工作用完了在某一层中的时间配额（无论中间主动放弃了多少次CPU）,就降低优先级（移入低一级队列）。</li>
+<li>经过一段时间S，就将系统中所有工作重新加入最高优先级队列</li>
 </ul>
-<p>计算机基础</p>
-<ul>
-<li>linux，相关工具</li>
-<li>（操作系统，计算机网络）</li>
-</ul>
-<p>其他：</p>
-<ul>
-<li>前端入门</li>
-<li>了解一些常用后端框架</li>
-<li>读书，读书，读书</li>
-<li>锻炼身体（身体是一切的基础，小毛病频发让我更深刻认识到这点了）</li>
-<li>思考方法论</li>
-</ul>
-<p>希望不是FLAG，姑且对自己说一声加油。</p>
+<h3 id="受限执行"><a href="#受限执行" class="headerlink" title="受限执行"></a>受限执行</h3><p>操作系统需要有效的运行程序，同时保留对CPU的控制权，否则任何一个程序都有可能获取控制权然后肆意修改用户的重要数据。现代操作系统将系统分为两种状态用户态和内核态，一些重要的API，仅在内核态可以调用。在某些情况下，运行中的用户程序会通过陷阱（可以是某些异常状态，或者是固定的时钟中断）陷入内核态，并将CPU控制权限交回给操作系统。<br>操作系统通过这样的形式保证程序可以在一定限制下执行，并且最大限度的保证程序运行时不受过多影响。</p>
+<h2 id="内存虚拟化"><a href="#内存虚拟化" class="headerlink" title="内存虚拟化"></a>内存虚拟化</h2><p>内存虚拟化也是操作系统提供给程序的一种假象，每个运行在操作系统上的程序都会感觉自己有一段非常大的，连续的内存空间用于存放他的代码和数据。操作系统通过虚拟化技术，为程序提供了虚拟地址空间，并在使用的时候，把对虚拟地址的调用转换为对物理地址的调用。  </p>
+<h3 id="地址转换"><a href="#地址转换" class="headerlink" title="地址转换"></a>地址转换</h3><p>通过硬件支持，使用基址寄存器和界限寄存器进行虚拟地址与物理地址之间的转换。</p>
+<h3 id="分段"><a href="#分段" class="headerlink" title="分段"></a>分段</h3><p>普通的基址寄存器映射有可能造成堆栈之间的空闲空间。使用分段技术，在MMU（内存管理单元）中通过给每个逻辑段一对基址限界寄存器。通过一定位数表示对某个段的引用，剩下的位数可以表示段的偏移量，通过找到指定的段，结合两个寄存器内的数据将虚拟地址转换为物理地址。<br>但是分段这种方式也有问题： </p>
+<ol>
+<li>由于段大小不同，可能会导致内存被分为大小不同的空间，导致满足内存分配会很难，造成外部的内存碎片。</li>
+<li>如果有一个段用于表示一个很大但是很稀疏的堆，整个堆仍然需要完整地加载到内存中。</li>
+</ol>
+<h3 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h3><p>分页概念在操作系统中十分重要。将内存空间分割成固定长度的分片，这就是分页。物理内存可以也视作一个固定大小的槽，数据在内存中的页，和物理页帧中移动。</p>
+<h4 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h4><p>为了记录地址空间的每个虚拟页放在物理内存中的位置，操作系统通常为每个进程保存一个数据结构，这既是页表。页表可以为地址空间中的每个虚拟页面保存地址转换需要的数据。<br>在一个简单的地址转换过程中，虚拟地址可以表示为两个部分，虚拟页面号（virtual page number, VPN）和偏移量，通过页表中保存着的VPN和物理页帧的映射信息，找到对应的物理页帧，加上偏移量即可完成地址转换。<br>那么页表应该保存在哪里呢？内存中？可是由于每一个页都会有对应的页表项，而每一个进程都会有其对应的页表，这些用于储存页表的空间会非常大。比如一个32位的地址空间，页大小为4kb，需要20位的VPN和12位的偏移量（2^12）。20位的VPN意味着操作系统必须为每个进程管理2^20个地址转换。如果每个页表项需要4个字节，那么每个进程的页表就需要4M内存。  </p>
+<h4 id="TLB（旁路转换缓冲器）"><a href="#TLB（旁路转换缓冲器）" class="headerlink" title="TLB（旁路转换缓冲器）"></a>TLB（旁路转换缓冲器）</h4><p>由于页表也是保存在内存中的，一次内存访问就需要先去查找内存中的页表，之后才能得到地址在物理内存中的实际位置，这无疑是将访问开销翻倍。<br>这里引入了TLB，通过高速硬件做一个页表的缓存。<br>一个页表可能是这样的结构：  </p>
+<p>VPN | PFN | 其他位</p>
+<h4 id="SWAP"><a href="#SWAP" class="headerlink" title="SWAP"></a>SWAP</h4><p>如果内存空间还是不能满足内存分配，操作系统会通过SWAP将内存内的数据置换到磁盘中，减少内存空间的压力。</p>
 
       
     </div>
@@ -382,9 +389,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/随笔/" rel="tag"># 随笔</a>
+            <a href="/tags/操作系统/" rel="tag"># 操作系统</a>
           
-            <a href="/tags/杂谈/" rel="tag"># 杂谈</a>
+            <a href="/tags/读书笔记/" rel="tag"># 读书笔记</a>
           
         </div>
       
@@ -397,8 +404,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/18/okio-source-code-anlysis-okio源码详细解析/" rel="next" title="okio源码详细解析">
-                <i class="fa fa-chevron-left"></i> okio源码详细解析
+              <a href="/2020/04/06/Android组件化实践/" rel="next" title="基于AGP的Android组件化编译插件实践">
+                <i class="fa fa-chevron-left"></i> 基于AGP的Android组件化编译插件实践
               </a>
             
           </div>
@@ -406,10 +413,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/04/06/Android组件化实践/" rel="prev" title="基于AGP的Android组件化编译插件实践">
-                基于AGP的Android组件化编译插件实践 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -567,7 +570,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#展望"><span class="nav-number">2.</span> <span class="nav-text">展望</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟化、并发和持久性"><span class="nav-number">1.</span> <span class="nav-text">虚拟化、并发和持久性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CPU虚拟化"><span class="nav-number">2.</span> <span class="nav-text">CPU虚拟化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#进程调度"><span class="nav-number">2.1.</span> <span class="nav-text">进程调度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#FIFO-First-In-First-Out"><span class="nav-number">2.1.1.</span> <span class="nav-text">FIFO(First In First Out)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SJF-Shortest-Job-First"><span class="nav-number">2.1.2.</span> <span class="nav-text">SJF(Shortest Job First)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#STCF-Shortest-Time-to-Compelte-First"><span class="nav-number">2.1.3.</span> <span class="nav-text">STCF(Shortest Time-to-Compelte First)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#轮转-Round-Robin"><span class="nav-number">2.1.4.</span> <span class="nav-text">轮转(Round-Robin)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多级反馈队列-Multiple-Level-Feedback-Queue"><span class="nav-number">2.1.5.</span> <span class="nav-text">多级反馈队列 (Multiple Level Feedback Queue)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#受限执行"><span class="nav-number">2.2.</span> <span class="nav-text">受限执行</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存虚拟化"><span class="nav-number">3.</span> <span class="nav-text">内存虚拟化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#地址转换"><span class="nav-number">3.1.</span> <span class="nav-text">地址转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分段"><span class="nav-number">3.2.</span> <span class="nav-text">分段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分页"><span class="nav-number">3.3.</span> <span class="nav-text">分页</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#页表"><span class="nav-number">3.3.1.</span> <span class="nav-text">页表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLB（旁路转换缓冲器）"><span class="nav-number">3.3.2.</span> <span class="nav-text">TLB（旁路转换缓冲器）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SWAP"><span class="nav-number">3.3.3.</span> <span class="nav-text">SWAP</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
