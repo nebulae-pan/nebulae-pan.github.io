@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="hotfix,Android," />
+  <meta name="keywords" content="Android,hotfix," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="hotfix比较成熟的原理热修复需要完成的功能：代码修复，资源修复，so修复代码修复大体分为两类，对Java层的修改，和对native层的修改。已有的方向： Dexposed在native层中找到需要修复的Java函数对应的mothed对象，修改为native方法，再将nativeFunc指向框架的native回调方法，再使用该方法回调Java层已经修复的方法。最大的问题：不支持ART虚拟机 Na">
-<meta name="keywords" content="hotfix,Android">
+<meta name="keywords" content="Android,hotfix">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android热修复技术概览">
 <meta property="og:url" content="http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/index.html">
@@ -296,16 +296,6 @@
 
           
             
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
           
 
           
@@ -418,9 +408,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/hotfix/" rel="tag"># hotfix</a>
-          
             <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/hotfix/" rel="tag"># hotfix</a>
           
         </div>
       
@@ -476,14 +466,10 @@
 
   
     <div class="comments" id="comments">
-      
-        <div id="gitment-container"></div>
-      
     </div>
-
   
 
-
+  
 
         </div>
         
@@ -782,44 +768,25 @@
 
 
 
-<!-- LOCAL: You can save these files to your site and update links -->
-    
-        
-        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
-        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
-    
-<!-- END LOCAL -->
-
-    
-
-    
-      <script type="text/javascript">
-      function renderGitment(){
-        var gitment = new Gitmint({
-            id: window.location.pathname, 
-            owner: 'nebulae-pan',
-            repo: 'nebulae-pan.github.io',
-            
-            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
-            
-            oauth: {
-            
-            
-                client_secret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
-            
-                client_id: 'a9364cafdc67c1bd7840'
-            }});
-        gitment.render('gitment-container');
-      }
-
-      
-      renderGitment();
-      
-      </script>
-    
 
 
 
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a9364cafdc67c1bd7840',
+          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
+          repo: 'nebulae-pan.github.io',
+          owner: 'nebulae-pan',
+          admin: ['nebulae-pan'],
+          id: location.pathname,
+          distractionFreeMode: 'true'
+        })
+        gitalk.render('gitalk-container')           
+       </script>
 
 
 
