@@ -441,9 +441,11 @@
           
 
   
-    <div class="comments" id="comments">
-    </div>
-    
+  <div class="comments" id="comments">
+    <div id="gitalk-container"></div>
+  </div>
+
+  
 
 
 
@@ -749,8 +751,10 @@
 
 
 
+
   <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
   <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
    <script type="text/javascript">
         var gitalk = new Gitalk({
           clientID: 'a9364cafdc67c1bd7840',
@@ -758,14 +762,16 @@
           repo: 'nebulae-pan.github.io',
           owner: 'nebulae-pan',
           admin: ['nebulae-pan'],
-          id: location.pathname,
-          distractionFreeMode: 'true'
+          id:'_20200406155015',
+          labels: '',
+          perPage: 10,
+          pagerDirection: '',
+          createIssueManually: true,
+          distractionFreeMode: false
         })
+
         gitalk.render('gitalk-container')           
        </script>
-
-
-
 
   
 

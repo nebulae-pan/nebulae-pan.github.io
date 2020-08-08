@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="开源框架,Java,Android,网络," />
+  <meta name="keywords" content="Android,网络,开源框架,Java," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="概述最近公司准备搞一个网络框架统一所有项目的网络请求，借此机会重新复习一下目前比较火的网络框架，顺便再进一步，写一写源码分析，所以这篇文章属于进阶类型，不会去介绍这个框架的用法，而是从简单的代码示例，一步步分析源码，走完整个框架的流程。之后可能会附上okio和okhttp的源码分析。简单说一下Retrofit，Retrofit是一个用于简化HTTP请求的库，官方网站。截止目前（2017-12-27">
-<meta name="keywords" content="开源框架,Java,Android,网络">
+<meta name="keywords" content="Android,网络,开源框架,Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Retrofit源码详细解析">
 <meta property="og:url" content="http://yoursite.com/2017/12/30/Retrofit-source-code-analysis-Retrofit源码详细解析/index.html">
@@ -467,13 +467,13 @@
       
         <div class="post-tags">
           
-            <a href="/tags/开源框架/" rel="tag"># 开源框架</a>
-          
-            <a href="/tags/Java/" rel="tag"># Java</a>
-          
             <a href="/tags/Android/" rel="tag"># Android</a>
           
             <a href="/tags/网络/" rel="tag"># 网络</a>
+          
+            <a href="/tags/开源框架/" rel="tag"># 开源框架</a>
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
           
         </div>
       
@@ -528,9 +528,11 @@
           
 
   
-    <div class="comments" id="comments">
-    </div>
-    
+  <div class="comments" id="comments">
+    <div id="gitalk-container"></div>
+  </div>
+
+  
 
 
 
@@ -836,8 +838,10 @@
 
 
 
+
   <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
   <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
    <script type="text/javascript">
         var gitalk = new Gitalk({
           clientID: 'a9364cafdc67c1bd7840',
@@ -845,14 +849,16 @@
           repo: 'nebulae-pan.github.io',
           owner: 'nebulae-pan',
           admin: ['nebulae-pan'],
-          id: location.pathname,
-          distractionFreeMode: 'true'
+          id:'_20171230132444',
+          labels: '',
+          perPage: 10,
+          pagerDirection: '',
+          createIssueManually: true,
+          distractionFreeMode: false
         })
+
         gitalk.render('gitalk-container')           
        </script>
-
-
-
 
   
 
