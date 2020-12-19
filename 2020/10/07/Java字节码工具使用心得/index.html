@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,AOP,Javassist,ASM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言AOP作为一种预编译技术，可以通过预编译或在运行时进行动态代理，实现不修改源代码的情况下给程序添加统一的功能。要上手应用这项技术，通过一些字节码工具就可以做到，并不要求开发者一定要掌握字节码相关的知识，但是在面对一些较为复杂的场景时，理解字节码的规范，就能更好的处理疑难问题。本文主要从使用层面上介绍ASM和Javassist这两个字节码处理工具的基本用法，并且会通过一些示例来展示二者适用的场景">
+<meta name="keywords" content="Java,AOP,Javassist,ASM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java AOP工具使用心得">
+<meta property="og:url" content="http://yoursite.com/2020/10/07/Java字节码工具使用心得/index.html">
+<meta property="og:site_name" content="nebula&#39;s nebulae">
+<meta property="og:description" content="前言AOP作为一种预编译技术，可以通过预编译或在运行时进行动态代理，实现不修改源代码的情况下给程序添加统一的功能。要上手应用这项技术，通过一些字节码工具就可以做到，并不要求开发者一定要掌握字节码相关的知识，但是在面对一些较为复杂的场景时，理解字节码的规范，就能更好的处理疑难问题。本文主要从使用层面上介绍ASM和Javassist这两个字节码处理工具的基本用法，并且会通过一些示例来展示二者适用的场景">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-12-19T11:57:06.442Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java AOP工具使用心得">
+<meta name="twitter:description" content="前言AOP作为一种预编译技术，可以通过预编译或在运行时进行动态代理，实现不修改源代码的情况下给程序添加统一的功能。要上手应用这项技术，通过一些字节码工具就可以做到，并不要求开发者一定要掌握字节码相关的知识，但是在面对一些较为复杂的场景时，理解字节码的规范，就能更好的处理疑难问题。本文主要从使用层面上介绍ASM和Javassist这两个字节码处理工具的基本用法，并且会通过一些示例来展示二者适用的场景">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/10/07/Java字节码工具使用心得/"/>
+
+
+
+
+
+  <title>Java AOP工具使用心得 | nebula's nebulae</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">nebula's nebulae</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/10/07/Java字节码工具使用心得/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="nebula">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ost封面.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nebula's nebulae">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java AOP工具使用心得</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-07T13:28:32+08:00">
+                2020-10-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2020/10/07/Java字节码工具使用心得/" class="leancloud_visitors" data-flag-title="Java AOP工具使用心得">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>AOP作为一种预编译技术，可以通过预编译或在运行时进行动态代理，实现不修改源代码的情况下给程序添加统一的功能。要上手应用这项技术，通过一些字节码工具就可以做到，并不要求开发者一定要掌握字节码相关的知识，但是在面对一些较为复杂的场景时，理解字节码的规范，就能更好的处理疑难问题。<br>本文主要从使用层面上介绍ASM和Javassist这两个字节码处理工具的基本用法，并且会通过一些示例来展示二者适用的场景。由于笔者Javassist使用方面的经验多一些，因此会多分享一些关于Javassist的用法。  </p>
+<h2 id="ASM与Javassist"><a href="#ASM与Javassist" class="headerlink" title="ASM与Javassist"></a>ASM与Javassist</h2><p>如果提前了解过，就能发现仅从使用方面来，看这二者就有很大区别。Javassist通过一系列的api，能够将编写成字符串形式的源代码插入到已存在的逻辑中、或者创建一个新的类/method/field。ASM则需要使用比较“朴素”的方式插入指令，需要使用者掌握一些简单的字节码规范。<br>在运行效率上，因为ASM的操作层级更低，不需要Javassist那样处理字符串格式的源代码、做语法逻辑、参数的校验，因此ASM的效率一般高于Javassist。与之相对的，ASM有一部分错误要在运行期间才能发现，而且由于是字节码层面的问题，进行排查又对开发者的知识掌握有所要求。  </p>
+<h2 id="Javassist的使用"><a href="#Javassist的使用" class="headerlink" title="Javassist的使用"></a>Javassist的使用</h2><p>Javassist通过声明一个<code>ClassPool</code>来确定其进行类寻找的范围，在内存中，使用<code>CtClass</code>来表示一个类，对<code>CtClass</code>实例进行操作就可以实现AOP的功能。<br>可以将<code>CtClass</code>理解为编写的代码在内存中的抽象，能够根据规则对类文件进行修改。在目标类被classloader加载前，对其进行的改动均可以在运行时生效。<br><code>CtClass</code>获取方法和域的方式和用于反射的<code>Class</code>相同。比如使用<code>getDeclaredMethods()</code>可以获取当前类下直接声明的所有方法，使用<code>getMethods()</code>获取当前类所有的public方法（不包括父类）。<br>得到<code>CtClass</code>的实例后可以对方法，域进行增删改，而获取到<code>CtMethod</code>实例后，可以对执行逻辑进行修改。<br>最基本的AOP操作就可以利用上述方法来完成，比如通过APT拿到被注解的，需要被处理的类，然后统一对某些类或方法进行处理（增加log，统计时长等等），最后调用<code>writeFile()</code>写入到class文件中，就完成了一个AOP流程。<br>简单的插入方法、成员、代码足以应付较多的场景，不过若是一些复杂场景下需要判断某个方法是否被调用，或是计划将某些调用替换成其他的调用，简单的插入API就没什么太多作用了。好在Javassist提供了Expr包下的API，很好的简化了基于mehtod/field调用的处理逻辑。</p>
+<h3 id="代码编辑-检测"><a href="#代码编辑-检测" class="headerlink" title="代码编辑/检测"></a>代码编辑/检测</h3><p>在<code>CtClass</code>或者<code>CtMethod</code>的实例上调用<code>instrument</code>方法，传入<code>ExprEditor</code>的子类，就可以在相应的override中，处理目标方法中重要的逻辑。目前支持的处理有field的访问、方法调用、构造函数调用、构造对象、<br>cast、构造数组、Instanceof、catch/finally块。<br>上述override的参数都继承自<code>Expr</code>，顾名思义，该类代表语句，通过其提供的API就可以知道一些相关的信息，并且使用<code>replace</code>方法，可以将该语句替换成其他的语句。<code>Expr</code>中比较常用的是field访问（FieldAccess）和method调用（MethodCall），用一个常见的例子来演示<code>ExprEditor</code>的用法：将所有System.out.println()的方法调用替换成logger的调用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ctClass.instrument(object : ExprEditor() &#123;</span><br><span class="line">    var isSystemOut = <span class="keyword">false</span></span><br><span class="line">    <span class="function">override fun <span class="title">edit</span><span class="params">(f: FieldAccess?)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 判断out对象是否取自System类</span></span><br><span class="line">        <span class="keyword">if</span> (f.fieldName == <span class="string">"out"</span></span><br><span class="line">            &amp;&amp; f.className == <span class="string">"java.lang.System"</span></span><br><span class="line">        ) &#123;</span><br><span class="line">            isSystemOut = <span class="keyword">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">override fun <span class="title">edit</span><span class="params">(m: MethodCall?)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (m == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 判断println是否是PrintStream声明的方法</span></span><br><span class="line">        <span class="keyword">if</span> (isSystemOut</span><br><span class="line">            &amp;&amp; m.className == <span class="string">"java.io.PrintStream"</span></span><br><span class="line">            &amp;&amp; m.methodName == <span class="string">"println"</span></span><br><span class="line">        ) &#123;</span><br><span class="line">        	<span class="comment">// 替换方法调用</span></span><br><span class="line">            m.replace(<span class="string">"com.android.utils.Logger.log(\$args);"</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        isSystemOut = <span class="keyword">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>上面的示例中展示了<code>FieldAccess</code>和<code>MethodCall</code>两种<code>Expr</code>的使用，比如通过<code>getClassName()</code>可以拿到声明field和method的class，判断来源；通过<code>where()</code>，可以获得当前访问field或调用method的方法（或是构造函数）。<br>replace参数中的<code>$args</code>是Javassist提供的占位符，这些占位符在不同位置使用时会有不同的表示，以<code>$0, $1, $2, ...</code>为例，在以<code>CtMethod</code>实例为操作对象时（比如在insertBefore, insertAfter等方法中），$0代表this关键字（若为static方法则为null），$1, $2等等表示当前<code>CtMethod</code>所代表方法传入的参数。而在操作对象为<code>MethodCall</code>的实例时（如replace中操作），$0表示调用该方法的实例（如果是static方法则为null），$1, $2等等表示调用方法的参数。<br>其余更详细的占位符说明可见<a href="https://www.javassist.org/tutorial/tutorial2.html#intro" target="_blank" rel="noopener">Javassist指南</a>。  </p>
+<p>有一些需要注意的点：</p>
+<ul>
+<li><code>Expr</code>获取方法或类信息的API都是在调用时检索的，在replace之后调用这些API会无法得到预期的返回值</li>
+<li><code>replace()</code>调用或者<code>insertXXX()</code>调用时，javassist都会做编译校验，比如需要插入的语句语法正确，不能访问不在<code>ClassPool</code>中的类和方法等等</li>
+</ul>
+<p>使用<code>instrument()</code>方法和<code>ExprEditor</code>配合可以完成大多数场景下的AOP需求，不过还是有些场景力所不能及，比如，需要在一个方法中检索所有this调用的方法、或是列举所有方法中的字面常量。要办到这些就需要更低抽象层次的API，这时javassist的bytecode API就派上了用场。</p>
+<h3 id="字节码API"><a href="#字节码API" class="headerlink" title="字节码API"></a>字节码API</h3><p>在<code>javassist.bytecode</code>包下的类提供的API，可以让开发者进行字节码层面的操作，使用这些api有些类似于ASM的tree API，  <code>javassist.bytecode.ClassFile</code>类就相当于ASM tree API中的ClassNode，是一整个class文件在内存中的体现。<br>通过一个检索方法中字符常量的例子来演示字节码API的使用方法：</p>
+<pre><code class="Java">val constPool = classFile.constPool
+classFile.methods.forEach {
+    val ci = it.codeAttribute.iterator()
+    ci.begin()
+    <span class="keyword">while</span> (ci.hasNext()) {
+        val pos = ci.next()            <span class="comment">//根据指令长度取到下一个指令的位置</span>
+        val code = ci.byteAt(pos)    <span class="comment">//根据位置拿到具体指令</span>
+        <span class="keyword">if</span> (code == Opcode.LDC) {
+            val constIndex = ci.byteAt(pos + <span class="number">1</span>)<span class="comment">//参数为stringIndex</span>
+            println(constPool.getStringInfo(constIndex))
+            <span class="keyword">return</span><span class="meta">@forEach</span>
+        }
+        <span class="keyword">if</span> (code == Opcode.LDC_W) {
+            val constIndex = ci.u16bitAt(pos + <span class="number">1</span>)<span class="comment">//wide指令取两个字节作为参数</span>
+            println(constPool.getStringInfo(constIndex))
+        }
+    }
+}
+</code></pre>
+<p>上述方法中所做的是，拿到所有classFile中的methodInfo，通过这些info的<code>CodeIterator</code>进行指令的遍历，借用<code>CodeIterator</code>所封装的API，可以较方便的定位到每一条指令，再根据虚拟机规则进行处理。这种方式会直接处理字节码，排查错误会更加有难度一些。  </p>
+<h3 id="一些注意事项"><a href="#一些注意事项" class="headerlink" title="一些注意事项"></a>一些注意事项</h3><p>在使用Javassist时会遇到一些问题，在文章中稍微分享一下</p>
+<ul>
+<li>一个CtClass无法在get()之后调用detach()两次。因为CtClass本身的缓存使用的是HashTable，该数据结构不能使用null作为key，而在第二次detach时，获取到的实例为null，用该key值操作时会产生NPE。</li>
+<li>由于有ClassPool，这个类会持有CtClass的实例，并且不会主动释放，处理大量文件时需要注意内存情况，在合适的时机<code>detach()</code>已经处理完成的类。</li>
+</ul>
+<h2 id="ASM的使用"><a href="#ASM的使用" class="headerlink" title="ASM的使用"></a>ASM的使用</h2><p>ASM的抽象层次更接近class文件本身，将符合虚拟机标准的class stream或是一个class文件传递给<code>ClassReader</code>，再为其指定一个<code>ClassVisitor</code>，ASM会使用visitor模式将文件的内容封装过后传递给回调接口，这个过程不需要将整个class文件完整读到内存中，类似SAX的方式，基于回调事件来表示一个类的数据与结构，其处理方式比较适合检索或是简单的修改，如果需要处理复杂的数据结构，或是和class文件内多个模块有所关联的情况，就可以考虑使用ASM提供的tree api了。  </p>
+<h3 id="ASM-Tree-API"><a href="#ASM-Tree-API" class="headerlink" title="ASM Tree API"></a>ASM Tree API</h3><p>Tree API 会将整个文件加载入内存，安装格式将class映射为内存中的数据结构<code>ClassNode</code>。ASM中的<code>ClassNode</code>和Javassist bytecode api中的<code>ClassFile</code>相似，或者说，javassist bytecode api整体实际上和ASM tree api都非常相似。</p>
+<h2 id="适用情况"><a href="#适用情况" class="headerlink" title="适用情况"></a>适用情况</h2><p>如果刚开始学习AOP相关的知识点，想尽快上手处理实际问题，那么建议使用Javassist，针对一些简单的情况来说，Javassist的使用几乎没有学习成本，编译期就会有一些校验，方便发现和解决问题。<br>不过也是这些校验和相关的计算，拖慢了执行速度。如果你的处理比较复杂，很可能会被Javassist的校验束缚，在不了解Javassist内部的一些处理逻辑时，绕过这些校验也颇为麻烦，这时就可以考虑使用ASM来进行处理；在对运行速度要求很高的时候，也同样可以选择ASM。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/AOP/" rel="tag"># AOP</a>
+          
+            <a href="/tags/Javassist/" rel="tag"># Javassist</a>
+          
+            <a href="/tags/ASM/" rel="tag"># ASM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/22/Android路由框架实践指南/" rel="next" title="Android路由框架实践指南">
+                <i class="fa fa-chevron-left"></i> Android路由框架实践指南
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+  <div class="comments" id="comments">
+    <div id="gitalk-container"></div>
+  </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/ost封面.png"
+                alt="nebula" />
+            
+              <p class="site-author-name" itemprop="name">nebula</p>
+              <p class="site-description motion-element" itemprop="description">技术积累</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ASM与Javassist"><span class="nav-number">2.</span> <span class="nav-text">ASM与Javassist</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Javassist的使用"><span class="nav-number">3.</span> <span class="nav-text">Javassist的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码编辑-检测"><span class="nav-number">3.1.</span> <span class="nav-text">代码编辑/检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字节码API"><span class="nav-number">3.2.</span> <span class="nav-text">字节码API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一些注意事项"><span class="nav-number">3.3.</span> <span class="nav-text">一些注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ASM的使用"><span class="nav-number">4.</span> <span class="nav-text">ASM的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ASM-Tree-API"><span class="nav-number">4.1.</span> <span class="nav-text">ASM Tree API</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#适用情况"><span class="nav-number">5.</span> <span class="nav-text">适用情况</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a9364cafdc67c1bd7840',
+          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
+          repo: 'nebulae-pan.github.io',
+          owner: 'nebulae-pan',
+          admin: ['nebulae-pan'],
+          id:'_20201007132832',
+          labels: 'gitalk'.split(',').filter(l => l),
+          perPage: parseInt(10),
+          pagerDirection: 'last',
+          createIssueManually: true,
+          distractionFreeMode: false
+        })
+
+        gitalk.render('gitalk-container')           
+       </script>
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("vBKDPVhTwlx7DhKgeggeB9ed-gzGzoHsz", "ptDgigcptBL2uqKMgIVm454u");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
