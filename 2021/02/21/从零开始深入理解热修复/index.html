@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,热修复," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言如果要给热修复一个大致的定义，那么简单来说，热修复所做的就是在不重新安装的情况下改变原有应用的代码，以达成修复bug的目的。热修复在长时间的演进当中，出现了很多的实现方式，如在native层替换ArtMethod（代表框架：Andfix）、使用ClassLoader加载补丁（代表框架：Tinker）、多方案混合（代表框架Sophix，吸收了不同方案的优点和缺点），AOP+自动化补丁（代表框架：">
+<meta name="keywords" content="Android,热修复">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的Android热修复之旅（一）：热修复简单原理">
+<meta property="og:url" content="http://yoursite.com/2021/02/21/从零开始深入理解热修复/index.html">
+<meta property="og:site_name" content="nebula&#39;s nebulae">
+<meta property="og:description" content="前言如果要给热修复一个大致的定义，那么简单来说，热修复所做的就是在不重新安装的情况下改变原有应用的代码，以达成修复bug的目的。热修复在长时间的演进当中，出现了很多的实现方式，如在native层替换ArtMethod（代表框架：Andfix）、使用ClassLoader加载补丁（代表框架：Tinker）、多方案混合（代表框架Sophix，吸收了不同方案的优点和缺点），AOP+自动化补丁（代表框架：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/images/hotfix-flow.png">
+<meta property="og:updated_time" content="2021-06-08T15:40:37.367Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从零开始的Android热修复之旅（一）：热修复简单原理">
+<meta name="twitter:description" content="前言如果要给热修复一个大致的定义，那么简单来说，热修复所做的就是在不重新安装的情况下改变原有应用的代码，以达成修复bug的目的。热修复在长时间的演进当中，出现了很多的实现方式，如在native层替换ArtMethod（代表框架：Andfix）、使用ClassLoader加载补丁（代表框架：Tinker）、多方案混合（代表框架Sophix，吸收了不同方案的优点和缺点），AOP+自动化补丁（代表框架：">
+<meta name="twitter:image" content="http://yoursite.com/images/hotfix-flow.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/02/21/从零开始深入理解热修复/"/>
+
+
+
+
+
+  <title>从零开始的Android热修复之旅（一）：热修复简单原理 | nebula's nebulae</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">nebula's nebulae</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/02/21/从零开始深入理解热修复/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="nebula">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ost封面.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nebula's nebulae">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从零开始的Android热修复之旅（一）：热修复简单原理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-21T19:20:00+08:00">
+                2021-02-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2021/02/21/从零开始深入理解热修复/" class="leancloud_visitors" data-flag-title="从零开始的Android热修复之旅（一）：热修复简单原理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>如果要给热修复一个大致的定义，那么简单来说，热修复所做的就是在不重新安装的情况下改变原有应用的代码，以达成修复bug的目的。热修复在长时间的演进当中，出现了很多的实现方式，如在native层替换ArtMethod（代表框架：Andfix）、使用ClassLoader加载补丁（代表框架：Tinker）、多方案混合（代表框架Sophix，吸收了不同方案的优点和缺点），AOP+自动化补丁（代表框架：Instant Run、Robust），本文主要深入的讲解参考Instant Run设计的AOP热修复方案，其他的实现方式，会在后文中提及，并会将类Instant Run和这些方案进行对比，从多个角度更好的分析不同解决方案的优缺点。 </p>
+<h2 id="方案简介"><a href="#方案简介" class="headerlink" title="方案简介"></a>方案简介</h2><p>在深入Instant Run方案的细节之前，先介绍一下该方案的优点：1. 支持运行时修复、2. 无需hook（不用根据Android版本和ROM做兼容）<br>那么接下来就从实现原理来看一下Instant Run为什么能做到这两点。仔细思考热修复的功能，发现其实就是一种轻量级的动态化表现，要实现这种动态化有很多种方式，比如在Java提供的API中，就有动态加载代码最简单的方式——通过ClassLoader去加载符合虚拟机（JVM, AVM）规范的类文件，因此Classloader方案就应运而生了，这个方案会将修改过后的class文件制作成补丁，然后在将会被修复的终端上通过ClassLoader进行加载，这样就相当于类粒度的替换，诸如注解、字段的修改都可以支持。不过由于虚拟机的限制，类名一致的class无法通过同一个ClassLoader重复加载，已经加载到虚拟机中的<code>Class</code>卸载的条件又较为苛刻，因此这种使用ClassLoader的热修复方案都必须应用重启才可生效。<br>那么，如果退一步呢？其实从实际情况来考虑，很多需要热修复的场景下，并不会去改动注解、字段，绝大多数需要热修的都是方法逻辑。如果只加载方法的话，就可以将方法提取到新生成的类中，而不需要加载原本的类了。并且通过这种加载新类的方式也无需重启应用。Instant Run就是使用的这样的方式做到的运行时修复。当然，光是加载新类还完全做不到热修复，因为无法替换原有的类，所以需要建立映射关系，并且根据补丁状态进行补丁逻辑的跳转。接下来，就按照上文所描述的内容，一步步深入参考Instant Run设计的热修复方案的原理，并从实际的应用角度分析设计思路。</p>
+<h2 id="如何运行补丁？"><a href="#如何运行补丁？" class="headerlink" title="如何运行补丁？"></a>如何运行补丁？</h2><h3 id="从简单实例开始"><a href="#从简单实例开始" class="headerlink" title="从简单实例开始"></a>从简单实例开始</h3><p>假设我们已经有了一个准备好的补丁，并且准备进行热修复的应用只有下面一个类，类中只有一个方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"bug"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果要修改这段代码，让其具有在没有加载补丁的时候执行原有逻辑，在有补丁的时候可以执行补丁内逻辑的功能，我们可以在编译时通过字节码工具做如下改动</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Hotfix.needPatch()) &#123;</span><br><span class="line">            <span class="keyword">return</span> (String)Hotfix.invokePatch();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"bug"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hotfix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">needPatch</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//has patch</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">invokePatch</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//invoke patch</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在方法的原本逻辑之外增加一层判断，如果需要应用补丁，就通过<code>Hotfix</code>执行补丁包提供的逻辑，否则执行原本的逻辑，如此便能让被处理后的方法具有简单的动态化了。最简单的情况处理完了，那么接下来给<code>HotfixDemo</code>这个类新增一些其他的方法，并把上述的方案覆盖到所有的实方法。</p>
+<h3 id="从扩展用例深入"><a href="#从扩展用例深入" class="headerlink" title="从扩展用例深入"></a>从扩展用例深入</h3><p>一般来说，使用热修复时不会所有方法都将会被修复，所以要判断补丁的修复范围，如果说要使用一个标志来选择方法，那么方法签名就非常合适了，符合虚拟机规范的类文件都可以保证一个方法的签名是唯一的，那么增加方法签名扩写一下逻辑：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Hotfix.needPatch(<span class="string">"method()Ljava/lang/String;"</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> (String)Hotfix.invokePatch(<span class="string">"method()Ljava/lang/String;"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"bug"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// etc...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hotfix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">needPatch</span><span class="params">(String identity)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// identity method need patch</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">invokePatch</span><span class="params">(String identity)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// invoke identity method patch</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>好了，单个类中方法分发的逻辑大致完成了，让我们再次拓展范围，现在应用中不止<code>HotifxDemo</code>这个类了，我们要有新的字段来区分不同的类。按照上面的流程，应该会很自然的想到为<code>needPatch()</code>和<code>invokePatch()</code>再增加一个参数，这个参数用类全限定名做区分，就像下面这样</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Hotfix.needPatch(HotfixDemo.class.getName(), <span class="string">"method()Ljava/lang/String;"</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> (String)Hotfix.invokePatch(HotfixDemo.class.getName(), <span class="string">"method()Ljava/lang/String;"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"bug"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hotfix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">needPatch</span><span class="params">(String className, String identity)</span> </span>&#123;</span><br><span class="line">        MethodPatchInfo methodInfo = classesPatchInfo.get(className);</span><br><span class="line">        <span class="keyword">if</span> (methodInfo == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> methodInfo.needPatch(identity);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">invokePatch</span><span class="params">(String className, String identity)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//invoke identity method patch</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时，我们先去查询该方法所在的类是否在修复列表中，而后再去查询方法是否需要修复。按照这样的实现，一般来说热修复框架会去维护一个类名和对应类热修复信息的表，这个表在加载补丁的时候进行数据填充，如果把上面的方案推及到应用所有的方法中，就会令每个方法都会额外增加一步从映射表（classPatchInfo）中查询的操作，并且，考虑到多线程并发的情况，要为这个映射表的操作进行加锁（更新/卸载补丁会修改这个映射表），对于一些原本逻辑指令就很少的方法来说，这样无疑增加了非常大的开销。那么是否有优化的方式呢？既然Class本身也可以作为一个容器，那么为什么不直接把<code>MethodPatchInfo</code>放到Class中，用以取代维护<code>Class</code>和<code>methodPatchInfo</code>映射关系的映射表呢。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> MethodPatchInfo sInfo;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        MethodPatchInfo info = sInfo;    <span class="comment">// 局部变量赋值</span></span><br><span class="line">        <span class="keyword">if</span> (info != <span class="keyword">null</span> &amp;&amp; info.needPatch(<span class="string">"method()Ljava/lang/String;"</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> (String)info.invokePatch(<span class="string">"method()Ljava/lang/String;"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"bug"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这里，为每个类都新增一个static field，在安装补丁时，为sInfo进行赋值，待方法执行时，只需判断sInfo是否为空就能知道当前类中的方法是否要执行补丁逻辑。如此一来，由每一个来类维护自己修复方法的分发逻辑，用一些微不足道的空间换时间，就完全不用进行额外的检索操作了。<strong>额外注意第五行的局部变量赋值，这里是为了在方法的作用域内保证指向sInfo的引用不变，防止其他线程卸载补丁后，<code>needPatch()</code>或<code>invokePatch()</code>方法出现NPE。</strong></p>
+<h2 id="如何制作补丁"><a href="#如何制作补丁" class="headerlink" title="如何制作补丁"></a>如何制作补丁</h2><p>在上文中我们分析了如何通过注入修改app的代码，让app在对开发透明的情况下实现对动态化的支持。那么接下来，为了完成热修复流程，最少还有三个问题等待我们去解决</p>
+<ol>
+<li>如何定位修复范围</li>
+<li>如何在实际执行时，将app方法的执行正确转发到补丁内的对应方法</li>
+<li>补丁方法的逻辑是什么形式的</li>
+</ol>
+<h3 id="定位修复范围"><a href="#定位修复范围" class="headerlink" title="定位修复范围"></a>定位修复范围</h3><p>因为无法在app上线时知道未来的修复内容，所以修复范围一定是携带于补丁文件中的。定位到一个具体的修复方法，除了必须的类全限定名、方法签名，还须有新生成补丁类的全限定名，<br>类全限定名和方法签名都可以在运行时通过注入的参数拿到，所以只用维护一个被修复类全限定名和补丁类全限定名的一个映射关系就可以了。<br>我们可以把维护这个映射关系的映射表放到一个Class类中（当然放到普通文件中也完全可以），就像下面这样<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PatchMetaInfo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Map&lt;String, String&gt; <span class="title">loadPatchDeliverInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        HashMap&lt;String, String&gt; result = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        result.put(<span class="string">"com.test.HotfixDemo"</span>, <span class="string">"com.test.HotfixDemo$Patch"</span>);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们可以让<code>**$Patch</code>类继承<code>MethodPatchInfo</code>并实现具体的<code>needPatch()</code>和<code>invokePatch()</code>逻辑，拿到map之后，就可以通过反射创建<code>**$Patch</code>的实例，并注入每一个key所对应的类中了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">com.test.HotfxiDemo.sInfo = ReflectHelper.newInstance(<span class="string">"com.test.HotfixDemo$Patch"</span>);</span><br></pre></td></tr></table></figure>
+<p>待到下次执行到被修复的方法时，sInfo不为空，便可以直接执行sInfo提供的方法了。接下来，逻辑执行就来到了<code>MethodPatchInfo</code>的实现当中了。</p>
+<h3 id="补丁逻辑调用"><a href="#补丁逻辑调用" class="headerlink" title="补丁逻辑调用"></a>补丁逻辑调用</h3><p><code>needPathch()</code>，顾名思义，我们会使用这个方法，判断当前执行的方法是否在修复列表中。修复列表就是所有被改动方法的方法签名组成的集合，注入的调用代码中会将方法签名通过参数传递。这个方法同样也可以在制作补丁时生成</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span>$<span class="title">Patch</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> HashSet&lt;String&gt; mHotfixRangeSet = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> HotfixDemo$Patch() &#123;</span><br><span class="line">        mHotfixRangeSet.add(<span class="string">"method()Ljava/lang/String;"</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">needPatch</span><span class="params">(String methodSignature)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mHotfixRangeSet.contains(methodSignature);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>若执行后判定在修复范围内，之后就需要调用<code>invokePatch()</code>方法执行具体补丁方法的逻辑了。<code>invokePatch()</code>方法完全可以认为是，修复后的且未注入热修复逻辑的原方法，所以他的返回值、参数一定要和原方法匹配，当然这个匹配并不是说必须完全一致，我们可以用<code>Object[]</code>接受各式各样的参数列表，用Object代替所有的返回值，并在调用处进行一次强转即可，方法声明会像这个样子：<code>Object invokePatch(String methodSignature, Object[] params)</code>。接下来，在方法内部去调用不同的修复方法，这里我们仍然需要方法签名<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span>$<span class="title">Patch</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invokePatch</span><span class="params">(String methodSignature, Object[] params)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> (methodSignature) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">"method()Ljava/lang/String;"</span>;</span><br><span class="line">                <span class="keyword">return</span> method();</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"fix"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，这些形式固定的流程都可以在生成补丁时自动生成，在最开始对代码进行注入时，也只需要传递不同的参数到统一的接口就可以做到执行补丁内指定方法的逻辑。<br>到这里终于把整个执行流程都串起来了，让我们先来梳理一下  </p>
+<p><img src="/images/hotfix-flow.png" alt="流程图"></p>
+<p>应用被赋予热修复能力后，当执行到一个方法时，会先判断当前类对应的补丁是否存在（sInfo != null)，若存在则继续判断当前执行的方法是否在修复类的修复范围内（<code>**$Patch#needPatch()</code>)，两者条件都满足则会去调用<code>**$Patch#invokePatch()</code>，执行具体的修复后的方法。否则，执行原本的逻辑。<br>流程理清了，我们还剩最后一个问题，也是最主要的一个问题，补丁内的修复方法逻辑是如何的？</p>
+<h3 id="补丁实际逻辑"><a href="#补丁实际逻辑" class="headerlink" title="补丁实际逻辑"></a>补丁实际逻辑</h3><p>上文中我们用来做示例的方法非常简单，声明方面仅有一个返回值没有参数，并且方法体内也仅有处理一个字符串常量的逻辑，但在一般情况下，一个方法的内容要复杂的多，除了有各种形式的参数和返回值外，还会在方法逻辑中调用其他方法，操作处理字段，所以让我们再举一个稍微复杂些的例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> sNumberA = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">int</span> mNumberB = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">public</span> String mString = <span class="string">"3"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String msg = sNumberA + <span class="string">":"</span> + mNumberB + mString;</span><br><span class="line">        print(msg);</span><br><span class="line">        <span class="keyword">return</span> msg;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        System.out.println(msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这个例子的<code>method()</code>方法中，处理了<code>HotfixDemo</code>的字段，还调用了一个成员方法，假如我们把这段逻辑修改后，像之前的例子一样，将方法全部copy到<code>HotfixDemo$Patch</code>中，肯定是行不通的，因为作为一个和<code>HotfixDemo</code>没有关联的类，并未声明逻辑中访问的这些字段和方法。因此我们要在<code>HotfixDemo$Patch</code>中，处理和调用<code>HotfixDemo</code>中的字段方法，而无法访问的私有字段，通过反射就可以了。通过这样的“转译”，我们可以得到的补丁如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HotfixDemo</span>$<span class="title">Patch</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 修复过后的补丁方法，这里方法签名有些变化，因为要访问原有类的成员，需要其对应的实例</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> host 原有类的运行实例</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">method</span><span class="params">(HotfixDemo host)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> sNumberA = ReflectHelper.getField(host, <span class="string">"sNumberA"</span>);</span><br><span class="line">        <span class="keyword">int</span> mNumberB = ReflectHelper.getField(host, <span class="string">"mNumberB"</span>);</span><br><span class="line">        String mString = ReflectHelper.getField(host, <span class="string">"mString"</span>);</span><br><span class="line"></span><br><span class="line">        String msg = sNumberA + <span class="string">":"</span> + mNumberB + mString;</span><br><span class="line">        ReflectHelper.invokeMethod(host, msg);</span><br><span class="line">        <span class="keyword">return</span> msg;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/热修复/" rel="tag"># 热修复</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/02/17/2020，关于过去、现在与未来/" rel="next" title="2020，关于过去、现在与未来">
+                <i class="fa fa-chevron-left"></i> 2020，关于过去、现在与未来
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/05/25/从零开始的Android热修复之旅（二）：补丁自动化/" rel="prev" title="从零开始的Android热修复之旅（二）：补丁自动化">
+                从零开始的Android热修复之旅（二）：补丁自动化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+  <div class="comments" id="comments">
+    <div id="gitalk-container"></div>
+  </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/ost封面.png"
+                alt="nebula" />
+            
+              <p class="site-author-name" itemprop="name">nebula</p>
+              <p class="site-description motion-element" itemprop="description">技术积累</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方案简介"><span class="nav-number">2.</span> <span class="nav-text">方案简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何运行补丁？"><span class="nav-number">3.</span> <span class="nav-text">如何运行补丁？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#从简单实例开始"><span class="nav-number">3.1.</span> <span class="nav-text">从简单实例开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从扩展用例深入"><span class="nav-number">3.2.</span> <span class="nav-text">从扩展用例深入</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何制作补丁"><span class="nav-number">4.</span> <span class="nav-text">如何制作补丁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定位修复范围"><span class="nav-number">4.1.</span> <span class="nav-text">定位修复范围</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#补丁逻辑调用"><span class="nav-number">4.2.</span> <span class="nav-text">补丁逻辑调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#补丁实际逻辑"><span class="nav-number">4.3.</span> <span class="nav-text">补丁实际逻辑</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a9364cafdc67c1bd7840',
+          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
+          repo: 'nebulae-pan.github.io',
+          owner: 'nebulae-pan',
+          admin: ['nebulae-pan'],
+          id:'_20210221192000',
+          labels: 'gitalk'.split(',').filter(l => l),
+          perPage: parseInt(10),
+          pagerDirection: 'last',
+          createIssueManually: true,
+          distractionFreeMode: false
+        })
+
+        gitalk.render('gitalk-container')           
+       </script>
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz", "SEgjIpBn8x0IJgL4vXdWuyvB");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
