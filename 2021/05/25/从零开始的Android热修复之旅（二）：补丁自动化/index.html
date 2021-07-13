@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="nebula&#39;s nebulae">
 <meta property="og:description" content="前言在系列的前文中，详细地描述了Instant Run方案的设计思路和在实际场景愈渐复杂情况下的方案细节演进，知道了如何通过注入代码，配合补丁让app无需hook系统API也能够表现出可控的动态性。关于补丁，我们也了解了其应该包含的内容，按照前文的描述，由于补丁类是一个新类，因此我们需要将被修复类的非public成员方法/字段的直接调用转译成反射调用（这里的反射调用涉及到的api仅会有protec">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2021-07-13T15:25:40.408Z">
+<meta property="og:updated_time" content="2021-07-13T15:38:17.984Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="从零开始的Android热修复之旅（二）：补丁自动化">
 <meta name="twitter:description" content="前言在系列的前文中，详细地描述了Instant Run方案的设计思路和在实际场景愈渐复杂情况下的方案细节演进，知道了如何通过注入代码，配合补丁让app无需hook系统API也能够表现出可控的动态性。关于补丁，我们也了解了其应该包含的内容，按照前文的描述，由于补丁类是一个新类，因此我们需要将被修复类的非public成员方法/字段的直接调用转译成反射调用（这里的反射调用涉及到的api仅会有protec">
@@ -352,8 +352,9 @@
 <ul>
 <li>新增一个类。新增类的引用会直接体现在补丁的改动当中，我们需要做的只是让他们都通过同一个ClassLoader加载即可，无需对方法的指令进行转译</li>
 <li>新增一个方法。同理，新增方法的直接引用也会体现在补丁的改动当中，但是要为新增的方法放在补丁类中，并为其中的指令做转译</li>
-<li>新增一个field。新增field和新增方法是完全不同的情况了。按照当前的实现，补丁类的实例是static的，如果新增一个static field，在补丁类实例中可以保存状态，但是member field就需要额外的处理了<br>能够看到，我们能够处理的新增，仅仅是直接调用的情况。如果是反射调用，或是新增一个被修复类中没有重载过的重载方法，由于很难在补丁内处理他们的调用入口，所以诸如这样的情况Instant Run是无法支持的，这也是该方案的限制之一。  </li>
+<li>新增一个field。新增field和新增方法是完全不同的情况了。按照当前的实现，补丁类的实例是static的，如果新增一个static field，在补丁类实例中可以保存状态，但是member field就需要额外的处理了</li>
 </ul>
+<p>能够看到，我们能够处理的新增，仅仅是直接调用的情况。如果是反射调用，或是新增一个被修复类中没有重载过的重载方法，由于很难在补丁内处理他们的调用入口，所以诸如这样的情况Instant Run是无法支持的，这也是该方案的限制之一。  </p>
 <h2 id="进阶彩蛋"><a href="#进阶彩蛋" class="headerlink" title="进阶彩蛋"></a>进阶彩蛋</h2><p>如果不使用Javassist中提供的replace api，通过直接操作字节码用复杂一些的方式来实现指令访问的替换，能够对JVM的指令有更深的了解，这里提供一下实现的思路。<br>首先，Java字节码指令中，访问字段的指令有</p>
 <ul>
 <li><code>getfield</code></li>
