@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,热修复," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言在之前的两篇文章中，我们从基本原理以及丁自动化流程这两个方面了解了热修复是什么，完成一个热修复框架应该怎么做。并且在上一篇文章的结尾，列举了一些需要处理的实际问题，在这一篇文章里，我们来一一分析这些问题，并找到这些问题的解决方法。 super.调用优化在上一篇文章中，我们讨论了处理super调用的方式，将所有被super调用的方法进行替换，转为对一个额外注入的桥接方法的调用，该方法会预先列举所">
+<meta name="keywords" content="Android,热修复">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的Android热修复之旅（三）：进阶以及优化改进">
+<meta property="og:url" content="http://yoursite.com/2021/10/01/从零开始的Android热修复之旅（三）：进阶以及优化改进/index.html">
+<meta property="og:site_name" content="nebula&#39;s nebulae">
+<meta property="og:description" content="前言在之前的两篇文章中，我们从基本原理以及丁自动化流程这两个方面了解了热修复是什么，完成一个热修复框架应该怎么做。并且在上一篇文章的结尾，列举了一些需要处理的实际问题，在这一篇文章里，我们来一一分析这些问题，并找到这些问题的解决方法。 super.调用优化在上一篇文章中，我们讨论了处理super调用的方式，将所有被super调用的方法进行替换，转为对一个额外注入的桥接方法的调用，该方法会预先列举所">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-11-18T16:48:52.686Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从零开始的Android热修复之旅（三）：进阶以及优化改进">
+<meta name="twitter:description" content="前言在之前的两篇文章中，我们从基本原理以及丁自动化流程这两个方面了解了热修复是什么，完成一个热修复框架应该怎么做。并且在上一篇文章的结尾，列举了一些需要处理的实际问题，在这一篇文章里，我们来一一分析这些问题，并找到这些问题的解决方法。 super.调用优化在上一篇文章中，我们讨论了处理super调用的方式，将所有被super调用的方法进行替换，转为对一个额外注入的桥接方法的调用，该方法会预先列举所">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/10/01/从零开始的Android热修复之旅（三）：进阶以及优化改进/"/>
+
+
+
+
+
+  <title>从零开始的Android热修复之旅（三）：进阶以及优化改进 | nebula's nebulae</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">nebula's nebulae</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/10/01/从零开始的Android热修复之旅（三）：进阶以及优化改进/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="nebula">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ost封面.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nebula's nebulae">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从零开始的Android热修复之旅（三）：进阶以及优化改进</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-01T18:34:56+08:00">
+                2021-10-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2021/10/01/从零开始的Android热修复之旅（三）：进阶以及优化改进/" class="leancloud_visitors" data-flag-title="从零开始的Android热修复之旅（三）：进阶以及优化改进">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在之前的两篇文章中，我们从基本原理以及丁自动化流程这两个方面了解了热修复是什么，完成一个热修复框架应该怎么做。并且在上一篇文章的结尾，列举了一些需要处理的实际问题，在这一篇文章里，我们来一一分析这些问题，并找到这些问题的解决方法。</p>
+<h2 id="super-调用优化"><a href="#super-调用优化" class="headerlink" title="super.调用优化"></a>super.调用优化</h2><p>在上一篇文章中，我们讨论了处理super调用的方式，将所有被super调用的方法进行替换，转为对一个额外注入的桥接方法的调用，该方法会预先列举所有可能被super调用的方法，以便他可以通过参数进行调用转发。这样的方式能够解决我们最根本的问题，但是并不是那么完美，如果被修复的类是一个庞大复杂的类，还有复杂的继承关系，那这个桥接方法可能会非常大，甚至有可能超过方法的指令上限，并且额外注入的方法也会导致代码增多，使包体变大。<br>那有什么方式可以避免新增额外的桥接方法呢？可以先看一下对父类方法的super.调用在指令层面的表现是什么。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">// 示例代码 TestClass.class</span><br><span class="line">public void runTestMethod() &#123;</span><br><span class="line">    super.protectedSuperDotCallTest();</span><br><span class="line">    super.publicSuperDotCallTest();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 字节码</span><br><span class="line">public void runTestMethod();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: (0x0001) ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=8, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #6                  // Method com/xxxxx/hotfix/testcase/SuperClass.protectedSuperDotCallTest:()V</span><br><span class="line">         4: aload_0</span><br><span class="line">         5: iconst_1</span><br><span class="line">         6: iconst_0</span><br><span class="line">         9: invokespecial #12                 // Method com/xxxxx/hotfix/testcase/SuperClass.publicSuperDotCallTest:()Ljava/lang/String;</span><br><span class="line">        10: pop</span><br><span class="line">        11: return</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，super.的调用指令实际上和private方法以及构造方法的调用指令相同，都是<code>invoke-special</code>指令，既然指令相同，能否按照一般指令的转译方式来制作补丁呢？我们可以先尝试让补丁类继承被修复类的父类，使super调用可以正确指向父类方法，并把操作数替换为被修复类的运行时实例，这样看起来很完美的解决了问题，也无需在接入业务构建时插入额外的桥接方法了。但是有一个点，patch类继承被修复类的父类，如果父类拥有有参构造方法，会导致在应用补丁创建patch类示例时无法调用无参构造方法完成实例化，在无法覆盖所有父类构造方法执行逻辑的情况下，也无法使用默认值完成参数的传递。<br>那第二步，把patch类的父类改成<code>Object</code>是否可行呢？尝试一下，我们便会得到一个<code>Verifier rejected Error.</code>，行不通。不继承被修复父类就无法调用super方法，继承了被修复类父类又无法在所有场景下使用无参构造方法，那应该怎么做才能在保证patch类父类为<code>Object</code>的情况下调用到被修复类的父类方法呢？这里就可以印证一条名言，计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决——找一个可以执行这条指令的类作为中间层就行了，我们可以新建一个桥接类，让该类继承被修复类的父类，再声明一个静态方法，在静态方法（使用静态方法避免类的实例化）中完成super的调用，这样就可以通过虚拟机的类检查，而补丁类中的super.调用，转为对这个静态方法的<code>invoke-static</code>调用即可。</p>
+<h2 id="签名区分映射"><a href="#签名区分映射" class="headerlink" title="签名区分映射"></a>签名区分映射</h2><p>进行热修复的方法分发时，我们要进行方法的区分，在前文中已经提到过使用方法签名就可以完美做到区分不同的方法，而且能够保证唯一性，并且签名字符串也在常量池有对应项，这也意味着不会额外增加包体积，但是通过签名做区分的方式还是有两个问题，</p>
+<ol>
+<li>字符串判断相等是O(n)复杂度的，随着签名字符串长度增加，判断分发的时间也会增加</li>
+<li>字符串在混淆时不会被处理，会导致方法信息明文展示</li>
+</ol>
+<p>为了优化这两项，我们可以参考mapping文件的映射机制，也在构建时针对方法签名进行一个映射，让其变成更加无意义、更短的标志。如果仅为了区分方法，我们可以用一个整型来做表示，这个整型数值和方法签名的映射关系映射关系大致如下所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">com.xxxxx.hotfix.runtime.patch.supervisor.TestPatchSupervisor$1</span><br><span class="line">  onEvent(ILjava/lang/String;)V-&gt;0</span><br><span class="line">com.xxxxx.hotfix.demo.testcase.NewMethodTestCase</span><br><span class="line">  runTestCheck()V-&gt;1</span><br><span class="line">  runTestMethod()V-&gt;0</span><br><span class="line">com.xxxxx.hotfix.runtime.helper.Logger</span><br><span class="line">  w(Ljava/lang/String;)V-&gt;1</span><br><span class="line">  e(Ljava/lang/String;)V-&gt;0</span><br><span class="line">  v(Ljava/lang/String;)V-&gt;2</span><br><span class="line">com.xxxxx.hotfix.demo.testcase.CrashCase</span><br><span class="line">  makeCrash(Lcom/xxxxx/hotfix/demo/LogView;)V-&gt;0</span><br><span class="line">com.xxxxx.hotfix.demo.TestPanelActivity$onCreate$5</span><br><span class="line">  onClick(Landroid/view/View;)V-&gt;0</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>类名无须映射，其下声明的所有方法分配不重复的整型id。该映射关系和R8/ProGuard的mapping.txt类似，在后续针对线上包的所有操作和解析中都要用到，比如在制作补丁时作为反解规范使用，因此在发布后应当和.apk, mapping.txt, usage.txt等文件一起归档储存。</p>
+<h2 id="改动检测"><a href="#改动检测" class="headerlink" title="改动检测"></a>改动检测</h2><p>前几年开源的热修复框架定位修复函数的手段主要是使用注解或者锚点方法，优点很明显，定位明确，构建时需要处理的范围非常小。对于一些简单修复的场景来说这样的方式是足够的，但是一旦改动范围增加，在不了解编译器编译规则的情况下，手动增加注解很容易有疏漏。在此基础之上，我们可以考虑使用代码对比进行自动检测，来定位被改动的方法。自动检测有以下好处：</p>
+<ol>
+<li>减少打补丁时增加注解的步骤，开发只需修改代码，补丁流程可以放到CI/CD里</li>
+<li>可以在检测中进行规则约束，及时通知制作补丁的同学修改不支持的操作</li>
+<li>可以对大范围的改动进行检测（比如三方sdk升级）</li>
+</ol>
+<p>改动检测实际上是比较改动前后的内容差异，因此我们要将改动前的代码储存下来和改动之后的代码进行比较。借助ASM对class文件的解析，我们可以在内存中拿到类的所有属性、方法和字段的信息。如果两个类是完全一样的，那么在内存中他们的表现形式也应该相同，但是ASM并没有提供这样比较的API供我们使用，因此要自实现以完成比较，并且输出可以用于制作补丁的差异信息。<br>类文件经过ASM Tree API的解析后，在内存中会以<code>ClassNode</code>的数据结构储存，<code>ClassNode</code>的成员有类对应的属性、<code>MethodNode</code>和<code>FieldNode</code>，而<code>MethodNode</code>和<code>FieldNode</code>也是一系列属性的结合。进行比较需将上述提到的所有属性都进行对比，但由于属性数量较多，每一种类型的比较都进行处理会是一个比较庞大的工作量。我们不妨换一种思路————使用反射。拿到所有field，然后基本类型和<code>String</code>直接进行值的对比，非基本类型的对象再递归进行反射比较。递归要额外注意一些指针的引用（比如指令列表<code>InsnList</code>），会造成递归无限循环，因此一定要将指针加入过滤，不进行比较。<br><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">reflectMemberCompare</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    curr: <span class="type">Any</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">    ori: <span class="type">Any</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">    filterList: <span class="type">Array</span>&lt;<span class="type">String</span>&gt;,</span></span></span><br><span class="line"><span class="function"><span class="params">    process: (<span class="type">ChangeDetail</span>)</span></span> -&gt; <span class="built_in">Boolean</span></span><br><span class="line">) &#123;</span><br><span class="line">    <span class="keyword">val</span> clazz = curr::<span class="class"><span class="keyword">class</span>.<span class="title">java</span></span></span><br><span class="line">    <span class="keyword">if</span> (clazz != ori::<span class="class"><span class="keyword">class</span>.<span class="title">java</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> IllegalArgumentException(<span class="string">"param curr type: <span class="subst">$&#123;clazz.canonicalName&#125;</span> is not equals to param ori type:<span class="subst">$&#123;ori::class.java.canonicalName&#125;</span> "</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    clazz.declaredFields.filter &#123;</span><br><span class="line">        !filterList.contains(it.name)</span><br><span class="line">    &#125;.forEach &#123;</span><br><span class="line">        it.isAccessible = <span class="literal">true</span></span><br><span class="line">        <span class="keyword">val</span> currValue = it.<span class="keyword">get</span>(curr)</span><br><span class="line">        <span class="keyword">val</span> oriValue = it.<span class="keyword">get</span>(ori)</span><br><span class="line">        <span class="keyword">if</span> (!isEquals(currValue, oriValue)) &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">isEquals</span><span class="params">(clazz: <span class="type">Class</span>&lt;*&gt;, target: <span class="type">Any</span>?, other: <span class="type">Any</span>?)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (other?.javaClass != clazz) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//基本类型和String，一定override了equals，直接比较</span></span><br><span class="line">    <span class="keyword">if</span> (isWrapperType(clazz) || target <span class="keyword">is</span> String) &#123;</span><br><span class="line">        <span class="keyword">return</span> target == other</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//array相等的比较</span></span><br><span class="line">    <span class="keyword">if</span> (clazz.isArray) &#123;</span><br><span class="line">        <span class="keyword">return</span> isArrayEquals(target!!, other)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (target <span class="keyword">is</span> List&lt;*&gt;) &#123;</span><br><span class="line">        <span class="keyword">return</span> isListEquals(target, other <span class="keyword">as</span> List&lt;*&gt;)</span><br><span class="line">    &#125;</span><br><span class="line">    clazz.declaredFields.forEach &#123;</span><br><span class="line">        it.isAccessible = <span class="literal">true</span></span><br><span class="line">        <span class="keyword">val</span> currValue = it.<span class="keyword">get</span>(target)</span><br><span class="line">        <span class="keyword">val</span> oriValue = it.<span class="keyword">get</span>(other)</span><br><span class="line">        <span class="keyword">if</span> (!isEquals(currValue, oriValue)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>用上述的方式可以很好的处理属性变更比较和<code>FieldNode</code>的比较，不过方法由于指令体的存在，导致其比较特殊，需额外进行处理。先来看看方法的组成，方法的组成大致可以分为三部分，1.方法签名，2.方法体，3.方法属性（注解，范型、访问级别、局部变量表等），这几部分都有变更的可能性。方法签名包括了方法的名称、返回值、参数（类型、顺序、数量），其中任一部分改变，我们都会认为是新增了一个变更后的方法，且原方法被删除。方法体的变更检查则要从指令入手，我们可以用方法变更前后的指令数为第一个判定标准，若指令数相同，再比较指令是否变更（操作符与操作数是否相同），需要注意的是<code>LineNumberNode</code>，该属性不会影响运行时逻辑，在检测中应该被忽略。<br>第二点，约束规则，因为Instant Run方案的一些限制，诸如注解、accessFlag的修改都是不支持的，通过在文档中一条条列举不支持的选项对于使用方来说无疑是很繁琐的，因此如果在构建补丁时，自动检测出改动的内容是否在我们支持的范围内，并给出不支持修改的提示信息，是一个较为合适的解决方案。而在前一段中讨论到的检测方案，粒度能够精确到类文件所有属性，也能够让我们在规范规则约束的时候提供详尽的改动信息。<br>最后一点，部分框架使用注解标记方法进行修复方法的定位，但新增注解并不能适用于已经引入的第三方库。假使一个三方库在线上暴露出了一些问题，按照正常迭代修改的话，只需要修改maven/gradle依赖的版本，等待上线即可。但如果情况比较严重，想针对这种情况进行热修复的发布，那制作补丁时就一定需要知道所有改动的点，人为判断在此时就略显乏力了。使用改动检测就能很好解决这样的问题，只用将三方库或引入的模块加入检测范围，就可以自动化的完成改动的检测。当然这一点也会让补丁构建的时间增长很多。</p>
+<h2 id="R8编译-ProGuard处理"><a href="#R8编译-ProGuard处理" class="headerlink" title="R8编译/ProGuard处理"></a>R8编译/ProGuard处理</h2><p>实际上，几乎对于每一个应用来说，在构建release版本的包时，开启R8编译/ProGuard都是一个必须的选项，更是总所周知的，使用这个工具对构建流程进行处理后，能够让包体积变小、混淆代码增大反编译难度，但是也会带来一些诸如反射失效之类的问题。<br>看一下官方如何描述R8编译的任务</p>
+<ul>
+<li>代码资源缩减：移除不使用的类、字段、方法、属性以及资源</li>
+<li>混淆：缩短类和成员的名称</li>
+<li>优化：检查并重写代码<br>我们使用的热修复方案的覆盖范围是方法粒度的，因此最后一项优化对方案没有任何影响，它只会优化方法内部的执行逻辑，而前两项，会切实的改动程序内方法的对外形式，针对这两项，需要我们进一步的探讨。</li>
+</ul>
+<h3 id="针对混淆的处理"><a href="#针对混淆的处理" class="headerlink" title="针对混淆的处理"></a>针对混淆的处理</h3><p>R8进行混淆处理，会缩短所有未保持的类、字段、方法的名称，下面是一个来自mapping.txt的示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">androidx.appcompat.app.ActionBarDrawerToggle$DelegateProvider -&gt; a.a.a.b:</span><br><span class="line">androidx.appcompat.app.AlertController -&gt; androidx.appcompat.app.AlertController:</span><br><span class="line">    android.content.Context mContext -&gt; a</span><br><span class="line">    int mListItemLayout -&gt; O</span><br><span class="line">    int mViewSpacingRight -&gt; l</span><br><span class="line">    android.widget.Button mButtonNeutral -&gt; w</span><br><span class="line">    int mMultiChoiceItemLayout -&gt; M</span><br><span class="line">    boolean mShowTitle -&gt; P</span><br><span class="line">    int mViewSpacingLeft -&gt; j</span><br><span class="line">    int mButtonPanelSideLayout -&gt; K</span><br></pre></td></tr></table></figure></p>
+<p>混淆处理后意味着在应用中已经不存在<code>androidx.appcompat.app.ActionBarDrawerToggle$DelegateProvider</code>类了，取而代之的是一串短且不易区分的名称<code>a.a.a.b</code>，一些针对类名、方法名的反射操作就会失效。通常面对需要反射处理的类，都会对其进行Keep处理，但是热修复生成补丁时，并不会预先知道将会被处理的类，也就无从谈起Keep处理了。我们要做的，就是让补丁内的类也应用如上规则。<br>ProGuard提供了<code>-applymapping</code>选项用来应用已有的mapping文件。不过这里我们可以舍近求远，尝试通过修改class文件的常量池和属性表来做到补丁的混淆，通过这种方式可以让更好理解混淆的原理，且能更好自定义处理流程。<br>我们要确定范围，然后通过mapping文件将名称进行映射即可。先看一下混淆的改动范围，分为类自身成员和引用的外部成员，类自身的成员实际上只有声明在类中的方法和字段（内部类可以认为是一个新的类），外部引用的范围就比较大了，会有如下内容：</p>
+<ol>
+<li>父类类名</li>
+<li>实现接口类名</li>
+<li>声明方法的参数&amp;返回值类型类名</li>
+<li>字段类型类名</li>
+<li>注解类名</li>
+<li>访问的方法名称（包括方法所属类的类名）</li>
+<li>访问的字段名称（包括字段所属类的类名）</li>
+</ol>
+<p>其中，第三点需要解析方法描述符，依次映射完成后再组合进行替换。举一个例子：<code>(Ljava/lang/String;Ljava/util/List;)Z</code>，这个类型描述符表示它所描述的方法接受两个类型分别为<code>String</code>和<code>List</code>的参数，返回一个bool类型的参数。在mapping中查找<code>Ljava/lang/String;</code>混淆后的名称（实际情况下jdk内的类不会混淆，这里只是举一个例子）进行替换，<code>Ljava/util/List;</code>同理，返回值如果非基本类型也需要进行如上映射。处理完成后描述符可能会是如下形式：<code>(La/b/a;La/c/a;)Z</code>。<br>第五点需要处理的比较多，注解会被使用在多个地方，可能是方法，字段，方法参数等等，需要去读取上述成员的<code>RuntimeVisibleAnnotations</code>表和<code>RuntimeInvisibleAnnotations</code>表，再进行替换。<br>第六、七点处理方式大体一致，可以直接遍历常量池，寻找Methodref，Fieldref，InterfaceMethodref项，处理这些项中索引到的Class项和NameAndType项。<br>处理完上面所有范围的成员名称后，就可以得到一个经过混淆的类。  </p>
+<h3 id="针对裁剪的处理"><a href="#针对裁剪的处理" class="headerlink" title="针对裁剪的处理"></a>针对裁剪的处理</h3><p>R8编译/Progurad在未使用<code>-dontshrink</code>时，会删除程序中未使用到的类、方法字段，对应的删除内容会输出到usage.txt文件当中。以一个类说明，被删除的类在程序中相当于不存在了，但是无法保证我们在制作补丁的时候不会引用到该类。既然该类在构建时被删除了，那我们就可以认为对于程序来说，该类是一个新增类，我们可以用新增类的形式去处理它，方法和字段同理。那么如何正确定位到被shrink处理的内容呢？<br>先来看一下usage.txt的内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">androidx.drawerlayout.R$attr</span><br><span class="line">androidx.vectordrawable.R</span><br><span class="line">androidx.appcompat.app.AppCompatDelegateImpl</span><br><span class="line">    public void setSupportActionBar(androidx.appcompat.widget.Toolbar)</span><br><span class="line">    public boolean hasWindowFeature(int)</span><br><span class="line">    public void setHandleNativeActionModesEnabled(boolean)</span><br><span class="line">    android.view.ViewGroup getSubDecor()</span><br><span class="line">    public void setLocalNightMode(int)</span><br><span class="line">    final androidx.appcompat.app.AppCompatDelegateImpl$AutoNightModeManager getAutoNightModeManager()</span><br><span class="line">    public final androidx.appcompat.app.ActionBarDrawerToggle$Delegate getDrawerToggleDelegate()</span><br><span class="line">    private static final boolean DEBUG</span><br><span class="line">    private static final java.lang.String KEY_LOCAL_NIGHT_MODE</span><br><span class="line">    static final java.lang.String EXCEPTION_HANDLER_MESSAGE_SUFFIX</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>如果某个类，后面没有成员行的信息，表示的是整个类都被删除，有成员行，表示被列出的成员都被删除了，但是该类没有被删除。可以通过mapping.txt的内容来判断一个成员是否被删除了，如果在mapping.txt中找到了映射关系，则该成员没有被删除。我们能够根据上述规则，从需要被补丁的类开始进行查找，遍历其类结构和所有的方法指令，找到其中的引用，然后进行上述操作得到一个需要被还原的集合，其中会包含被还原的类、某个类中被还原的字段和方法。这些内容都会被视为新增，然后进行后续的处理。  </p>
+<h2 id="如何支持修复构造方法"><a href="#如何支持修复构造方法" class="headerlink" title="如何支持修复构造方法"></a>如何支持修复构造方法</h2><p>构造方法的修复和普通方法的修复略有不同，由于所有的构造方法必须直接或者间接调用到父类的构造方法(<code>super()</code> 或者 <code>this()</code>)，因此对构造方法插桩相较于普通方法来说要额外增加<code>this()</code>或者<code>super()</code>的指令。但是被修复的逻辑中，很可能调用的方法和修复前不同，比如被修复类调用了<code>super(activity)</code>，但修复后会改为对<code>super(application)</code>的调用，这时就要求注入方法逻辑内的super/this调用要具备选择分发的能力。<br>在Instant Run的实现中，在保留原有构造方法的情况下会生成一个新的构造方法，这个构造方法的方法体对所有可能调用的当前类的构造方法和父类的构造方法做了枚举，根据传入的参数来确定需要执行哪一个构造方法。构建流程中注入到if/else逻辑中的<code>this()</code>调用就将会调用到这个新增的构造方法，由此来达成构造方法的修复支持，静态构造方法同理。<br>由于虚拟机对构造方法的约束，导致仅有这样的方式能够赋予构造方法动态性以支持热修复，这种方法的弊端同上一篇文章中讲到生成的super桥接方法类似，都会增大包的体积，对构造方法的修复可以依据接入方的实际情况进行取舍。</p>
+<h2 id="如何支持新增一个成员字段"><a href="#如何支持新增一个成员字段" class="headerlink" title="如何支持新增一个成员字段"></a>如何支持新增一个成员字段</h2><p>在讲到R8/ProGuard时提到，有字段被shrink的情况下，如果我们在补丁制作时使用到了这个字段，对于运行的应用来说，这个字段是一个当前数据逻辑中不存在，新增的字段。新增方法时，我们新增的是一段逻辑，不需要区分他是类方法还是成员方法，在运行补丁时只要能够调用到逻辑即可，但是字段不同，成员字段在每个实例中都有一个备份。不过，换一个角度来说，如果为被修复类的所有运行时实例都做好映射，那也就能够支持字段的新增了。<br>再明确一下新增成员字段的需求，需要建立被修复类实例和新增成员字段的映射关系，且这个映射关系不能影响到实例的gc，由此我们很容易想到可以使用<code>WeakHashMap</code>来维护这个映射关系。当在制作补丁时开发新增了字段，制作补丁时会区分是类字段还是实例字段，如果是类字段，直接将字段放到补丁类中即可，如果是实例字段，则需要维护一个被修复类运行时实例和实例字段值的<code>WeakHashMap</code>，并根据传入的被修复类运行时实例进行索引。所有在原本逻辑中对新增字段的操作指令，都会转为对<code>WeakHashMap</code>中value的操作指令。由此便可以实现新增一个字段的修复。</p>
+<h2 id="反射调用优化"><a href="#反射调用优化" class="headerlink" title="反射调用优化"></a>反射调用优化</h2><p>大家都知道，反射调用一个方法时，因为额外校验、无法编译器优化等原因，性能会比直接调用相差一个数量级以上，在逻辑简单时尚可接受，但是若在一些密集处理，或者在绘制时频繁调用的地方应用热修复，就有可能导致原先正常的逻辑在执行补丁时出现明显卡顿，甚至ANR。因此，优化掉反射调用可以很好的帮助热修复扩大适用场景和修复范围。<br>为什么使用反射调用原有类的逻辑在前文中已经分析过了，在此我们可以复习一下。热修复的补丁包含了改动后的逻辑，改动后的逻辑有可能需要调用类中原本存在的非public方法或访问非public的字段，又由于补丁内的类是一个全新的类，将会在应用补丁时通过ClassLoader加载，因此对其他非public方法\字段的调用就需要通过反射完成了。<br>既然非public方法\字段的访问才需要反射调用，那我们或许可以减少这样的字段或方法——在编译器将非framework层的所有字段访问标志改为public，并将所有非private的方法访问标志改为public。至于为什么不改动private方法的访问标志，主要是因为public方法的调用指令其实是invoke-virtual和private方法的调用指令(invoke-special)是不同的，虚拟机执行前者时会在函数表中查询具体实现，为了将对指令的改动和影响降低到最小，对private方法的标志位改动就忽略了。但是private的调用在所有的方法调用中实际上占据了大头，不对其进行处理的话，优化就很难有所成效。<br>或许可以从修改方法访问标志以外的角度入手。从更为通用的角度看去，不难发现程序实际上只是逻辑和数据的集合，逻辑的体现是方法指令，而数据的体现就是字段，在进行热修复时，原本的数据势必是无法随意迁移的，但是逻辑并非如此，因此我们可以考虑将逻辑也直接放到补丁当中，具体体现就是将所有的private方法直接复制到补丁类中，然后将补丁中所有对被修复类private方法的调转译为对补丁内对应方法的调用即可。<br>如此，就可以将所有非framework层在热修复时需要反射调用的点优化掉。不过由于我们无法修改framework层的方法优先级，因此在补丁中调用到framework层的protected方法时就需要反射调用了，除此之外还有private的JNI方法，由于无法copy其代码，也需要反射调用。</p>
+<h2 id="优化和线上成果"><a href="#优化和线上成果" class="headerlink" title="优化和线上成果"></a>优化和线上成果</h2><h2 id="方案存在的问题"><a href="#方案存在的问题" class="headerlink" title="方案存在的问题"></a>方案存在的问题</h2><p>受限于实现机制，该方案还是会有一些无法支持的修复方式，会在下面列出，所幸对于热修复这样一个轻量级的操作来说，修改涉及到下列的情况通常极少出现</p>
+<ul>
+<li>不支持修改范型注解等一系列修改非方法逻辑的操作</li>
+<li>不支持override线上版本未override的方法</li>
+<li>不支持新增四大组件的子类</li>
+<li>不支持在已有匿名内部类的类中，新增一个声明位置不在最后的匿名内部类</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/热修复/" rel="tag"># 热修复</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/25/从零开始的Android热修复之旅（二）：补丁自动化/" rel="next" title="从零开始的Android热修复之旅（二）：补丁自动化">
+                <i class="fa fa-chevron-left"></i> 从零开始的Android热修复之旅（二）：补丁自动化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+  <div class="comments" id="comments">
+    <div id="gitalk-container"></div>
+  </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/ost封面.png"
+                alt="nebula" />
+            
+              <p class="site-author-name" itemprop="name">nebula</p>
+              <p class="site-description motion-element" itemprop="description">技术积累</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#super-调用优化"><span class="nav-number">2.</span> <span class="nav-text">super.调用优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#签名区分映射"><span class="nav-number">3.</span> <span class="nav-text">签名区分映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#改动检测"><span class="nav-number">4.</span> <span class="nav-text">改动检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#R8编译-ProGuard处理"><span class="nav-number">5.</span> <span class="nav-text">R8编译/ProGuard处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#针对混淆的处理"><span class="nav-number">5.1.</span> <span class="nav-text">针对混淆的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#针对裁剪的处理"><span class="nav-number">5.2.</span> <span class="nav-text">针对裁剪的处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何支持修复构造方法"><span class="nav-number">6.</span> <span class="nav-text">如何支持修复构造方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何支持新增一个成员字段"><span class="nav-number">7.</span> <span class="nav-text">如何支持新增一个成员字段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反射调用优化"><span class="nav-number">8.</span> <span class="nav-text">反射调用优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化和线上成果"><span class="nav-number">9.</span> <span class="nav-text">优化和线上成果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方案存在的问题"><span class="nav-number">10.</span> <span class="nav-text">方案存在的问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a9364cafdc67c1bd7840',
+          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
+          repo: 'nebulae-pan.github.io',
+          owner: 'nebulae-pan',
+          admin: ['nebulae-pan'],
+          id:'_20211001183456',
+          labels: 'gitalk'.split(',').filter(l => l),
+          perPage: parseInt(10),
+          pagerDirection: 'last',
+          createIssueManually: true,
+          distractionFreeMode: false
+        })
+
+        gitalk.render('gitalk-container')           
+       </script>
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz", "SEgjIpBn8x0IJgL4vXdWuyvB");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
