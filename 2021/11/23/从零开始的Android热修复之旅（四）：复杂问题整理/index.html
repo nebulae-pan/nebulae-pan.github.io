@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,热修复," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="开篇经过前三篇文章的讨论，相信有读者们已经能够完全掌握类Instant Run原理的热修复方案了，但是在原理和实现之间还是有着众多细节问题需要我们去解决的。本文将会举出一些笔者在从demo到线上应用这一流程当中遇到的问题，并分享一些解决这些问题的经验。其中会涉及到一些关于编译、工具、语言等相关的小知识。相信读者们踩完这些坑之后，会发现自己实现一套热修复框架是一件非常简单的事情。   编译相关在处理">
+<meta name="keywords" content="Android,热修复">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的Android热修复之旅（四）：复杂问题整理">
+<meta property="og:url" content="http://yoursite.com/2021/11/23/从零开始的Android热修复之旅（四）：复杂问题整理/index.html">
+<meta property="og:site_name" content="nebula&#39;s nebulae">
+<meta property="og:description" content="开篇经过前三篇文章的讨论，相信有读者们已经能够完全掌握类Instant Run原理的热修复方案了，但是在原理和实现之间还是有着众多细节问题需要我们去解决的。本文将会举出一些笔者在从demo到线上应用这一流程当中遇到的问题，并分享一些解决这些问题的经验。其中会涉及到一些关于编译、工具、语言等相关的小知识。相信读者们踩完这些坑之后，会发现自己实现一套热修复框架是一件非常简单的事情。   编译相关在处理">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/images/R-changed.png">
+<meta property="og:updated_time" content="2021-12-25T05:14:21.137Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从零开始的Android热修复之旅（四）：复杂问题整理">
+<meta name="twitter:description" content="开篇经过前三篇文章的讨论，相信有读者们已经能够完全掌握类Instant Run原理的热修复方案了，但是在原理和实现之间还是有着众多细节问题需要我们去解决的。本文将会举出一些笔者在从demo到线上应用这一流程当中遇到的问题，并分享一些解决这些问题的经验。其中会涉及到一些关于编译、工具、语言等相关的小知识。相信读者们踩完这些坑之后，会发现自己实现一套热修复框架是一件非常简单的事情。   编译相关在处理">
+<meta name="twitter:image" content="http://yoursite.com/images/R-changed.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/11/23/从零开始的Android热修复之旅（四）：复杂问题整理/"/>
+
+
+
+
+
+  <title>从零开始的Android热修复之旅（四）：复杂问题整理 | nebula's nebulae</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">nebula's nebulae</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/11/23/从零开始的Android热修复之旅（四）：复杂问题整理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="nebula">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ost封面.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nebula's nebulae">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从零开始的Android热修复之旅（四）：复杂问题整理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-23T22:41:12+08:00">
+                2021-11-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2021/11/23/从零开始的Android热修复之旅（四）：复杂问题整理/" class="leancloud_visitors" data-flag-title="从零开始的Android热修复之旅（四）：复杂问题整理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h2><p>经过前三篇文章的讨论，相信有读者们已经能够完全掌握类Instant Run原理的热修复方案了，但是在原理和实现之间还是有着众多细节问题需要我们去解决的。本文将会举出一些笔者在从demo到线上应用这一流程当中遇到的问题，并分享一些解决这些问题的经验。其中会涉及到一些关于编译、工具、语言等相关的小知识。相信读者们踩完这些坑之后，会发现自己实现一套热修复框架是一件非常简单的事情。  </p>
+<h2 id="编译相关"><a href="#编译相关" class="headerlink" title="编译相关"></a>编译相关</h2><p>在处理APP编译时注入工具的选择上，考虑到运行速度和代码量，笔者选用了ASM，原本以为在ASM Bytecode Outline插件的协助下，进行字节码逻辑的注入是一件非常简洁的事情，但实际上在开发过程中遇到的小问题（多是Error的形式）远比我们想象的要多。由于ASM没有改动后的校验，不像编译器一般在compile阶段会检查不合法的语义语法，在编写的过程中，绝大多数的问题都是字节码插桩完成，打包成功，运行时报错（Error），下面会列出一些遇到过的字节码注入问题，在通过标准编译器编译代码时这些问题都会被编译器找到并提示，因此在运行时基本不会遇到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.IncompatibleClassChangeError: Found interface com.xxx.hotfix.runtime.patch.RuntimeDirector, but class was expected (declaration of &apos;com.xxx.hotfix.runtime.patch.RuntimeDirector&apos; appears in /data/app/com.xxx.hotfix.demo--s-04slO01UaxvrwU6HArg==/base.apk)</span><br></pre></td></tr></table></figure>
+<p>这个异常中的<code>RuntimeDirector</code>实际是一个接口，在调用接口内方法的时候没有使用<code>invoke-interface</code>指令而使用了<code>invoke-virtual</code>指令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java.lang.IllegalAccessError: Illegal class access: &apos;com.xxx.hotfix.demo.TestCommonSyntheticPatch&apos; attempting to access &apos;com.xxx.hotfix.demo.TestCommon&apos; (declaration of &apos;com.xxx.hotfix.demo.TestCommonSyntheticPatch&apos; appears in /data/user/0/com.xxx.hotfix.demo/cache/xxxFix/patch.zip)</span><br><span class="line">        at com.xxx.hotfix.demo.TestCommonSyntheticPatch.invocationDispatch(Unknown Source:0)</span><br><span class="line">        at com.xxx.hotfix.demo.TestCommon.privateTestModifiedField(Unknown Source:13)</span><br><span class="line">        at com.xxx.hotfix.demo.TestCommon.testField(TestCommon.java:27)</span><br><span class="line">        at com.xxx.hotfix.demo.TestCommon.execTestCase(TestCommon.java:80)</span><br><span class="line">        at com.xxx.hotfix.demo.MainActivity$onCreate$3.onClick(MainActivity.kt:26)</span><br><span class="line">        at android.view.View.performClick(View.java:7252)</span><br></pre></td></tr></table></figure>
+<p>这里是一个新生成的类，在访问原有类的时候会抛出了<code>IllegalAccessError</code>，原因是没有通过访问级别的校验，比如一个类访问了另一个类的private方法，这也是compiler在编译时能够检出的问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.InstantiationException: java.lang.Class&lt;com.xxx.hyperion.discuss.main.forum.BaseForumAdapter_SyntheticPatch&gt; cannot be instantiated</span><br></pre></td></tr></table></figure>
+<p>这个Error是构造试图一个abstract类的对象时抛出的，比较常见，反射<code>newInstance</code>一个抽象类就可以复现了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.VerifyError: Verifier rejected class com.xxx.hotfix.demo.TestSyntheticPatch: void com.xxx.hotfix.demo.TestSyntheticPatch.onCreate(android.os.Bundle) failed to verify: void com.xxx.hotfix.demo.TestSyntheticPatch.onCreate(android.os.Bundle): [0x67] register v0 has type Reference: java.lang.Object but expected Precise Reference: java.lang.String (declaration of &apos;com.xxx.hotfix.demo.TestSyntheticPatch&apos; appears in /data/user/0/com.xxx.hotfix.demo/cache/xxxFix/patch.zip)</span><br></pre></td></tr></table></figure>
+<p>这个问题乍一看其实没什么头绪的，因为本身是虚拟机加载类时的Error，没有具体问题的栈堆，message的信息也比较少，所以逐个方法逐行指令定位问题，最后发现是一个<code>Integer</code>实例被aload指令放到栈顶，而使用栈顶数据的方法对应的参数签名是<code>I</code>，也就是int类型。到这里可能有的读者会奇怪，为什么这样是不行的呢？编写代码时，<code>Integer</code>类型的值是可以作为参数传递给<code>int</code>类型使用的。我们可以来看一下下面这段代码和其javap后的指令。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Integer integer = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">this</span>.method(integer);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public void test();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=2, args_size=1</span><br><span class="line">         0: iconst_0</span><br><span class="line">         1: invokestatic  #1                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;</span><br><span class="line">         4: astore_1</span><br><span class="line">         5: aload_0</span><br><span class="line">         6: aload_1</span><br><span class="line">         7: invokevirtual #2                  // Method java/lang/Integer.intValue:()I</span><br><span class="line">        10: invokevirtual #3                  // Method method:(I)V</span><br><span class="line">        13: return</span><br></pre></td></tr></table></figure>
+<p>很明显，指令数量比起代码来说多了不少，显然编译器在编译时做了些什么。看下第1行，调用了<code>Integer.valueOf()</code>方法为局部变量赋值，第7行，在作为参数传递给method方法时，又隐式调用了<code>Integer#intValue()</code>方法，将包装类型转为了原始类型。可见，能够在编写代码时完全不区分原始类型和包装类型的使用，完全是仰仗了编译器为逻辑做的隐式调用。Java代码的隐式调用还有很多，比如字符串拼接时会通过StringBuilder完成、父类只有默认构造函数时子类构造函数会隐式调用<code>super()</code>；其他的编译处理还有桥接等，泛型的实现离不开桥接方法的生成。</p>
+<h3 id="Object类的FIELD"><a href="#Object类的FIELD" class="headerlink" title="Object类的FIELD"></a>Object类的FIELD</h3><p>在这一节的开头，可以先请大家想一想，一个class中是否可以存在两个同名的field？当然，既然这么问出来，答案肯定是<em>可以</em>，虽然在日常的Java coding中，IDE和compiler都会警告我们这样不合法，但是在kotlin中就非常容易出现上述的情况。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">private static android.app.Application INSTANCE;</span><br><span class="line">  descriptor: Landroid/app/Application;</span><br><span class="line">  flags: ACC_PRIVATE, ACC_STATIC</span><br><span class="line">  RuntimeInvisibleAnnotations:</span><br><span class="line">    0: #50()</span><br><span class="line"></span><br><span class="line">private static final com.xxx.hyperion.main.home.AppConfigModel appConfigModel;</span><br><span class="line">  descriptor: Lcom/xxx/hyperion/main/home/AppConfigModel;</span><br><span class="line">  flags: ACC_PRIVATE, ACC_STATIC, ACC_FINAL</span><br><span class="line"></span><br><span class="line">public static final com.xxx.hyperion.app.HyperionApplicationHelper INSTANCE;</span><br><span class="line">  descriptor: Lcom/xxx/hyperion/app/HyperionApplicationHelper;</span><br><span class="line">  flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL</span><br></pre></td></tr></table></figure></p>
+<p>这是一个object类所声明的成员，可以看到有两个名称为<code>INSTANCE</code>的field，一个是object类原本的单例对象，一个是开发者手动声明的对象；其实这样可以说明，虚拟机区分member是会用到签名的。既然可能会有两个同名field member的存在，在反射获取field时，就需要注意原生反射API提供的<code>getField()</code>方法在这种情景下并不能满足索引的需求了，获取<code>Field</code>实例，不仅要名称，还要它对应的签名。</p>
+<h3 id="Javassist检查异常"><a href="#Javassist检查异常" class="headerlink" title="Javassist检查异常"></a>Javassist检查异常</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javassist.bytecode.BadBytecode: conflict: *top* and java.lang.Object</span><br></pre></td></tr></table></figure>
+<p>Javassist会对某些操作字节码的API做编译检查，上面这个问题在Javassist可能会抛出的异常中也属于是比较难以定位的了，不像语法检查，没有直接的错误提示，只能够逐行代码debug。最后定位发现，该问题出在，插入代码时并没有使用Javassist提供的insert API，而是通过字节码代码的方式为try-catch语句的try语句块中新增了一个局部变量，然后在try-catch外部使用了这个局部变量。很明显，局部变量是有作用域的，在ExceptionTable中会标记try-catch语句包裹的范围，范围内声明的局部变量作用域就在ExceptionTable的startPc和endPc之间，Javassist在insert逻辑时，也同时处理了作用域问题，可见改动字节码时需要注意的东西还是非常多的。最后的改动就是将ExceptionTable中的startPc改动为声明局部变量的下一行，让这个局部变量的作用域不在ExceptionTable的覆盖区间内。<br>与之相似的，局部变量的作用域的范围也会体现在LocalVariableTable中，并且javassist是会检查这个作用域的，如果在作用域外引用到了这个变量，就会产生问题。</p>
+<h3 id="方法体过大"><a href="#方法体过大" class="headerlink" title="方法体过大"></a>方法体过大</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Method exceeds compiler instruction limit: 22581 in java.util.Map com.xxx.hotfix.patch.PatchDispatcherImpl.loadPatchDeliverInfo()</span><br></pre></td></tr></table></figure>
+<p>又是一个正常开发中很难遇到的问题，因为制作补丁的过程中，有一部分方法的生成是通过字节码工具完成的，在改动范围非常大的时候，对应生产的方法体也就会大很多，比如这个例子中，指令数就超过了20000条，当然解决方式也比较简单，将逻辑拆分到不同的方法当中，再由一个方法统一调用就可以解决了。举例就是，这个方法可能处理了10000个类，我们可以将其拆分成10个方法，每个方法处理1000个类，最后再由原先的方法调用中间生成的10个方法。</p>
+<h2 id="R-class的处理"><a href="#R-class的处理" class="headerlink" title="R.class的处理"></a>R.class的处理</h2><p>热修复方案上线后的一段时间里，有同学反馈在制作补丁时偶尔会遇到如下所示的问题<br><img src="/images/R-changed.png" alt="常量改变的示例"></p>
+<p>改动检测工具检测到了一个整型常量的读取变更，根据指令信息我们找到了对应的源码，发现这个整型常量实际上就是对R文件内声明字段的引用，这些字段在构建时生成，并且为常量，class文件编译时编译器会直接将使用处对字段的引用<em>内联</em>,也就是将其替换成对应的字面常量。可实际上代码中对R的引用并没有被改动过，深究发现生成默认的构建方式中，gradle使用aapt2生成R文件时并不能保证每次构建时字段的值完全一致。因此保证R的一致性成为了自动化检测改动工具的重要功能。需要注意的是，由于app模块和library模块对R的处理方式不同，library模块生成的R并非是常量，因此这里只需要处理app工程中的R文件即可。<br>最开始的设想，通过保存构建时的R.jar文件，额外处理构建补丁的流程，在原工程的compilerJavac的任务前，将生成的R.jar替换成之前构建时保存的文件即可，这样能够保证构建补丁生成class文件时，被内联的值和线上包的值一定保持相同。但在后续的调研中发现，aapt2虽然不支持aapt中的使用public.xml固定资源，但是新增的<code>--emit-ids</code>和<code>--stable-ids</code>也可以做到输出并重新复用R文件内容。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/热修复/" rel="tag"># 热修复</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/10/01/从零开始的Android热修复之旅（三）：进阶以及优化改进/" rel="next" title="从零开始的Android热修复之旅（三）：进阶以及优化改进">
+                <i class="fa fa-chevron-left"></i> 从零开始的Android热修复之旅（三）：进阶以及优化改进
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+  <div class="comments" id="comments">
+    <div id="gitalk-container"></div>
+  </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/ost封面.png"
+                alt="nebula" />
+            
+              <p class="site-author-name" itemprop="name">nebula</p>
+              <p class="site-description motion-element" itemprop="description">技术积累</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#开篇"><span class="nav-number">1.</span> <span class="nav-text">开篇</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译相关"><span class="nav-number">2.</span> <span class="nav-text">编译相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Object类的FIELD"><span class="nav-number">2.1.</span> <span class="nav-text">Object类的FIELD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Javassist检查异常"><span class="nav-number">2.2.</span> <span class="nav-text">Javassist检查异常</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方法体过大"><span class="nav-number">2.3.</span> <span class="nav-text">方法体过大</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#R-class的处理"><span class="nav-number">3.</span> <span class="nav-text">R.class的处理</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a9364cafdc67c1bd7840',
+          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
+          repo: 'nebulae-pan.github.io',
+          owner: 'nebulae-pan',
+          admin: ['nebulae-pan'],
+          id:'_20211123224112',
+          labels: 'gitalk'.split(',').filter(l => l),
+          perPage: parseInt(10),
+          pagerDirection: 'last',
+          createIssueManually: true,
+          distractionFreeMode: false
+        })
+
+        gitalk.render('gitalk-container')           
+       </script>
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz", "SEgjIpBn8x0IJgL4vXdWuyvB");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
