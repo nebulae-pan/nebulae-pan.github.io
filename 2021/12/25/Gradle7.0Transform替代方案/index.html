@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,Java,Gradle," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言2021年7月，Android Gradle Plugin更新了7.0版本，大家惊奇的发现，可以算得上是“家喻户晓”的Android AOP工具Transfrom标记为deprecated了，并且在注释中并未提供直接的替换类。去网上搜了搜，发现也有很多相关的文章，不过得益于国内“借鉴”的风气，我发现很多文章都不约而同的提到了一个接口：TransformAction，并在文章中声称Transfo">
+<meta name="keywords" content="Android,Java,Gradle">
+<meta property="og:type" content="article">
+<meta property="og:title" content="傻傻分不清楚：Gradle TransformAction和AGP Transform">
+<meta property="og:url" content="http://yoursite.com/2021/12/25/Gradle7.0Transform替代方案/index.html">
+<meta property="og:site_name" content="nebula&#39;s nebulae">
+<meta property="og:description" content="前言2021年7月，Android Gradle Plugin更新了7.0版本，大家惊奇的发现，可以算得上是“家喻户晓”的Android AOP工具Transfrom标记为deprecated了，并且在注释中并未提供直接的替换类。去网上搜了搜，发现也有很多相关的文章，不过得益于国内“借鉴”的风气，我发现很多文章都不约而同的提到了一个接口：TransformAction，并在文章中声称Transfo">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/images/2021/deprecated.png">
+<meta property="og:image" content="http://yoursite.com/images/2021/search.png">
+<meta property="og:image" content="http://yoursite.com/images/2021/aar-used.png">
+<meta property="og:image" content="http://yoursite.com/images/2021/dependency-configurator.png">
+<meta property="og:image" content="http://yoursite.com/images/2021/declaration.png">
+<meta property="og:image" content="http://yoursite.com/images/2021/transform-function.png">
+<meta property="og:image" content="http://yoursite.com/images/2021/transform-flow.png">
+<meta property="og:updated_time" content="2022-02-03T15:03:25.001Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="傻傻分不清楚：Gradle TransformAction和AGP Transform">
+<meta name="twitter:description" content="前言2021年7月，Android Gradle Plugin更新了7.0版本，大家惊奇的发现，可以算得上是“家喻户晓”的Android AOP工具Transfrom标记为deprecated了，并且在注释中并未提供直接的替换类。去网上搜了搜，发现也有很多相关的文章，不过得益于国内“借鉴”的风气，我发现很多文章都不约而同的提到了一个接口：TransformAction，并在文章中声称Transfo">
+<meta name="twitter:image" content="http://yoursite.com/images/2021/deprecated.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/12/25/Gradle7.0Transform替代方案/"/>
+
+
+
+
+
+  <title>傻傻分不清楚：Gradle TransformAction和AGP Transform | nebula's nebulae</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">nebula's nebulae</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/12/25/Gradle7.0Transform替代方案/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="nebula">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ost封面.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nebula's nebulae">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">傻傻分不清楚：Gradle TransformAction和AGP Transform</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-25T15:14:42+08:00">
+                2021-12-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2021/12/25/Gradle7.0Transform替代方案/" class="leancloud_visitors" data-flag-title="傻傻分不清楚：Gradle TransformAction和AGP Transform">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>2021年7月，Android Gradle Plugin更新了7.0版本，大家惊奇的发现，可以算得上是“家喻户晓”的Android AOP工具<code>Transfrom</code>标记为deprecated了，并且在注释中并未提供直接的替换类。去网上搜了搜，发现也有很多相关的文章，不过得益于国内“借鉴”的风气，我发现很多文章都不约而同的提到了一个接口：<code>TransformAction</code>，并在文章中声称<code>TransformAction</code>就是<code>Transform</code>的代替。真的是这样吗？这个<code>TransformAction</code>到底是什么？他能否完全替代<code>Transform</code>的功能？这篇文章就带大家一起来探究。</p>
+<p><img src="/images/2021/deprecated.png" alt="transform被废弃"></p>
+<h2 id="TransformAction-in-Gradle"><a href="#TransformAction-in-Gradle" class="headerlink" title="TransformAction in Gradle"></a>TransformAction in Gradle</h2><p>了解一个模块最好的方式就是看官方文档，点<a href="https://docs.gradle.org/current/userguide/artifact_transforms.html" target="_blank" rel="noopener">这里</a>。当然如果嫌太长，可以先看下我的总结：TransformAction是一个使用依赖前的转换API，可以注册两个属性间的转换Action，将依赖从一个状态切换到另一个状态。<br>让我们从代码入手，先来看看TransformAction的声明<br><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">TransformAction</span>&lt;<span class="type">T extends TransformParameters</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    T getParameters();</span><br><span class="line"></span><br><span class="line">    void transform(TransformOutputs var1);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>简单到爆，一共就两个方法，<code>getParameters</code>还被<code>@Inject</code>标记，不需要实现，只有一个<code>transform</code>方法需要实现，看名字就知道，需要在<code>transform</code>方法中进行转换的处理，再来一段最简单示例<br><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.gradle.api.artifacts.transform.TransformParameters;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">MyTransform</span> <span class="title">implements</span> <span class="title">TransformAction</span>&lt;<span class="type">TransformParameters.None</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@InputArtifact</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> Provider&lt;FileSystemLocation&gt; getInputArtifact();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> void transform(TransformOutputs outputs) &#123;</span><br><span class="line">        File input = getInputArtifact().<span class="keyword">get</span>().getAsFile();</span><br><span class="line">        File output = outputs.file(input.getName() + <span class="string">".transformed"</span>);</span><br><span class="line">        <span class="comment">// Do something to generate output from input</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到输入的文件内容和输出的地址都可以通过框架获取。那么输入从哪里来呢？所有依赖的文件都需要作为输入被处理吗？显然不是，前文也说过，<code>TransformAction</code>基于依赖所具有的属性进行转换，在其注册时，提供了方法指定所需要的API。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// groovy code</span></span><br><span class="line">dependencies &#123;</span><br><span class="line">    registerTransform(Minify) &#123;</span><br><span class="line">        from.attribute(minified, <span class="literal">false</span>).attribute(artifactType, <span class="string">"jar"</span>)</span><br><span class="line">        to.attribute(minified, <span class="literal">true</span>).attribute(artifactType, <span class="string">"jar"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码段展示了注册<code>TransformAction</code>的方式，<code>from</code>和<code>to</code>分别标记了需要处理的<code>attribute</code>和处理之后的<code>attribute</code>，符合输入条件的依赖才会被注册的<code>TransformAction</code>进行处理。另外，在<code>dependencies</code>闭包下调用注册方法也应证了<code>TransformAction</code>是为引入的依赖进行服务的。<br>因此，在使用<code>TransformAction</code>时需要特别注意的只有两点：1. 转换的起始状态和目标状态是什么， 2. 转换的具体实现。  </p>
+<h3 id="举栗子"><a href="#举栗子" class="headerlink" title="举栗子"></a>举栗子</h3><p>概念的介绍可能不太直观，那么举一个在Android中非常常见的例子，Android ARchive文件的使用。<br>Android ARchive，也就是.aar后缀的资源包，gradle是如何使用它的呢？如果有同学尝试过就知道，如果是默认使用java-libray的工程，肯定无法依赖并使用aar的，引入时会报<code>Could not resolve ${dependencyNotation}</code>，说明在Android Gradle Plugin当中，插件对aar包的依赖进行了处理，只有通过了插件处理，才能正确使用aar内的资源。那就来看看AGP是如何在<code>TransformAction的</code>帮助下做到这点的。本所有代码来自Android Gradle Plugin 7.0.0。<br>既然aar是一个非常常见的格式，那可以尝试从这个类型的声明入手，全局搜一下<code>&quot;aar&quot;</code>，在搜索列表里发现了一个重要内容</p>
+<p><img src="/images/2021/search.png" alt="检索结果"></p>
+<p><code>AndroidArtifacts</code>，注释写了：Helper for publishing android artifacts, both for internal (inter-project) and external (to repositories)，可以用于帮助发布一些项目内或仓库的android文件,如其名，在类中枚举了一系列Android中可能用到的文件。再进一步看一看<code>AAR</code>枚举的调用点</p>
+<p><img src="/images/2021/aar-used.png" alt="AAR使用"></p>
+<p>调用点不多，我们可以按顺序一个个查看，当然，从名字来看，还可以再缩小定位范围，<code>DependencyConfigurator</code>和我们查找的aar引用看上去就有很大的关联性，那就先从这个类入手。</p>
+<p><img src="/images/2021/dependency-configurator.png" alt="DepdencyConfigurator"></p>
+<p>跳转过来就发现，上面有一个<code>registerTransform()</code>方法的调用，追溯调用，发现最后会调用到<code>project.dependencies.registerTransform()</code>，而这个方法的第一个参数就是<code>Class&lt;? extends TransformAction&lt;T&gt;&gt;</code>，关联上了，看上去AAR这个artifact确实需要<code>TransformAction</code>的处理。使用<code>AndroidArtifacts.ArtifactType.AAR</code>的类是<code>JetifyTransform</code>，Jetfiy，是不是很眼熟，迁移androidx时就有jetify相关的配置，不过我们把jetfiy放到后面，先来看下有没有直接和AAR相关的<code>TransformAction</code>。浏览下<code>DependencyConfigurator</code>，找到个简单粗暴的命名：<code>AarTransform</code>。<br>点进<code>AarTransform</code>，会有一种豁然开朗的感觉，注释写着Transform that returns the content of an extracted AAR folder（返回解压到AAR文件夹内容的Transform），还列出了一系列类型</p>
+<p><img src="/images/2021/declaration.png" alt="声明"></p>
+<p>很容易就能够看出来，这里声明的是所有AAR包中可能出现的资源类型，再看下面的<code>transform()</code>方法</p>
+<p><img src="/images/2021/transform-function.png" alt="transform"></p>
+<p>也是很直接的逻辑，根据类型将aar包中的文件解压到输出目录，且输入输出都是框架提供的，使用者并不需要关心。</p>
+<h3 id="举栗子2"><a href="#举栗子2" class="headerlink" title="举栗子2"></a>举栗子2</h3><p>上文提到了Jetify，那这里再以Jetify举个例子。让我们先回忆一下jetifier是做什么用的——jetifier可以将引用依赖内的<code>android.support.*</code>引用都替换为对<code>androidx</code>的引用。知道了这一点，让我们来看下注册的逻辑<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">// com.android.build.gradle.internal.DependencyConfigurator</span><br><span class="line"></span><br><span class="line">if (projectOptions.get(BooleanOption.ENABLE_JETIFIER)) &#123;</span><br><span class="line">    registerTransform(</span><br><span class="line">        JetifyTransform::class.java,</span><br><span class="line">        AndroidArtifacts.ArtifactType.AAR,</span><br><span class="line">        jetifiedAarOutputType</span><br><span class="line">    ) &#123; params -&gt;</span><br><span class="line">        params.ignoreListOption.setDisallowChanges(jetifierIgnoreList)</span><br><span class="line">    &#125;</span><br><span class="line">    registerTransform(</span><br><span class="line">        JetifyTransform::class.java,</span><br><span class="line">        AndroidArtifacts.ArtifactType.JAR,</span><br><span class="line">        AndroidArtifacts.ArtifactType.PROCESSED_JAR</span><br><span class="line">    ) &#123; params -&gt;</span><br><span class="line">        params.ignoreListOption.setDisallowChanges(jetifierIgnoreList)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>第一行会读取一个属性，<code>ENABLE_JETIFIER</code>，是不是很熟悉，迁移androidx的时候，官方文档会要求开发者在gradle.properties文件中增加打开jetifier开关的配置，这个开关的使用场景就是这里。然后，会为aar和jar类型的依赖都注册<code>JetifyTransform</code>，很显然，aar文件和jar文件都会包含代码逻辑，都需要检查是否有<code>android.support.*</code>的引用。然后是<code>transform()</code>的逻辑，这个方法的注释写的非常清楚，这里就只挑重点逻辑来讲<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// com.android.build.gradle.internal.dependency.JetifyTransform</span><br><span class="line">override fun transform(transformOutputs: TransformOutputs) &#123;</span><br><span class="line">    val inputFile = inputArtifact.get().asFile</span><br><span class="line"></span><br><span class="line">    val outputFile = transformOutputs.file(&quot;jetified-$&#123;inputFile.name&#125;&quot;)</span><br><span class="line">    jetifierProcessor.transform2(</span><br><span class="line">        input = setOf(FileMapping(inputFile, outputFile)),</span><br><span class="line">        copyUnmodifiedLibsAlso = true,</span><br><span class="line">        skipLibsWithAndroidXReferences = true</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>简单来说，jetifier将要处理的依赖分为4类</p>
+<ol>
+<li>androidx的依赖库</li>
+<li>废弃的support依赖库</li>
+<li>被配置为忽略的依赖库</li>
+<li>不符合上述条件的其他依赖库</li>
+</ol>
+<p>1和3都不需要处理，直接忽略，2可能是未被dependency substitution替换，或者是没有相应的androidx版本，这种情况的库也会被忽略，只有符合第4点的依赖需要被处理。具体的处理逻辑在<code>com.android.tools.build.jetifier.processor.Processor</code>中，<code>Processor</code>会解压缩aar或者jar包，并将.class文件，.java文件（比如jar包中的source）,.xml文件，proguard.txt文件中对<code>android.support*</code>的依赖都替换为响应的<code>androidx</code>依赖，并且如果有pom文件的话也会进行处理。完成后会将处理过的资源重新压缩，并且会带上<strong>jetified</strong>的前缀。这个前缀相信大家都很熟悉了，在更新依赖时，某些构建错误中都能发现它的身影。</p>
+<h3 id="一些使用的注意点"><a href="#一些使用的注意点" class="headerlink" title="一些使用的注意点"></a>一些使用的注意点</h3><ul>
+<li><code>TransformAction</code>在使用依赖前才会执行，并且第一次执行后会在<code>.gradle/caches</code>下生成缓存</li>
+<li><code>TransformAction</code>需要将输出写入到<code>TransformOutputs</code>指定的位置</li>
+<li>如果输出类型为文件时，不能通过<code>TransformOutputs</code>指定多个输出文件的目录，仅有第一个会生效，因此无法用它来实现Fataar的功能</li>
+</ul>
+<h2 id="Transform-in-Android-Gradle-Plugin"><a href="#Transform-in-Android-Gradle-Plugin" class="headerlink" title="Transform in Android Gradle Plugin"></a>Transform in Android Gradle Plugin</h2><p><code>TransformAction</code>介绍的差不多了，再回来聊一下<code>Transform</code>。”A Transform that processes intermediary build artifacts.”——注释的介绍也很直接的指出了<code>Transform</code>这个工具实际上用于构建中间产物的转换。而且他的实现方式也没有非常复杂，每一个新注册的<code>Transform</code>都会对应一系列的Task，如果开启了允许gradle在sync时构建task列表的功能，则能在Android Studio右侧的gradle列表中找到根据transform所生成的task了。<br>知道了<code>Transform</code>运行时的载体，那么<code>Transfrom</code>的输入输出是如何确定的呢？开发者有如何在实现逻辑时拿到自己想要处理的输入资源呢？仔细看<code>Transform</code>的API，会发现两个需要子类实现的方法——<code>getScopes()</code>和<code>getInputTypes()</code>，从这两个方法的注释可以看出它们的返回值决定了当前<code>Transform</code>的输入，输出的类型则通过<code>getOutputTypes()</code>来确定。<br>最后就是如何确定资源的所属了，大家都知道，在Android构建的过程中，生成的资源也是很多的，<code>Transform</code>能够处理的中间产物也有很多，而为这些资源进行分类和注册是通过<code>TransfromManager</code>来完成的。<code>TransformManager</code>会将需要处理的资源集合以<code>TransformStream</code>的形式进行组织，并且在新增Stream的时候也会为其指明对应的<code>Scope</code>和<code>ContentType</code>。以源码中注册项目中的class文件Stream的代码举例（删了一些流程无关代码）</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// com.android.build.gradle.internal.TaskManager</span></span><br><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">fun</span> <span class="title">addJavacClassesStream</span><span class="params">(creationConfig: <span class="type">ComponentCreationConfig</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> artifacts = creationConfig.artifacts</span><br><span class="line">    <span class="keyword">val</span> javaOutputs = artifacts.<span class="keyword">get</span>(JAVAC)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// create separate streams for the output of JAVAC and for the pre/post javac</span></span><br><span class="line">    <span class="comment">// bytecode hooks</span></span><br><span class="line">    <span class="keyword">val</span> transformManager = creationConfig.transformManager</span><br><span class="line">    transformManager.addStream(</span><br><span class="line">            OriginalStream.builder(<span class="string">"javac-output"</span>) <span class="comment">// Need both classes and resources because some annotation</span></span><br><span class="line">                    <span class="comment">// processors generate resources</span></span><br><span class="line">                    .addContentTypes(ImmutableSet.of(DefaultContentType.CLASSES))</span><br><span class="line">                    .addScope(QualifiedContent.Scope.PROJECT)</span><br><span class="line">                    .setFileCollection(project.layout.files(javaOutputs))</span><br><span class="line">                    .build())</span><br><span class="line">    <span class="keyword">val</span> variantData = creationConfig.variantData</span><br><span class="line">    transformManager.addStream(</span><br><span class="line">            OriginalStream.builder(<span class="string">"pre-javac-generated-bytecode"</span>)</span><br><span class="line">                    .addContentTypes(ImmutableSet.of(DefaultContentType.CLASSES))</span><br><span class="line">                    .addScope(QualifiedContent.Scope.PROJECT)</span><br><span class="line">                    .setFileCollection(variantData.allPreJavacGeneratedBytecode)</span><br><span class="line">                    .build())</span><br><span class="line">    <span class="comment">// post-javac-generated-bytecode</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到上面的逻辑为<code>TransformManager</code>添加了数个<code>OriginalStream</code>，第一个以”javac-output”为名的Strean，为其指定的Scope为<code>Scope.PROJECT</code>，ContentTypes为<code>DefaultContentType.CLASSES</code>，javaOutputs这个输入就是实际需要处理的资源（通过debug可以知道，这个输入实际上就是javac之后的class文件集合所在的目录，路径为<code>/build/intermediates/javac/${variant}/classes</code>）。第二个”pre-javac-generated-bytecode”，其实就是kotlin编译后的class文件（路径为<code>/build/tmp/kotlin-classes/${variant}</code>，因为kotlin的编译是在java之前的，所以会归到pre这个Stream中。其他Stream的声明方式也是类似，在执行到对应<code>Transform</code>时，就会根据<code>Transform</code>需要的<code>Scopes</code>和<code>ContentTypes</code>选择符合条件的Stream，经过<code>Transform</code>的处理之后，会被消费，然后一个新的Stream会被构造出来并供下一个<code>Transform</code>使用。下面的流程图能够比较直观的展示stream消耗的流程  </p>
+<p><img src="/images/2021/transform-flow.png" alt="Transform Stream consume"></p>
+<h2 id="回到Transform替换方案"><a href="#回到Transform替换方案" class="headerlink" title="回到Transform替换方案"></a>回到Transform替换方案</h2><p>大致了解了<code>TransformAction</code>和<code>Transform</code>，那再让我们回到前言提到的<code>Transform</code>的废弃上来。虽然代码中没有举出<code>Transform</code>的替代方案，但是从代码中我们还是能够看出一些端倪的，从<code>TaskManager</code>可以找到一个新增的Task：<code>TransformClassesWithAsmTask</code>，他有一个即视感非常强烈的前缀，并且其中的成员也让人感觉非常熟悉</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下面两个field标记了输入（有.class文件和.jar文件），Transform中对应的就是transformInvocation.inputs</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">val</span> inputClassesDir: ConfigurableFileCollection</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">val</span> inputJarsDir: DirectoryProperty</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这个field用于确定输出目录</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">val</span> inputJarsWithIdentity: JarsClasspathInputsWithIdentity</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一些环境变量和classpath</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">val</span> runtimeClasspath: ConfigurableFileCollection</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">val</span> bootClasspath: ConfigurableFileCollection</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出，Transform中对应的是transformInvocation.outputProvider</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">val</span> classesOutputDir: DirectoryProperty</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="keyword">val</span> jarsOutputDir: DirectoryProperty</span><br></pre></td></tr></table></figure>
+<p>inputClassesDir和inputJarsDir的赋值也和<code>TransformManager</code>添加Stream时指定的<code>FileCollection</code>相同</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">inputClassesDir.from(creationConfig.artifacts.getAllClasses().filter &#123;</span><br><span class="line">    !it.name.endsWith(DOT_JAR)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">inputJarsWithIdentity.inputJars.from(</span><br><span class="line">        creationConfig.artifacts.getAllClasses().filter &#123;</span><br><span class="line">            it.name.endsWith(DOT_JAR)</span><br><span class="line">        &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>以inputClassesDir的内容举例，下面是allClasses的赋值，在<code>AbstractAppTaskManager</code>中，这个类是Java编写的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> Provider&lt;Directory&gt; javacOutput = creationConfig.getArtifacts().get(JAVAC.INSTANCE);</span><br><span class="line"><span class="keyword">final</span> FileCollection preJavacGeneratedBytecode =</span><br><span class="line">        creationConfig.getVariantData().getAllPreJavacGeneratedBytecode();</span><br><span class="line"><span class="keyword">final</span> FileCollection postJavacGeneratedBytecode =</span><br><span class="line">        creationConfig.getVariantData().getAllPostJavacGeneratedBytecode();</span><br><span class="line"><span class="comment">// 删除了一些不必要的逻辑</span></span><br><span class="line">ConfigurableFileCollection files =</span><br><span class="line">        creationConfig</span><br><span class="line">                .getServices()</span><br><span class="line">                .fileCollection(</span><br><span class="line">                        javacOutput, preJavacGeneratedBytecode, postJavacGeneratedBytecode);</span><br><span class="line">creationConfig.getArtifacts().appendToAllClasses(files);</span><br></pre></td></tr></table></figure>
+<p>可以看到上文中提到的三个Java类编译后的相关输入，由此可见旧版的<code>Transform</code>和新增的<code>TransformClassesWithAsmTask</code>处理的源基本相同。那不同的点就在于<strong>transform</strong>这个流程了。<code>TransformClassesWithAsmTask</code>如其名所示，相当于强制使用了ASM进行字节码的处理（关于ASM的介绍可以参考<a href="https://nebulae-pan.github.io/2020/10/07/Java%E5%AD%97%E8%8A%82%E7%A0%81%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/" target="_blank" rel="noopener">这篇文章</a>)，并且和之前<code>Transform</code>使用Stream的方式不同——Stream每次被消耗后，都会通过io在build/intermediates/transforms文件夹下生成对应的输出目录，然后下一个<code>Transform</code>再使用之前的输出目录作为输入。<code>TransformClassesWithAsmTask</code>使用了visitorsList这个field维护了一个<code>ClassVistorFactor</code>的列表，进行<strong>transform</strong>流程时，也只需要依次应用对应的<code>ClassVisitor</code>即可，不需要再为每一次<strong>transform</strong>准备一个io的输出了。<br>那么可见，<code>TransformClassesWithAsmTask</code>的使用也是非常简单的，只需要注册实现的<code>AsmClassVisitorFactory</code>即可。官方的<a href="https://github.com/android/gradle-recipes" target="_blank" rel="noopener">gradle-recipes</a>也有<a href="https://github.com/android/gradle-recipes/blob/agp-7.0/BuildSrc/testAsmTransformApi/buildSrc/src/main/kotlin/ExamplePlugin.kt" target="_blank" rel="noopener">AsmTransformApi的使用用例</a>。在groovy脚本中，使用方法写出来有些类似下面</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.android.build.api.instrumentation.*</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.ClassVisitor</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.util.TraceClassVisitor</span><br><span class="line"></span><br><span class="line">androidComponents &#123;</span><br><span class="line">    onVariants(selector().all(), &#123; variant -&gt;</span><br><span class="line">        variant.transformClassesWith(ExampleClassVisitorFactory, InstrumentationScope.ALL) &#123;</span><br><span class="line">            it.getTransformString().set(<span class="string">"transform params"</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        variant.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">ExampleParams</span> <span class="keyword">extends</span> <span class="title">InstrumentationParameters</span> &#123;</span></span><br><span class="line">    <span class="meta">@Input</span></span><br><span class="line">    Property&lt;String&gt; getTransformString()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">ExampleClassVisitorFactory</span> <span class="keyword">implements</span> <span class="title">AsmClassVisitorFactory</span>&lt;<span class="title">ExampleParams</span>&gt; &#123;</span></span><br><span class="line">    ClassVisitor createClassVisitor(</span><br><span class="line">            ClassContext classContext,</span><br><span class="line">            ClassVisitor classVisitor</span><br><span class="line">    ) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> TraceClassVisitor(nextClassVisitor, PrintWriter(System.out))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">boolean</span> isInstrumentable(ClassData classData) &#123;</span><br><span class="line">        <span class="keyword">return</span> classData.className.startsWith(<span class="string">"com.example"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>能看到和<code>TransformAction</code>的注册非常像，但是实际上<code>AsmClassVisitorFactory</code>的使用和<code>TransformAction</code>并没有直接的联系，仅仅是gradle提供的objectFactory可以帮助实例化声明的接口用于参数传递。</p>
+<h3 id="为了兼容该做什么？"><a href="#为了兼容该做什么？" class="headerlink" title="为了兼容该做什么？"></a>为了兼容该做什么？</h3><p><code>TransformClassesWithAsmTask</code>目前其实并不灵活，绑定了ASM的使用，并且无法像<code>Transform</code>一样预先收集所有的依赖classpath，并且在已有的注释中也写明了当前的api并不稳定，后续可能会有较大的更新。综合来看其实并不需要着急进行新框架的兼容，等到稳定版本发布之时再考虑兼容的问题也并不迟。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Gradle/" rel="tag"># Gradle</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/11/23/从零开始的Android热修复之旅（四）：复杂问题整理/" rel="next" title="从零开始的Android热修复之旅（四）：复杂问题整理">
+                <i class="fa fa-chevron-left"></i> 从零开始的Android热修复之旅（四）：复杂问题整理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+  <div class="comments" id="comments">
+    <div id="gitalk-container"></div>
+  </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/ost封面.png"
+                alt="nebula" />
+            
+              <p class="site-author-name" itemprop="name">nebula</p>
+              <p class="site-description motion-element" itemprop="description">技术积累</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TransformAction-in-Gradle"><span class="nav-number">2.</span> <span class="nav-text">TransformAction in Gradle</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#举栗子"><span class="nav-number">2.1.</span> <span class="nav-text">举栗子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#举栗子2"><span class="nav-number">2.2.</span> <span class="nav-text">举栗子2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一些使用的注意点"><span class="nav-number">2.3.</span> <span class="nav-text">一些使用的注意点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transform-in-Android-Gradle-Plugin"><span class="nav-number">3.</span> <span class="nav-text">Transform in Android Gradle Plugin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回到Transform替换方案"><span class="nav-number">4.</span> <span class="nav-text">回到Transform替换方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为了兼容该做什么？"><span class="nav-number">4.1.</span> <span class="nav-text">为了兼容该做什么？</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a9364cafdc67c1bd7840',
+          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
+          repo: 'nebulae-pan.github.io',
+          owner: 'nebulae-pan',
+          admin: ['nebulae-pan'],
+          id:'_20211225151442',
+          labels: 'gitalk'.split(',').filter(l => l),
+          perPage: parseInt(10),
+          pagerDirection: 'last',
+          createIssueManually: true,
+          distractionFreeMode: false
+        })
+
+        gitalk.render('gitalk-container')           
+       </script>
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz", "SEgjIpBn8x0IJgL4vXdWuyvB");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
