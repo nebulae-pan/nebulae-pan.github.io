@@ -1,353 +1,263 @@
 <!DOCTYPE html>
-
-
-
-  
-
-
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<meta name="theme-color" content="#222">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-
-
-
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
-
-
-
-
-
-
-
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
-
-
-
-
-
-  <meta name="keywords" content="Android,路由框架," />
-
-
-
-
-
-
-
-
-
-
-<meta name="description" content="前言路由框架归根结底就是path和指定跳转目标的映射，通过将这些映射关系保存在路由表中，统一处理所有跳转请求，并提供拦截、降级等功能。本文将探讨一些路由框架上的技术实现细节。第一步需要从路由的功能性上开始分析，路由比较适合的使用范围是不同模块间的通信/调用，可以通过Path解除模块间的直接耦合，因此跨模块收集路由信息就成了必要的功能，即使引用了不同时打包编译的代码，也可以正确收集到全局的路由信息。">
-<meta name="keywords" content="Android,路由框架">
-<meta property="og:type" content="article">
+  <meta name="description" content="基于AGP Transform实现的一套路由框架">
+<meta property="og:type" content="website">
 <meta property="og:title" content="Android路由框架实践指南">
-<meta property="og:url" content="http://yoursite.com/2020/06/22/Android路由框架实践指南/index.html">
+<meta property="og:url" content="http://yoursite.com/2020/06/22/Android%E8%B7%AF%E7%94%B1%E6%A1%86%E6%9E%B6%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/index.html">
 <meta property="og:site_name" content="nebula&#39;s nebulae">
-<meta property="og:description" content="前言路由框架归根结底就是path和指定跳转目标的映射，通过将这些映射关系保存在路由表中，统一处理所有跳转请求，并提供拦截、降级等功能。本文将探讨一些路由框架上的技术实现细节。第一步需要从路由的功能性上开始分析，路由比较适合的使用范围是不同模块间的通信/调用，可以通过Path解除模块间的直接耦合，因此跨模块收集路由信息就成了必要的功能，即使引用了不同时打包编译的代码，也可以正确收集到全局的路由信息。">
-<meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-06-22T11:18:22.747Z">
+<meta property="og:description" content="基于AGP Transform实现的一套路由框架">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-22T11:12:46.527Z">
+<meta property="article:modified_time" content="2022-03-20T08:30:06.402Z">
+<meta property="article:author" content="nebula">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="路由框架">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Android路由框架实践指南">
-<meta name="twitter:description" content="前言路由框架归根结底就是path和指定跳转目标的映射，通过将这些映射关系保存在路由表中，统一处理所有跳转请求，并提供拦截、降级等功能。本文将探讨一些路由框架上的技术实现细节。第一步需要从路由的功能性上开始分析，路由比较适合的使用范围是不同模块间的通信/调用，可以通过Path解除模块间的直接耦合，因此跨模块收集路由信息就成了必要的功能，即使引用了不同时打包编译的代码，也可以正确收集到全局的路由信息。">
+
+
+<link rel="canonical" href="http://yoursite.com/2020/06/22/Android%E8%B7%AF%E7%94%B1%E6%A1%86%E6%9E%B6%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/">
 
 
 
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Mist',
-    version: '5.1.3',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: true,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yoursite.com/2020/06/22/Android%E8%B7%AF%E7%94%B1%E6%A1%86%E6%9E%B6%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/","path":"2020/06/22/Android路由框架实践指南/","title":"Android路由框架实践指南"}</script>
 
-
-
-  <link rel="canonical" href="http://yoursite.com/2020/06/22/Android路由框架实践指南/"/>
-
-
-
-
-
-  <title>Android路由框架实践指南 | nebula's nebulae</title>
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android路由框架实践指南 | nebula's nebulae</title>
   
 
 
 
 
 
-
-
-
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
 
-  
-  
-    
-  
-
-  <div class="container sidebar-position-left page-post-detail">
-    <div class="headband"></div>
-
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">nebula's nebulae</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
     </div>
-      
-        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
-      
   </div>
 
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">nebula's nebulae</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">快来火炉旁边找个位子随便坐</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
   </div>
 </div>
 
+
+
 <nav class="site-nav">
-  
-
-  
-    <ul id="menu" class="menu">
-      
-        
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
-
-      
-    </ul>
-  
-
-  
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
 </nav>
 
 
 
- </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E8%B7%AF%E7%94%B1%E4%BF%A1%E6%81%AF"><span class="nav-number">2.</span> <span class="nav-text">全局路由信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E6%87%92%E5%8A%A0%E8%BD%BD"><span class="nav-number">2.1.</span> <span class="nav-text">分组懒加载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E6%B3%A8%E5%85%A5"><span class="nav-number">3.</span> <span class="nav-text">参数注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E5%A4%8DPath%E6%A3%80%E6%B5%8B"><span class="nav-number">4.</span> <span class="nav-text">重复Path检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.</span> <span class="nav-text">其他</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">nebula</p>
+  <div class="site-description" itemprop="description">技术积累</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nebulae-pan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nebulae-pan" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
     </header>
 
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
-            
-
-  <div id="posts" class="posts-expand">
     
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
 
   
 
-  
+
+<div class="post-block">
   
   
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/22/Android路由框架实践指南/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/22/Android%E8%B7%AF%E7%94%B1%E6%A1%86%E6%9E%B6%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="nebula">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/ost封面.png">
+      <meta itemprop="description" content="技术积累">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="nebula's nebulae">
     </span>
-
-    
       <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android路由框架实践指南
+        </h1>
 
-        
-        
-          <h1 class="post-title" itemprop="name headline">Android路由框架实践指南</h1>
-        
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
 
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-22T19:12:46+08:00">
-                2020-06-22
-              </time>
-            
+      <time title="创建时间：2020-06-22 19:12:46" itemprop="dateCreated datePublished" datetime="2020-06-22T19:12:46+08:00">2020-06-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-03-20 16:30:06" itemprop="dateModified" datetime="2022-03-20T16:30:06+08:00">2022-03-20</time>
+    </span>
 
-            
+  
+    <span id="/2020/06/22/Android%E8%B7%AF%E7%94%B1%E6%A1%86%E6%9E%B6%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/" class="post-meta-item leancloud_visitors" data-flag-title="Android路由框架实践指南" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
 
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2020/06/22/Android路由框架实践指南/" class="leancloud_visitors" data-flag-title="Android路由框架实践指南">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
+            <div class="post-description">基于AGP Transform实现的一套路由框架</div>
         </div>
       </header>
-    
 
     
     
     
     <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>路由框架归根结底就是path和指定跳转目标的映射，通过将这些映射关系保存在路由表中，统一处理所有跳转请求，并提供拦截、降级等功能。本文将探讨一些路由框架上的技术实现细节。<br>第一步需要从路由的功能性上开始分析，路由比较适合的使用范围是不同模块间的通信/调用，可以通过Path解除模块间的直接耦合，因此跨模块收集路由信息就成了必要的功能，即使引用了不同时打包编译的代码，也可以正确收集到全局的路由信息。<br>除此之外，路由还最好提供重复Path检测、参数注入、拦截器、跳转降级等功能。</p>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>路由框架归根结底就是path和指定跳转目标的映射，通过将这些映射关系保存在路由表中，统一处理所有跳转请求，并提供拦截、降级等功能。本文将探讨一些路由框架上的技术实现细节。<br>第一步需要从路由的功能性上开始分析，路由比较适合的使用范围是不同模块间的通信&#x2F;调用，可以通过Path解除模块间的直接耦合，因此跨模块收集路由信息就成了必要的功能，即使引用了不同时打包编译的代码，也可以正确收集到全局的路由信息。<br>除此之外，路由还最好提供重复Path检测、参数注入、拦截器、跳转降级等功能。</p>
 <h2 id="全局路由信息"><a href="#全局路由信息" class="headerlink" title="全局路由信息"></a>全局路由信息</h2><p>常见的路由框架如ARouter也可以收集全部的信息——在运行初始化时遍历dex文件，查找所有符合储存路由表信息结构的内容即可，但是这样在运行时的遍历流程比较耗费时间和占用设备性能。这里提出一个编译期进行数据收集的方案，以求将查找遍历流程的开销转移到编译期。<br>既然需要编译期进行数据的收集，就需要将路由表通过某种形式保存下来，令可以在编译期使用。最简单的便是使用class文件保存，有两个显而易见的好处：一是classloader进行了数据的编解码，只需要使用工具生成可以保存数据且符合class规则的文件即可。二是class为字节码文件，格式较为精简，体积小。<br>可以在编译期访问到路由表数据，其实就解决了最主要的问题。这里可以将路由表分为两个级别，更好的管理整个应用中的路由数据——分表管理当前代码包（jar或aar）的路由信息，总表管理整个应用的运行时数据。<br>可以用这个公式表示分表和总表的关系：</p>
-<p>App总表 = App分表 + module1分表 + module2分表 + ……</p>
+<p>App总表 &#x3D; App分表 + module1分表 + module2分表 + ……</p>
 <p>为了更加符合实际情况，这里抽象接口来表示。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//路由分表，每个module一个分表</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IRouterNodeProvider</span> </span>&#123;</span><br><span class="line">	<span class="comment">//提供路由表内容</span></span><br><span class="line">    <span class="function">List&lt;RouterNode&gt; <span class="title">getRouterNodes</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//路由总表，可以检索到整个app运行时的路由信息</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IRouterLoader</span> </span>&#123;</span><br><span class="line">    <span class="function">List&lt;RouterNode&gt; <span class="title">loadNode</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>子模块编译期间通过解析注解收集当前module的路由信息，并通过字节码工具实现<code>IRouterNodeProvider</code>。一个实现类的例子如下<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//通过字节码工具生成的类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ComponentNodeProvider</span> <span class="keyword">implements</span> <span class="title">IRouterNodeProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> List <span class="title">getRouterNodes</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayList var1 = <span class="keyword">new</span> ArrayList();</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.FRAGMENT, <span class="string">"/login/loginFrag"</span>, LoginFragment.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">"/login/name"</span>, NameActivity.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">"/login/choice"</span>, ChoiceActivity.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">"/login/codeActivity"</span>, CodeActivity.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">"/login/test"</span>, TestActivity.class));</span><br><span class="line">        <span class="keyword">return</span> var1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//路由分表，每个module一个分表</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IRouterNodeProvider</span> &#123;</span><br><span class="line">	<span class="comment">//提供路由表内容</span></span><br><span class="line">    List&lt;RouterNode&gt; <span class="title function_">getRouterNodes</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//路由总表，可以检索到整个app运行时的路由信息</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IRouterLoader</span> &#123;</span><br><span class="line">    List&lt;RouterNode&gt; <span class="title function_">loadNode</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>子模块编译期间通过解析注解收集当前module的路由信息，并通过字节码工具实现<code>IRouterNodeProvider</code>。一个实现类的例子如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//通过字节码工具生成的类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ComponentNodeProvider</span> <span class="keyword">implements</span> <span class="title class_">IRouterNodeProvider</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> List <span class="title function_">getRouterNodes</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">ArrayList</span> <span class="variable">var1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>();</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.FRAGMENT, <span class="string">&quot;/login/loginFrag&quot;</span>, LoginFragment.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">&quot;/login/name&quot;</span>, NameActivity.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">&quot;/login/choice&quot;</span>, ChoiceActivity.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">&quot;/login/codeActivity&quot;</span>, CodeActivity.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, <span class="string">&quot;/login/test&quot;</span>, TestActivity.class));</span><br><span class="line">        <span class="keyword">return</span> var1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>在主模块编译期间，遍历输入的子模块，收集所有符合要求子模块的路由表，并组合成总表。<br>编译期进行全局路由信息的功能就可以这样实现。然后需要处理另一个问题，如果路由信息的量十分庞大，如果在项目第一次使用时就加载所有信息到内存中必然会对内存造成很大的负荷，因此需要根据实际的调用情况进行分块加载。但实际情况中，具体的业务需求也繁杂不一，自动化的分组方式可能效果并不是很好（比如将信息分成等量的几块，用到某块的内容时就加载一整块），这时偏自定义的方式可能更加适合路由的分块策略。</p>
 <h3 id="分组懒加载"><a href="#分组懒加载" class="headerlink" title="分组懒加载"></a>分组懒加载</h3><p>在创建path的时候填入group，就可以根据分组内容将路由信息分成不同的块，而这些块之间会有很高的关联性，如果其中一个path被使用，其余同组的path也会有很高的几率在接下来的过程中被调用。为了支持分组，需要对生成字节码的接口进行一些改动。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//组分表，在一个module中可能会有多个组分表，每一个group内的所有路由信息对应一个组分表</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IRouterNodeProvider</span> </span>&#123;</span><br><span class="line">    <span class="function">List&lt;RouterNode&gt; <span class="title">getRouterNodes</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//路由总表</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IRouterLazyLoader</span> </span>&#123;</span><br><span class="line">	<span class="comment">//根据group可以获取到对应所有组分表的信息</span></span><br><span class="line">    <span class="function">List&lt;IRouterNodeProvider&gt; <span class="title">lazyLoadFactoryByGroup</span><span class="params">(String group)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//组分表，在一个module中可能会有多个组分表，每一个group内的所有路由信息对应一个组分表</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IRouterNodeProvider</span> &#123;</span><br><span class="line">    List&lt;RouterNode&gt; <span class="title function_">getRouterNodes</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//路由总表</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IRouterLazyLoader</span> &#123;</span><br><span class="line">	<span class="comment">//根据group可以获取到对应所有组分表的信息</span></span><br><span class="line">    List&lt;IRouterNodeProvider&gt; <span class="title function_">lazyLoadFactoryByGroup</span><span class="params">(String group)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>改动过后，总表就可以根据group信息直接返回一系列组分表的路由信息并使用。一个总表的具体内容可能如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//字节码工具生成的类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RouterLazyLoaderImpl</span> <span class="keyword">implements</span> <span class="title">IRouterLazyLoader</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> List <span class="title">lazyLoadFactoryByGroup</span><span class="params">(String group)</span> </span>&#123;</span><br><span class="line">        ArrayList var2 = <span class="keyword">new</span> ArrayList();</span><br><span class="line">        <span class="comment">//这里是group的hash</span></span><br><span class="line">        <span class="keyword">switch</span>(group.hashCode()) &#123;</span><br><span class="line">        <span class="keyword">case</span> -<span class="number">1399907075</span>:</span><br><span class="line">        	<span class="comment">//主module生成的路由信息组分表</span></span><br><span class="line">            var2.add(<span class="keyword">new</span> NodeProvider());</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">3151346</span>:</span><br><span class="line">        	<span class="comment">//通过编译时的检索，获得的其他module的组分表</span></span><br><span class="line">            var2.add(<span class="keyword">new</span> android.khala.gen.router.frag.java_component.NodeProvider());</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">1984153269</span>:</span><br><span class="line">            var2.add(<span class="keyword">new</span> android.khala.gen.router.service.java_component.NodeProvider());</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//字节码工具生成的类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RouterLazyLoaderImpl</span> <span class="keyword">implements</span> <span class="title class_">IRouterLazyLoader</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> List <span class="title function_">lazyLoadFactoryByGroup</span><span class="params">(String group)</span> &#123;</span><br><span class="line">        <span class="type">ArrayList</span> <span class="variable">var2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>();</span><br><span class="line">        <span class="comment">//这里是group的hash</span></span><br><span class="line">        <span class="keyword">switch</span>(group.hashCode()) &#123;</span><br><span class="line">        <span class="keyword">case</span> -<span class="number">1399907075</span>:</span><br><span class="line">        	<span class="comment">//主module生成的路由信息组分表</span></span><br><span class="line">            var2.add(<span class="keyword">new</span> <span class="title class_">NodeProvider</span>());</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">3151346</span>:</span><br><span class="line">        	<span class="comment">//通过编译时的检索，获得的其他module的组分表</span></span><br><span class="line">            var2.add(<span class="keyword">new</span> <span class="title class_">android</span>.khala.gen.router.frag.java_component.NodeProvider());</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">1984153269</span>:</span><br><span class="line">            var2.add(<span class="keyword">new</span> <span class="title class_">android</span>.khala.gen.router.service.java_component.NodeProvider());</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> var2;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>根据Path获取到路由信息后，就可以根据信息判断跳转的类型并执行响应的操作流程了。</p>
 <h2 id="参数注入"><a href="#参数注入" class="headerlink" title="参数注入"></a>参数注入</h2><p>在Activity、Fragment等需要通过bundle传递参数的情况中，很多时候key,value的填写较为繁琐，传参需要校验，获取参数也需要单独的逻辑，并且一旦传递的参数修改，上述的逻辑也都需要改动。参数注入可以通过将key和类中对应的field映射起来，自动生成获取参数的逻辑代码。<br>这里采用的方案是为使用了参数注入的Activity和Fragment类额外实现一个接口（新增方法）。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IInjectable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">void</span> autoSynthetic$FieldInjectComponent();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用被注入的参数前，调用inject()</span></span><br><span class="line"><span class="comment">//inject()逻辑如下</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">inject</span><span class="params">(Object target)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (target <span class="keyword">instanceof</span> IInjectable) &#123;</span><br><span class="line">        ((IInjectable) target).autoSynthetic$FieldInjectComponent();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//一个实现的例子</span></span><br><span class="line"><span class="meta">@Inject</span>(name = <span class="string">"a"</span>)</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> testInt;</span><br><span class="line"><span class="meta">@Inject</span></span><br><span class="line"><span class="keyword">private</span> String testString;</span><br><span class="line"><span class="meta">@Inject</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> color;</span><br><span class="line"></span><br><span class="line"><span class="comment">//编译过程中通过字节码工具生成</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> autoSynthetic$FieldInjectSoulComponent() &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> <span class="keyword">instanceof</span> IInjectable) &#123;</span><br><span class="line">        Bundle var1 = <span class="keyword">this</span>.getArguments();</span><br><span class="line">        <span class="keyword">if</span> (var1 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">this</span>.testInt = var1.getInt(<span class="string">"a"</span>, <span class="keyword">this</span>.testInt);</span><br><span class="line">            <span class="keyword">this</span>.testString = var1.getString(<span class="string">"testString"</span>);</span><br><span class="line">            <span class="keyword">this</span>.color = var1.getInt(<span class="string">"color"</span>, <span class="keyword">this</span>.color);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IInjectable</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> autoSynthetic$FieldInjectComponent();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用被注入的参数前，调用inject()</span></span><br><span class="line"><span class="comment">//inject()逻辑如下</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(Object target)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (target <span class="keyword">instanceof</span> IInjectable) &#123;</span><br><span class="line">        ((IInjectable) target).autoSynthetic$FieldInjectComponent();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//一个实现的例子</span></span><br><span class="line"><span class="meta">@Inject(name = &quot;a&quot;)</span></span><br><span class="line"><span class="keyword">private</span> <span class="type">int</span> testInt;</span><br><span class="line"><span class="meta">@Inject</span></span><br><span class="line"><span class="keyword">private</span> String testString;</span><br><span class="line"><span class="meta">@Inject</span></span><br><span class="line"><span class="keyword">private</span> <span class="type">int</span> color;</span><br><span class="line"></span><br><span class="line"><span class="comment">//编译过程中通过字节码工具生成</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> autoSynthetic$FieldInjectSoulComponent() &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span> <span class="keyword">instanceof</span> IInjectable) &#123;</span><br><span class="line">        <span class="type">Bundle</span> <span class="variable">var1</span> <span class="operator">=</span> <span class="built_in">this</span>.getArguments();</span><br><span class="line">        <span class="keyword">if</span> (var1 != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="built_in">this</span>.testInt = var1.getInt(<span class="string">&quot;a&quot;</span>, <span class="built_in">this</span>.testInt);</span><br><span class="line">            <span class="built_in">this</span>.testString = var1.getString(<span class="string">&quot;testString&quot;</span>);</span><br><span class="line">            <span class="built_in">this</span>.color = var1.getInt(<span class="string">&quot;color&quot;</span>, <span class="built_in">this</span>.color);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这种方案通过直接为原有类添加一个新方法，不需要额外新增一个类，也一定程度上减小了AOP导致的包体积增大。</p>
 <h2 id="重复Path检测"><a href="#重复Path检测" class="headerlink" title="重复Path检测"></a>重复Path检测</h2><p>多模块开发，可能维护不同模块的人员也不同，相应的一些规范也会不同，路由信息的量大到一定程度，就会出现Path重复的问题，从实现角度和原则上来讲，最好Path和跳转目标是一一映射的关系，Path重复就会导致跳转行为无法确定，因此需要尽早提示开发Path重复的情况，人为的开发规定有时并不是那么靠谱，人犯错的情况往往比机器要多的多，所以一定需要进行路由的Path重复检测流程。<br>基于第一节的内容，路径检测实际上也分为两个模块：</p>
 <ol>
@@ -356,373 +266,70 @@
 </ol>
 <p>第一点非常简单，编译期收集当前module信息时就可以进行重复的判断并抛出异常，保证当前module的路由信息中Path没有重复情况。第二点在基于这个前提下实现就会容易不少。<br>上文提到过，该方案的路由信息是通过class储存的，因此完全可以在整体应用的编译期收集分表完成后，将这些路由表信息用新建的ClassLoader加载，得到对应的路由信息，再统一放到一个set中进行重复判断。由此亦可以在编译期抛出应用的Path重复情况，再通知到对应模块进行修改。<br>方案的问题是会导致编译时间的增长，和打包机器的内存使用率上升。并且如果一个全新的，且迭代较久的组件新加入应用中，可能导致重复情况较多，需要大量修改。  </p>
 <p>这里其实可以换一个思路，在不同模块之间不去做重复检测，而是通过某种额外手段规避不同模块间的重复情况。比如可以在编译期为每个模块分配一个路径的前缀或者scheme，对开发阶段透明。<br>以当前方案为例，最简单的方式，将获取指定路由信息的逻辑委托给NodeProvider，修改过后的<code>IRouterNodeProvider#getRouterNodes</code>方法可能是这个样子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ComponentNodeProvider</span> <span class="keyword">implements</span> <span class="title">IRouterNodeProvider</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String prefix = <span class="string">"prefix"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RouterNode <span class="title">obtainNode</span><span class="params">(String path)</span></span>&#123;</span><br><span class="line">        <span class="comment">//检索时加上前缀</span></span><br><span class="line">        <span class="keyword">return</span> NodeRepository.getByPath(prefix + path);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List <span class="title">getRouterNodes</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ArrayList var1 = <span class="keyword">new</span> ArrayList();</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.FRAGMENT, prefix + <span class="string">"/login/loginFrag"</span>, LoginFragment.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, prefix + <span class="string">"/login/name"</span>, NameActivity.class));</span><br><span class="line">        <span class="keyword">return</span> var1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ComponentNodeProvider</span> <span class="keyword">implements</span> <span class="title class_">IRouterNodeProvider</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">prefix</span> <span class="operator">=</span> <span class="string">&quot;prefix&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> RouterNode <span class="title function_">obtainNode</span><span class="params">(String path)</span>&#123;</span><br><span class="line">        <span class="comment">//检索时加上前缀</span></span><br><span class="line">        <span class="keyword">return</span> NodeRepository.getByPath(prefix + path);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> List <span class="title function_">getRouterNodes</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">ArrayList</span> <span class="variable">var1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>();</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.FRAGMENT, prefix + <span class="string">&quot;/login/loginFrag&quot;</span>, LoginFragment.class));</span><br><span class="line">        var1.add(RouterNodeFactory.produceRouterNode(NodeType.ACTIVITY, prefix + <span class="string">&quot;/login/name&quot;</span>, NameActivity.class));</span><br><span class="line">        <span class="keyword">return</span> var1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>经过这样处理后，新增一个组件只需要再配置一项不重复的前缀或者scheme即可。</p>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>其他关于拦截器，跳转降级等功能较为简单，在此不再赘述。</p>
 
-      
     </div>
-    
-    
-    
 
     
-
     
-
     
 
     <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/Android/" rel="tag"># Android</a>
-          
-            <a href="/tags/路由框架/" rel="tag"># 路由框架</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2020/05/17/操作系统入门——OSTEP读书笔记/" rel="next" title="操作系统入门——OSTEP读书笔记（虚拟化）">
-                <i class="fa fa-chevron-left"></i> 操作系统入门——OSTEP读书笔记（虚拟化）
-              </a>
-            
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E8%B7%AF%E7%94%B1%E6%A1%86%E6%9E%B6/" rel="tag"># 路由框架</a>
           </div>
 
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/10/07/Java字节码工具使用心得/" rel="prev" title="Java AOP工具使用心得">
-                Java AOP工具使用心得 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-
-    <div class="post-spread">
-      
-    </div>
-  </div>
-
-
-          </div>
-          
-
-
-          
-
-  
-  <div class="comments" id="comments">
-    <div id="gitalk-container"></div>
-  </div>
-
-  
-
-
-
-        </div>
         
-          
-  
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
-  </div>
 
-  <aside id="sidebar" class="sidebar">
-    
-    <div class="sidebar-inner">
-
-      
-
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
-
-      <section class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <img class="site-author-image" itemprop="image"
-                src="/images/ost封面.png"
-                alt="nebula" />
-            
-              <p class="site-author-name" itemprop="name">nebula</p>
-              <p class="site-description motion-element" itemprop="description">技术积累</p>
-          </div>
-
-          <nav class="site-state motion-element">
-
-            
-              <div class="site-state-item site-state-posts">
-              
-                <a href="/archives/">
-              
-                  <span class="site-state-item-count">16</span>
-                  <span class="site-state-item-name">日志</span>
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/05/17/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%85%A5%E9%97%A8%E2%80%94%E2%80%94OSTEP%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="prev" title="操作系统入门——OSTEP读书笔记（虚拟化）">
+                  <i class="fa fa-chevron-left"></i> 操作系统入门——OSTEP读书笔记（虚拟化）
                 </a>
-              </div>
-            
-
-            
-
-            
-              
-              
-              <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
-                  <span class="site-state-item-count">21</span>
-                  <span class="site-state-item-name">标签</span>
-                </a>
-              </div>
-            
-
-          </nav>
-
-          
-
-          <div class="links-of-author motion-element">
-            
-              
-                <span class="links-of-author-item">
-                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
-                    
-                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
-                </span>
-              
-            
-          </div>
-
-          
-          
-
-          
-          
-            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
-              <div class="links-of-blogroll-title">
-                <i class="fa  fa-fw fa-link"></i>
-                Links
-              </div>
-              <ul class="links-of-blogroll-list">
-                
-                  <li class="links-of-blogroll-item">
-                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
-                  </li>
-                
-              </ul>
             </div>
-          
-
-          
-
-        </div>
-      </section>
-
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全局路由信息"><span class="nav-number">2.</span> <span class="nav-text">全局路由信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分组懒加载"><span class="nav-number">2.1.</span> <span class="nav-text">分组懒加载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数注入"><span class="nav-number">3.</span> <span class="nav-text">参数注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重复Path检测"><span class="nav-number">4.</span> <span class="nav-text">重复Path检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">5.</span> <span class="nav-text">其他</span></a></li></ol></div>
-            
-
+            <div class="post-nav-item">
+                <a href="/2020/10/07/Java%E5%AD%97%E8%8A%82%E7%A0%81%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97/" rel="next" title="Java AOP工具使用心得">
+                  Java AOP工具使用心得 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
           </div>
-        </section>
-      <!--/noindex-->
-      
-
-      
-
-    </div>
-  </aside>
-
-
-        
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">nebula</span>
-
-  
+    </footer>
+  </article>
 </div>
 
 
-  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
-
-
-
-  <span class="post-meta-divider">|</span>
-
-
-
-  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
 
 
 
 
-        
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
 
 
-
-
-
-
-
-        
-      </div>
-    </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
-    
-
-    
-
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
 
-  
-
-<script type="text/javascript">
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
-
-
-
-
-
-
-
-
+    </div>
+  </footer>
 
   
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
-
-
-
-  
-  
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
-
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
-
-
-
-  
-
-
-  
-
-
-
-
-	
-
-
-
-
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
 
   
 
@@ -733,165 +340,14 @@
   
 
 
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz","app_key":"SEgjIpBn8x0IJgL4vXdWuyvB","server_url":null,"security":true}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
 
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
 
-
-
-
-
-
-
-
-
-  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
-  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-   <script type="text/javascript">
-        var gitalk = new Gitalk({
-          clientID: 'a9364cafdc67c1bd7840',
-          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
-          repo: 'nebulae-pan.github.io',
-          owner: 'nebulae-pan',
-          admin: ['nebulae-pan'],
-          id:'_20200622191246',
-          labels: 'gitalk'.split(',').filter(l => l),
-          perPage: parseInt(10),
-          pagerDirection: 'last',
-          createIssueManually: true,
-          distractionFreeMode: false
-        })
-
-        gitalk.render('gitalk-container')           
-       </script>
-
-  
-
-
-
-
-
-  
-
-  
-  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
-  <script>AV.initialize("2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz", "SEgjIpBn8x0IJgL4vXdWuyvB");</script>
-  <script>
-    function showTime(Counter) {
-      var query = new AV.Query(Counter);
-      var entries = [];
-      var $visitors = $(".leancloud_visitors");
-
-      $visitors.each(function () {
-        entries.push( $(this).attr("id").trim() );
-      });
-
-      query.containedIn('url', entries);
-      query.find()
-        .done(function (results) {
-          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
-
-          if (results.length === 0) {
-            $visitors.find(COUNT_CONTAINER_REF).text(0);
-            return;
-          }
-
-          for (var i = 0; i < results.length; i++) {
-            var item = results[i];
-            var url = item.get('url');
-            var time = item.get('time');
-            var element = document.getElementById(url);
-
-            $(element).find(COUNT_CONTAINER_REF).text(time);
-          }
-          for(var i = 0; i < entries.length; i++) {
-            var url = entries[i];
-            var element = document.getElementById(url);
-            var countSpan = $(element).find(COUNT_CONTAINER_REF);
-            if( countSpan.text() == '') {
-              countSpan.text(0);
-            }
-          }
-        })
-        .fail(function (object, error) {
-          console.log("Error: " + error.code + " " + error.message);
-        });
-    }
-
-    function addCount(Counter) {
-      var $visitors = $(".leancloud_visitors");
-      var url = $visitors.attr('id').trim();
-      var title = $visitors.attr('data-flag-title').trim();
-      var query = new AV.Query(Counter);
-
-      query.equalTo("url", url);
-      query.find({
-        success: function(results) {
-          if (results.length > 0) {
-            var counter = results[0];
-            counter.fetchWhenSave(true);
-            counter.increment("time");
-            counter.save(null, {
-              success: function(counter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(counter.get('time'));
-              },
-              error: function(counter, error) {
-                console.log('Failed to save Visitor num, with error message: ' + error.message);
-              }
-            });
-          } else {
-            var newcounter = new Counter();
-            /* Set ACL */
-            var acl = new AV.ACL();
-            acl.setPublicReadAccess(true);
-            acl.setPublicWriteAccess(true);
-            newcounter.setACL(acl);
-            /* End Set ACL */
-            newcounter.set("title", title);
-            newcounter.set("url", url);
-            newcounter.set("time", 1);
-            newcounter.save(null, {
-              success: function(newcounter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
-              },
-              error: function(newcounter, error) {
-                console.log('Failed to create');
-              }
-            });
-          }
-        },
-        error: function(error) {
-          console.log('Error:' + error.code + " " + error.message);
-        }
-      });
-    }
-
-    $(function() {
-      var Counter = AV.Object.extend("Counter");
-      if ($('.leancloud_visitors').length == 1) {
-        addCount(Counter);
-      } else if ($('.post-title-link').length > 1) {
-        showTime(Counter);
-      }
-    });
-  </script>
-
-
-
-  
-
-  
-
-  
-  
-
-  
-
-  
-
-  
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nebulae-pan","repo":"nebulae-pan.github.io","client_id":"a9364cafdc67c1bd7840","client_secret":"24a8098003fadc5970f7d244bd12e850dc09b3bb","admin_user":"nebulae-pan","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","js":{"url":"https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js","integrity":"sha256-Pmj85ojLaPOWwRtlMJwmezB/Qg8BzvJp5eTzvXaYAfA="},"path_md5":"b490fc4ab79cc305f3c3fc5f9efdffee"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
 
 </body>
 </html>

@@ -1,402 +1,313 @@
 <!DOCTYPE html>
-
-
-
-  
-
-
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<meta name="theme-color" content="#222">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-
-
-
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
-
-
-
-
-
-
-
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
-
-
-
-
-
-  <meta name="keywords" content="Android,Java,网络,开源框架," />
-
-
-
-
-
-
-
-
-
-
-<meta name="description" content="概述okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。square官方是这样描述okio的  Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data">
-<meta name="keywords" content="Android,Java,网络,开源框架">
-<meta property="og:type" content="article">
+  <meta name="description" content="kio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I&#x2F;O处理以及易用的API。让我们通过源码解析来学习其思想吧。">
+<meta property="og:type" content="website">
 <meta property="og:title" content="okio源码详细解析">
-<meta property="og:url" content="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio源码详细解析/index.html">
+<meta property="og:url" content="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio%E6%BA%90%E7%A0%81%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90/index.html">
 <meta property="og:site_name" content="nebula&#39;s nebulae">
-<meta property="og:description" content="概述okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。square官方是这样描述okio的  Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data">
-<meta property="og:locale" content="zh-Hans">
+<meta property="og:description" content="kio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I&#x2F;O处理以及易用的API。让我们通过源码解析来学习其思想吧。">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://yoursite.com/images/okio-class.png">
 <meta property="og:image" content="http://yoursite.com/images/okio-init.jpg">
 <meta property="og:image" content="http://yoursite.com/images/okio-write.png">
 <meta property="og:image" content="http://yoursite.com/images/okio-read.png">
-<meta property="og:updated_time" content="2018-12-15T04:01:15.279Z">
+<meta property="article:published_time" content="2018-01-18T13:48:20.000Z">
+<meta property="article:modified_time" content="2022-03-20T08:33:17.288Z">
+<meta property="article:author" content="nebula">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="开源框架">
+<meta property="article:tag" content="网络">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="okio源码详细解析">
-<meta name="twitter:description" content="概述okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。square官方是这样描述okio的  Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data">
 <meta name="twitter:image" content="http://yoursite.com/images/okio-class.png">
 
 
-
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Mist',
-    version: '5.1.3',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: true,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
+<link rel="canonical" href="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio%E6%BA%90%E7%A0%81%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90/">
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio源码详细解析/"/>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio%E6%BA%90%E7%A0%81%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90/","path":"2018/01/18/okio-source-code-anlysis-okio源码详细解析/","title":"okio源码详细解析"}</script>
 
-
-
-
-
-  <title>okio源码详细解析 | nebula's nebulae</title>
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>okio源码详细解析 | nebula's nebulae</title>
   
 
 
 
 
 
-
-
-
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
 
-  
-  
-    
-  
-
-  <div class="container sidebar-position-left page-post-detail">
-    <div class="headband"></div>
-
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">nebula's nebulae</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
     </div>
-      
-        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
-      
   </div>
 
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">nebula's nebulae</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">快来火炉旁边找个位子随便坐</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
   </div>
 </div>
 
+
+
 <nav class="site-nav">
-  
-
-  
-    <ul id="menu" class="menu">
-      
-        
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
-
-      
-    </ul>
-  
-
-  
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
 </nav>
 
 
 
- </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ByteString"><span class="nav-number">2.</span> <span class="nav-text">ByteString</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Source-amp-amp-Sink"><span class="nav-number">3.</span> <span class="nav-text">Source &amp;&amp; Sink</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Buffer"><span class="nav-number">4.</span> <span class="nav-text">Buffer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-number">4.1.</span> <span class="nav-text">示例分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Segment"><span class="nav-number">4.1.1.</span> <span class="nav-text">Segment</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SegmentPool"><span class="nav-number">4.1.2.</span> <span class="nav-text">SegmentPool</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0Buffer-read"><span class="nav-number">4.2.</span> <span class="nav-text">回到Buffer.read()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Buffer-write"><span class="nav-number">4.3.</span> <span class="nav-text">Buffer.write()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Buffer%E4%B8%8EBuffer%E4%B9%8B%E9%97%B4%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">4.4.</span> <span class="nav-text">Buffer与Buffer之间的操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TimeOut"><span class="nav-number">5.</span> <span class="nav-text">TimeOut</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">nebula</p>
+  <div class="site-description" itemprop="description">技术积累</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nebulae-pan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nebulae-pan" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
     </header>
 
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
-            
-
-  <div id="posts" class="posts-expand">
     
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
 
   
 
-  
+
+<div class="post-block">
   
   
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio源码详细解析/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/18/okio-source-code-anlysis-okio%E6%BA%90%E7%A0%81%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="nebula">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/ost封面.png">
+      <meta itemprop="description" content="技术积累">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="nebula's nebulae">
     </span>
-
-    
       <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          okio源码详细解析
+        </h1>
 
-        
-        
-          <h1 class="post-title" itemprop="name headline">okio源码详细解析</h1>
-        
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
 
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-18T21:48:20+08:00">
-                2018-01-18
-              </time>
-            
+      <time title="创建时间：2018-01-18 21:48:20" itemprop="dateCreated datePublished" datetime="2018-01-18T21:48:20+08:00">2018-01-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-03-20 16:33:17" itemprop="dateModified" datetime="2022-03-20T16:33:17+08:00">2022-03-20</time>
+    </span>
 
-            
+  
+    <span id="/2018/01/18/okio-source-code-anlysis-okio%E6%BA%90%E7%A0%81%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90/" class="post-meta-item leancloud_visitors" data-flag-title="okio源码详细解析" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
 
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/01/18/okio-source-code-anlysis-okio源码详细解析/" class="leancloud_visitors" data-flag-title="okio源码详细解析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
+            <div class="post-description">kio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。让我们通过源码解析来学习其思想吧。</div>
         </div>
       </header>
-    
 
     
     
     
     <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I/O处理以及易用的API。<br>square官方是这样描述okio的</p>
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>okio，是目前应用最多，最火的网络框架okhttp的底层依赖，它为okhttp提供了高效的I&#x2F;O处理以及易用的API。<br>square官方是这样描述okio的</p>
 <blockquote>
 <p>Okio is a library that complements java.io and java.nio to make it much easier to access, store, and process your data.</p>
 </blockquote>
 <p>现有的okio分析文章已经很多了，不过这里还是按照以往的分析方法再分析一下。</p>
 <h2 id="ByteString"><a href="#ByteString" class="headerlink" title="ByteString"></a>ByteString</h2><p><code>ByteString</code>是一个不可变的byte序列，而与其相应的<code>String</code>类是一个不可变的字符(char)序列，因此在这方面，String和ByteStrings非常类似——一个处理字符串，一个处理字节串。<code>ByteString</code>也提供了处理二进制数据的api，比如将其转换为一个特定值，对其进行Base64或者utf-8的编码和解码。如果将一个UTF-8字符串编码为ByteString，他会缓存对该字符串的引用，以便稍后对其进行解码时，直接返回缓存的值即可。<br>几个主要的成员field</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">byte</span>[] data;</span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> hashCode; </span><br><span class="line"><span class="keyword">transient</span> String utf8;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">byte</span>[] data;</span><br><span class="line"><span class="keyword">transient</span> <span class="type">int</span> hashCode; </span><br><span class="line"><span class="keyword">transient</span> String utf8; </span><br></pre></td></tr></table></figure>
 <p>data是储存数据的成员，当调用需要改变数据内容的方法时，会直接返回一个新的<code>ByteString</code>对象。<br>uft8主要储存字节码uft8编码后的字符串，是懒加载的，只有在用到时（调用<code>utf8()</code>方法）才会被赋值。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">utf8</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  String result = utf8;</span><br><span class="line">  <span class="comment">// We don't care if we double-allocate in racy code.</span></span><br><span class="line">  <span class="keyword">return</span> result != <span class="keyword">null</span> ? result : (utf8 = <span class="keyword">new</span> String(data, Util.UTF_8));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> String <span class="title function_">utf8</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> utf8;</span><br><span class="line">  <span class="comment">// We don&#x27;t care if we double-allocate in racy code.</span></span><br><span class="line">  <span class="keyword">return</span> result != <span class="literal">null</span> ? result : (utf8 = <span class="keyword">new</span> <span class="title class_">String</span>(data, Util.UTF_8));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>hashCode同理</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> result = hashCode;</span><br><span class="line">  <span class="keyword">return</span> result != <span class="number">0</span> ? result : (hashCode = Arrays.hashCode(data));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">hashCode</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> hashCode;</span><br><span class="line">  <span class="keyword">return</span> result != <span class="number">0</span> ? result : (hashCode = Arrays.hashCode(data));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>构造函数和几个静态工厂方法（删去了一些判空代码）</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">ByteString(<span class="keyword">byte</span>[] data) &#123;</span><br><span class="line">  <span class="keyword">this</span>.data = data; <span class="comment">// Trusted internal constructor doesn't clone data.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">of</span><span class="params">(<span class="keyword">byte</span>[] data, <span class="keyword">int</span> offset, <span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">  checkOffsetAndCount(data.length, offset, byteCount);</span><br><span class="line">  <span class="keyword">byte</span>[] copy = <span class="keyword">new</span> <span class="keyword">byte</span>[byteCount];</span><br><span class="line">  System.arraycopy(data, offset, copy, <span class="number">0</span>, byteCount);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ByteString(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">of</span><span class="params">(ByteBuffer data)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">byte</span>[] copy = <span class="keyword">new</span> <span class="keyword">byte</span>[data.remaining()];</span><br><span class="line">  data.get(copy);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ByteString(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">encodeUtf8</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">  ByteString byteString = <span class="keyword">new</span> ByteString(s.getBytes(Util.UTF_8));</span><br><span class="line">  byteString.utf8 = s;</span><br><span class="line">  <span class="keyword">return</span> byteString;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title">encodeString</span><span class="params">(String s, Charset charset)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ByteString(s.getBytes(charset));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">ByteString(<span class="type">byte</span>[] data) &#123;</span><br><span class="line">  <span class="built_in">this</span>.data = data; <span class="comment">// Trusted internal constructor doesn&#x27;t clone data.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title function_">of</span><span class="params">(<span class="type">byte</span>[] data, <span class="type">int</span> offset, <span class="type">int</span> byteCount)</span> &#123;</span><br><span class="line">  checkOffsetAndCount(data.length, offset, byteCount);</span><br><span class="line">  <span class="type">byte</span>[] copy = <span class="keyword">new</span> <span class="title class_">byte</span>[byteCount];</span><br><span class="line">  System.arraycopy(data, offset, copy, <span class="number">0</span>, byteCount);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ByteString</span>(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title function_">of</span><span class="params">(ByteBuffer data)</span> &#123;</span><br><span class="line">  <span class="type">byte</span>[] copy = <span class="keyword">new</span> <span class="title class_">byte</span>[data.remaining()];</span><br><span class="line">  data.get(copy);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ByteString</span>(copy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title function_">encodeUtf8</span><span class="params">(String s)</span> &#123;</span><br><span class="line">  <span class="type">ByteString</span> <span class="variable">byteString</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteString</span>(s.getBytes(Util.UTF_8));</span><br><span class="line">  byteString.utf8 = s;</span><br><span class="line">  <span class="keyword">return</span> byteString;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ByteString <span class="title function_">encodeString</span><span class="params">(String s, Charset charset)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ByteString</span>(s.getBytes(charset));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>构造方法很简单，就是简单的接收一个字节数组，向data成员赋值。静态工厂方法，也都是将传入的对象通过某种方法转换为byte数组，从上面的方法可看到，nio的支持也是有的。<br><code>encodeUtf8()</code>方法接收一个utf-8编码的字符串，这里ByteString会将这个字符串缓存起来，如果需要用到这个字符串，直接返回，而不需要通过重新编码获得一个utf-8字符串，一个空间换时间的例子。如果有其他编码的字符串，则调用<code>encodeString()</code>，仅仅将其解码转换为字节数组，赋值给data。<br>再看一下<code>ByteString</code>中的<code>toAsciiLowercase()</code>方法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ByteString <span class="title">toAsciiLowercase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// Search for an uppercase character. If we don't find one, return this.</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; data.length; i++) &#123;</span><br><span class="line">    <span class="keyword">byte</span> c = data[i];</span><br><span class="line">    <span class="keyword">if</span> (c &lt; <span class="string">'A'</span> || c &gt; <span class="string">'Z'</span>) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If we reach this point, this string is not not lowercase. Create and</span></span><br><span class="line">    <span class="comment">// return a new byte string.</span></span><br><span class="line">    <span class="keyword">byte</span>[] lowercase = data.clone();</span><br><span class="line">    lowercase[i++] = (<span class="keyword">byte</span>) (c - (<span class="string">'A'</span> - <span class="string">'a'</span>));</span><br><span class="line">    <span class="keyword">for</span> (; i &lt; lowercase.length; i++) &#123;</span><br><span class="line">      c = lowercase[i];</span><br><span class="line">      <span class="keyword">if</span> (c &lt; <span class="string">'A'</span> || c &gt; <span class="string">'Z'</span>) <span class="keyword">continue</span>;</span><br><span class="line">      lowercase[i] = (<span class="keyword">byte</span>) (c - (<span class="string">'A'</span> - <span class="string">'a'</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> ByteString(lowercase);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ByteString <span class="title function_">toAsciiLowercase</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="comment">// Search for an uppercase character. If we don&#x27;t find one, return this.</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; data.length; i++) &#123;</span><br><span class="line">    <span class="type">byte</span> <span class="variable">c</span> <span class="operator">=</span> data[i];</span><br><span class="line">    <span class="keyword">if</span> (c &lt; <span class="string">&#x27;A&#x27;</span> || c &gt; <span class="string">&#x27;Z&#x27;</span>) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If we reach this point, this string is not not lowercase. Create and</span></span><br><span class="line">    <span class="comment">// return a new byte string.</span></span><br><span class="line">    <span class="type">byte</span>[] lowercase = data.clone();</span><br><span class="line">    lowercase[i++] = (<span class="type">byte</span>) (c - (<span class="string">&#x27;A&#x27;</span> - <span class="string">&#x27;a&#x27;</span>));</span><br><span class="line">    <span class="keyword">for</span> (; i &lt; lowercase.length; i++) &#123;</span><br><span class="line">      c = lowercase[i];</span><br><span class="line">      <span class="keyword">if</span> (c &lt; <span class="string">&#x27;A&#x27;</span> || c &gt; <span class="string">&#x27;Z&#x27;</span>) <span class="keyword">continue</span>;</span><br><span class="line">      lowercase[i] = (<span class="type">byte</span>) (c - (<span class="string">&#x27;A&#x27;</span> - <span class="string">&#x27;a&#x27;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ByteString</span>(lowercase);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>toAsciiLowercase()</code>方法，寻找位于ASCII码’A’到’Z’间的字节，第一次找到之后<code>clone()</code>data，将其变为小写，并继续遍历之后的字符串，转变大写为小写。如果没有大写，直接返回这个ByteString的实例。<code>toAsciiUppercase()</code>逻辑与此方法相同，不再赘述。</p>
-<h2 id="Source-amp-amp-Sink"><a href="#Source-amp-amp-Sink" class="headerlink" title="Source &amp;&amp; Sink"></a>Source &amp;&amp; Sink</h2><p>在分析Buffer之前还是要先分析一下这两个接口，为什么呢？看一下Buffer的继承结构<br><img src="/images/okio-class.png" alt="Buffer类图"><br><code>Source</code>和<code>Sink</code>这两个接口非常简单，<code>Source</code>提供了向<code>Buffer</code>中写入数据的方法，而<code>Sink</code>提供了从<code>Buffer</code>中读取数据的方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Sink</span> <span class="keyword">extends</span> <span class="title">Closeable</span>, <span class="title">Flushable</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">write</span><span class="params">(Buffer source, <span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">  <span class="meta">@Override</span> <span class="function"><span class="keyword">void</span> <span class="title">flush</span><span class="params">()</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">  <span class="function">Timeout <span class="title">timeout</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="meta">@Override</span> <span class="function"><span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Source</span> <span class="keyword">extends</span> <span class="title">Closeable</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">long</span> <span class="title">read</span><span class="params">(Buffer sink, <span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">  <span class="function">Timeout <span class="title">timeout</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="meta">@Override</span> <span class="function"><span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="Source-amp-amp-Sink"><a href="#Source-amp-amp-Sink" class="headerlink" title="Source &amp;&amp; Sink"></a>Source &amp;&amp; Sink</h2><p>在分析Buffer之前还是要先分析一下这两个接口，为什么呢？看一下Buffer的继承结构<br><img src="/images/okio-class.png" alt="Buffer类图"><br><code>Source</code>和<code>Sink</code>这两个接口非常简单，<code>Source</code>提供了向<code>Buffer</code>中写入数据的方法，而<code>Sink</code>提供了从<code>Buffer</code>中读取数据的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Sink</span> <span class="keyword">extends</span> <span class="title class_">Closeable</span>, Flushable &#123;</span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">write</span><span class="params">(Buffer source, <span class="type">long</span> byteCount)</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">  <span class="meta">@Override</span> <span class="keyword">void</span> <span class="title function_">flush</span><span class="params">()</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">  Timeout <span class="title function_">timeout</span><span class="params">()</span>;</span><br><span class="line">  <span class="meta">@Override</span> <span class="keyword">void</span> <span class="title function_">close</span><span class="params">()</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Source</span> <span class="keyword">extends</span> <span class="title class_">Closeable</span> &#123;</span><br><span class="line">  <span class="type">long</span> <span class="title function_">read</span><span class="params">(Buffer sink, <span class="type">long</span> byteCount)</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">  Timeout <span class="title function_">timeout</span><span class="params">()</span>;</span><br><span class="line">  <span class="meta">@Override</span> <span class="keyword">void</span> <span class="title function_">close</span><span class="params">()</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>Sink</code>和<code>Source</code>是相对应的，接下来单独看一下<code>Sink</code>。Sink有一个子接口<code>BufferedSink</code>，这个接口又增加了许多额外的功能。实现类<code>RealBufferedSink</code>仅仅相当于一个代理，所有的实现逻辑都在<code>Buffer</code>中。</p>
 <h2 id="Buffer"><a href="#Buffer" class="headerlink" title="Buffer"></a>Buffer</h2><p>先看一下官方对<code>Buffer</code>的介绍：<code>Buffer</code> 是一个可变的字节序列，就和<code>ArrayList</code>一样，不需要预先调整缓冲区的大小。可以像操作一个队列一样操作Buffer，将数据写入队尾，或者从队头读取数据，并且使用者不需要管理读取的位置，可读取的长度或者序列的容量。Buffer的实现为<code>Segment</code>的连接列表，当将数据从一个buffer移动到另一个buffer时，只需要重新分配Segment的所有权，而不是进行数据的复制。</p>
 <h3 id="示例分析"><a href="#示例分析" class="headerlink" title="示例分析"></a>示例分析</h3><p>这里放一下官方的示例，通过这段代码深入okio的核心类<code>Buffer</code>。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ByteString PNG_HEADER = ByteString.decodeHex(<span class="string">"89504e470d0a1a0a"</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">decodePng</span><span class="params">(InputStream in)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> (BufferedSource pngSource = Okio.buffer(Okio.source(in))) &#123;</span><br><span class="line">    ByteString header = pngSource.readByteString(PNG_HEADER.size());</span><br><span class="line">    <span class="keyword">if</span> (!header.equals(PNG_HEADER)) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"Not a PNG."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">      Buffer chunk = <span class="keyword">new</span> Buffer();</span><br><span class="line">      <span class="comment">// Each chunk is a length, type, data, and CRC offset.</span></span><br><span class="line">      <span class="keyword">int</span> length = pngSource.readInt();</span><br><span class="line">      String type = pngSource.readUtf8(<span class="number">4</span>);</span><br><span class="line">      pngSource.readFully(chunk, length);</span><br><span class="line">      <span class="keyword">int</span> crc = pngSource.readInt();</span><br><span class="line">      decodeChunk(type, chunk);</span><br><span class="line">      <span class="keyword">if</span> (type.equals(<span class="string">"IEND"</span>)) <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">decodeChunk</span><span class="params">(String type, Buffer chunk)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (type.equals(<span class="string">"IHDR"</span>)) &#123;</span><br><span class="line">    <span class="keyword">int</span> width = chunk.readInt();</span><br><span class="line">    <span class="keyword">int</span> height = chunk.readInt();</span><br><span class="line">    System.out.printf(<span class="string">"%08x: %s %d x %d%n"</span>, chunk.size(), type, width, height);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.printf(<span class="string">"%08x: %s%n"</span>, chunk.size(), type);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">ByteString</span> <span class="variable">PNG_HEADER</span> <span class="operator">=</span> ByteString.decodeHex(<span class="string">&quot;89504e470d0a1a0a&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">decodePng</span><span class="params">(InputStream in)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">  <span class="keyword">try</span> (<span class="type">BufferedSource</span> <span class="variable">pngSource</span> <span class="operator">=</span> Okio.buffer(Okio.source(in))) &#123;</span><br><span class="line">    <span class="type">ByteString</span> <span class="variable">header</span> <span class="operator">=</span> pngSource.readByteString(PNG_HEADER.size());</span><br><span class="line">    <span class="keyword">if</span> (!header.equals(PNG_HEADER)) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IOException</span>(<span class="string">&quot;Not a PNG.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">      <span class="type">Buffer</span> <span class="variable">chunk</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Buffer</span>();</span><br><span class="line">      <span class="comment">// Each chunk is a length, type, data, and CRC offset.</span></span><br><span class="line">      <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> pngSource.readInt();</span><br><span class="line">      <span class="type">String</span> <span class="variable">type</span> <span class="operator">=</span> pngSource.readUtf8(<span class="number">4</span>);</span><br><span class="line">      pngSource.readFully(chunk, length);</span><br><span class="line">      <span class="type">int</span> <span class="variable">crc</span> <span class="operator">=</span> pngSource.readInt();</span><br><span class="line">      decodeChunk(type, chunk);</span><br><span class="line">      <span class="keyword">if</span> (type.equals(<span class="string">&quot;IEND&quot;</span>)) <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">decodeChunk</span><span class="params">(String type, Buffer chunk)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (type.equals(<span class="string">&quot;IHDR&quot;</span>)) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">width</span> <span class="operator">=</span> chunk.readInt();</span><br><span class="line">    <span class="type">int</span> <span class="variable">height</span> <span class="operator">=</span> chunk.readInt();</span><br><span class="line">    System.out.printf(<span class="string">&quot;%08x: %s %d x %d%n&quot;</span>, chunk.size(), type, width, height);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.printf(<span class="string">&quot;%08x: %s%n&quot;</span>, chunk.size(), type);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>decodePng()</code>方法中，<code>Okio.source(in)</code>利用InputStream构建了一个<code>Source</code>实例，然后<code>Okio.buffer()</code>利用source实例生成了一个<code>BufferedSource</code>的实例pngSource，这个实例的实际类型为RealBufferedSource（这里就是一个典型的<strong>装饰模式</strong>）。通过<code>RealBufferedSource.readByteString()</code>读取ByteString。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> Buffer buffer = <span class="keyword">new</span> Buffer();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> ByteString <span class="title">readByteString</span><span class="params">(<span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  require(byteCount);</span><br><span class="line">  <span class="keyword">return</span> buffer.readByteString(byteCount);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">require</span><span class="params">(<span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!request(byteCount)) <span class="keyword">throw</span> <span class="keyword">new</span> EOFException();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">request</span><span class="params">(<span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (byteCount &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"byteCount &lt; 0: "</span> + byteCount);</span><br><span class="line">  <span class="keyword">if</span> (closed) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"closed"</span>);</span><br><span class="line">  <span class="keyword">while</span> (buffer.size &lt; byteCount) &#123;</span><br><span class="line">    <span class="keyword">if</span> (source.read(buffer, Segment.SIZE) == -<span class="number">1</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">Buffer</span> <span class="variable">buffer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Buffer</span>();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> ByteString <span class="title function_">readByteString</span><span class="params">(<span class="type">long</span> byteCount)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">  require(byteCount);</span><br><span class="line">  <span class="keyword">return</span> buffer.readByteString(byteCount);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">require</span><span class="params">(<span class="type">long</span> byteCount)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">  <span class="keyword">if</span> (!request(byteCount)) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">EOFException</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">request</span><span class="params">(<span class="type">long</span> byteCount)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">  <span class="keyword">if</span> (byteCount &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;byteCount &lt; 0: &quot;</span> + byteCount);</span><br><span class="line">  <span class="keyword">if</span> (closed) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(<span class="string">&quot;closed&quot;</span>);</span><br><span class="line">  <span class="keyword">while</span> (buffer.size &lt; byteCount) &#123;</span><br><span class="line">    <span class="keyword">if</span> (source.read(buffer, Segment.SIZE) == -<span class="number">1</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p><code>readByteString()</code>方法中，先通过<code>require()</code>方法调用<code>request()</code>方法，利用<code>Source.read()</code>将source中的数据读入到buffer中，然后又调用回<code>Buffer.readByteString()</code>。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> ByteString <span class="title">readByteString</span><span class="params">(<span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> EOFException </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ByteString(readByteArray(byteCount));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">byte</span>[] readByteArray(<span class="keyword">long</span> byteCount) <span class="keyword">throws</span> EOFException &#123;</span><br><span class="line">  checkOffsetAndCount(size, <span class="number">0</span>, byteCount);</span><br><span class="line">  <span class="keyword">if</span> (byteCount &gt; Integer.MAX_VALUE) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"byteCount &gt; Integer.MAX_VALUE: "</span> + byteCount);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">byte</span>[] result = <span class="keyword">new</span> <span class="keyword">byte</span>[(<span class="keyword">int</span>) byteCount];</span><br><span class="line">  readFully(result);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">checkOffsetAndCount</span><span class="params">(<span class="keyword">long</span> size, <span class="keyword">long</span> offset, <span class="keyword">long</span> byteCount)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> ((offset | byteCount) &lt; <span class="number">0</span> || offset &gt; size || size - offset &lt; byteCount) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> ArrayIndexOutOfBoundsException(</span><br><span class="line">        String.format(<span class="string">"size=%s offset=%s byteCount=%s"</span>, size, offset, byteCount));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readFully</span><span class="params">(<span class="keyword">byte</span>[] sink)</span> <span class="keyword">throws</span> EOFException </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> offset = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span> (offset &lt; sink.length) &#123;</span><br><span class="line">    <span class="keyword">int</span> read = read(sink, offset, sink.length - offset);</span><br><span class="line">    <span class="keyword">if</span> (read == -<span class="number">1</span>) <span class="keyword">throw</span> <span class="keyword">new</span> EOFException();</span><br><span class="line">    offset += read;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> ByteString <span class="title function_">readByteString</span><span class="params">(<span class="type">long</span> byteCount)</span> <span class="keyword">throws</span> EOFException &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ByteString</span>(readByteArray(byteCount));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="type">byte</span>[] readByteArray(<span class="type">long</span> byteCount) <span class="keyword">throws</span> EOFException &#123;</span><br><span class="line">  checkOffsetAndCount(size, <span class="number">0</span>, byteCount);</span><br><span class="line">  <span class="keyword">if</span> (byteCount &gt; Integer.MAX_VALUE) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;byteCount &gt; Integer.MAX_VALUE: &quot;</span> + byteCount);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">byte</span>[] result = <span class="keyword">new</span> <span class="title class_">byte</span>[(<span class="type">int</span>) byteCount];</span><br><span class="line">  readFully(result);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">checkOffsetAndCount</span><span class="params">(<span class="type">long</span> size, <span class="type">long</span> offset, <span class="type">long</span> byteCount)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> ((offset | byteCount) &lt; <span class="number">0</span> || offset &gt; size || size - offset &lt; byteCount) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ArrayIndexOutOfBoundsException</span>(</span><br><span class="line">        String.format(<span class="string">&quot;size=%s offset=%s byteCount=%s&quot;</span>, size, offset, byteCount));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">readFully</span><span class="params">(<span class="type">byte</span>[] sink)</span> <span class="keyword">throws</span> EOFException &#123;</span><br><span class="line">  <span class="type">int</span> <span class="variable">offset</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span> (offset &lt; sink.length) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">read</span> <span class="operator">=</span> read(sink, offset, sink.length - offset);</span><br><span class="line">    <span class="keyword">if</span> (read == -<span class="number">1</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">EOFException</span>();</span><br><span class="line">    offset += read;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>readByteArray()</code>中，先检查读取内容的长度是否会造成越界，然后构造一个长度为byteCount的字节数组作为缓存区，利用<code>readFully()</code>方法向数组内充填数据。<code>readFully()</code>方法就是简单的循环调用<code>read()</code>方法，直到将缓存区写满为止。那么这里可以看出，读取数据的主要逻辑都在<code>read()</code>方法中。至于为什么要循环调用，这里先留一个悬念，分析完之后的内容理解这样写的意义了。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">read</span><span class="params">(<span class="keyword">byte</span>[] sink, <span class="keyword">int</span> offset, <span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">  checkOffsetAndCount(sink.length, offset, byteCount);</span><br><span class="line"></span><br><span class="line">  Segment s = head;</span><br><span class="line">  <span class="comment">//省略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">read</span><span class="params">(<span class="type">byte</span>[] sink, <span class="type">int</span> offset, <span class="type">int</span> byteCount)</span> &#123;</span><br><span class="line">  checkOffsetAndCount(sink.length, offset, byteCount);</span><br><span class="line"></span><br><span class="line">  <span class="type">Segment</span> <span class="variable">s</span> <span class="operator">=</span> head;</span><br><span class="line">  <span class="comment">//省略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>read()</code>最开始获取到了成员变量head的引用，它的类型是<code>Segment</code>，<code>Segment</code>在概述中也被提到，他是okio用来储存数据的实现。所有关于okio数据的处理，都会和<code>Segment</code>有关。所以既然看到了<code>Segment</code>，这里就起一个分支先分析一下<code>Segment</code>。  </p>
 <h4 id="Segment"><a href="#Segment" class="headerlink" title="Segment"></a>Segment</h4><p><code>Segment</code>的代码非常少，算上注释也只有150行出头，完整过一遍代码也是很快的。<br>先看一下Segment主要的成员变量，注释里简单介绍了一下这些成员。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Segment最多保存数据的大小 */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SIZE = <span class="number">8192</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** Segments will be shared when doing so avoids &#123;<span class="doctag">@code</span> arraycopy()&#125; of this many bytes. */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SHARE_MINIMUM = <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 不用说了，就是这个数组保存了所有数据 */</span></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">byte</span>[] data;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 当前Segment中下一个可以被读取的字节位置 */</span></span><br><span class="line"><span class="keyword">int</span> pos;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 第一个可以被写数据的字节位置 */</span></span><br><span class="line"><span class="keyword">int</span> limit;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 如果还有别的Segment实例或者ByteString使用了当前实例的data数组，则该变量为true */</span></span><br><span class="line"><span class="keyword">boolean</span> shared;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 如果Segment拥有字节数组，并且可以向其后面添加数据，则为true */</span></span><br><span class="line"><span class="keyword">boolean</span> owner;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 指向环形链表中当前Segment的下一个Segment实例 */</span></span><br><span class="line">Segment next;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 指向环形链表中当前Segment的上一个Segment实例 */</span></span><br><span class="line">Segment prev;</span><br></pre></td></tr></table></figure>
-<p>data是一个长度为8192的字节数组，通过pos和limit来控制有效数据的位置，pos标记着可读数据的位置，limit标记着可写的位置。limit - pos就是可读数据的长度，如果limit == pos，那就说明可读数据长度为零。<br>有next和prev两个指针，这一环形链表的典型成员变量，既然是一个环形列表的数据结构，那么肯定有相应数据结构的处理方法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="meta">@Nullable</span> <span class="function">Segment <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Segment result = next != <span class="keyword">this</span> ? next : <span class="keyword">null</span>;</span><br><span class="line">  prev.next = next;</span><br><span class="line">  next.prev = prev;</span><br><span class="line">  next = <span class="keyword">null</span>;</span><br><span class="line">  prev = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Segment最多保存数据的大小 */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">SIZE</span> <span class="operator">=</span> <span class="number">8192</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** Segments will be shared when doing so avoids &#123;<span class="doctag">@code</span> arraycopy()&#125; of this many bytes. */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">SHARE_MINIMUM</span> <span class="operator">=</span> <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 不用说了，就是这个数组保存了所有数据 */</span></span><br><span class="line"><span class="keyword">final</span> <span class="type">byte</span>[] data;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 当前Segment中下一个可以被读取的字节位置 */</span></span><br><span class="line"><span class="type">int</span> pos;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 第一个可以被写数据的字节位置 */</span></span><br><span class="line"><span class="type">int</span> limit;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 如果还有别的Segment实例或者ByteString使用了当前实例的data数组，则该变量为true */</span></span><br><span class="line"><span class="type">boolean</span> shared;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 如果Segment拥有字节数组，并且可以向其后面添加数据，则为true */</span></span><br><span class="line"><span class="type">boolean</span> owner;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 指向环形链表中当前Segment的下一个Segment实例 */</span></span><br><span class="line">Segment next;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 指向环形链表中当前Segment的上一个Segment实例 */</span></span><br><span class="line">Segment prev;</span><br></pre></td></tr></table></figure>
+<p>data是一个长度为8192的字节数组，通过pos和limit来控制有效数据的位置，pos标记着可读数据的位置，limit标记着可写的位置。limit - pos就是可读数据的长度，如果limit &#x3D;&#x3D; pos，那就说明可读数据长度为零。<br>有next和prev两个指针，这一环形链表的典型成员变量，既然是一个环形列表的数据结构，那么肯定有相应数据结构的处理方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="meta">@Nullable</span> Segment <span class="title function_">pop</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">Segment</span> <span class="variable">result</span> <span class="operator">=</span> next != <span class="built_in">this</span> ? next : <span class="literal">null</span>;</span><br><span class="line">  prev.next = next;</span><br><span class="line">  next.prev = prev;</span><br><span class="line">  next = <span class="literal">null</span>;</span><br><span class="line">  prev = <span class="literal">null</span>;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这个方法是典型的环形列表删除元素操作，先判断列表是否为空，然后移动指针，并把Segment的前驱后继指针都指向null。如果列表删除当前元素后不为空，返回这个被删除元素的next，如果为空，则返回null。与<code>pop()</code>方法对应的<code>push()</code>方法是在当前的Segment段后插入新的Segment段，并调整指针，这里就不放代码了。<br>接下来，既然是存放数据，就需要有读写操作，对于Segment的读操作（将数据读入到data数组中），并没有提供对应的方法，不过看到data是package的访问级别，可以推测到读取操作是通过其他类的方法直接操作data数组来完成的，根据成员变量来看，具体操作就是向data中写入数据，并更新pos的值。而写操作（外界从data数组中取数据）与之类似，最后会改变limit的值。<br>用图举个例子：</p>
 <ul>
 <li><p>初始时，data内没有数据，pos和limit指向0<br><img src="/images/okio-init.jpg" alt="init"></p>
 </li>
-<li><p>向Segment中写入6个字节数据，limit后移六位，这时可读的数据长度为limit-pos = 6<br><img src="/images/okio-write.png" alt="write"></p>
+<li><p>向Segment中写入6个字节数据，limit后移六位，这时可读的数据长度为limit-pos &#x3D; 6<br><img src="/images/okio-write.png" alt="write"></p>
 </li>
-<li><p>从Segment中读取5个字节数据，pos后移5位，这时仍然可读的数据长度为limit-pos = 1<br><img src="/images/okio-read.png" alt="read"></p>
+<li><p>从Segment中读取5个字节数据，pos后移5位，这时仍然可读的数据长度为limit-pos &#x3D; 1<br><img src="/images/okio-read.png" alt="read"></p>
 </li>
 </ul>
-<p>当然，每个Segment实例能存储的数据都是有限的，如果写入的数据超过了segmentA的最大大小，那么较好的做法就是将余下的数据写入segmentB中，然后将segmentB放到segmentA的后面（segmentA.next = segmentB）。这时候问题就来了，这个segmentB是否可以任意生成？显然，如果每次加入新数据都要新生成一个Segment实例，开销有点高。在okio中，是通过SegmentPool来控制Segment实例的分配和回收的，下来一起详细分析一下这个类的代码。</p>
+<p>当然，每个Segment实例能存储的数据都是有限的，如果写入的数据超过了segmentA的最大大小，那么较好的做法就是将余下的数据写入segmentB中，然后将segmentB放到segmentA的后面（segmentA.next &#x3D; segmentB）。这时候问题就来了，这个segmentB是否可以任意生成？显然，如果每次加入新数据都要新生成一个Segment实例，开销有点高。在okio中，是通过SegmentPool来控制Segment实例的分配和回收的，下来一起详细分析一下这个类的代码。</p>
 <h4 id="SegmentPool"><a href="#SegmentPool" class="headerlink" title="SegmentPool"></a>SegmentPool</h4><p>SegmentPool更像是一个工具类，其中只有两个类方法，分别是take()和recycle()，顾名思义，这两个方法一个是获得Segment实例，一个是回收Segment实例。<br>先看一下take()方法：  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 下一个可用Segment实例的引用 */</span></span><br><span class="line"><span class="keyword">static</span> Segment next;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 池中的所有字节长度 */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">long</span> byteCount;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> Segment <span class="title">take</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">synchronized</span> (SegmentPool.class) &#123;</span><br><span class="line">    <span class="keyword">if</span> (next != <span class="keyword">null</span>) &#123;</span><br><span class="line">      Segment result = next;</span><br><span class="line">      next = result.next;</span><br><span class="line">      result.next = <span class="keyword">null</span>;</span><br><span class="line">      byteCount -= Segment.SIZE;</span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> Segment(); <span class="comment">// Pool is empty. Don't zero-fill while holding a lock.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>成员变量next，就是下一个可用Segment实例的引用，如果next为空，说明SegmentPool中没有任何实例，这时会new 一个Segment，并且直接返回。如果next不会空，会返回当前的next，并让next指针重新指向被返回实例的next（这里有点绕，都叫next），将这个实例的next指针置空，最后再减掉被移出SegmentPool的字节数。调用这个方法就可以获得一个pos == limit == 0的Segment实例了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 下一个可用Segment实例的引用 */</span></span><br><span class="line"><span class="keyword">static</span> Segment next;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** 池中的所有字节长度 */</span></span><br><span class="line"><span class="keyword">static</span> <span class="type">long</span> byteCount;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> Segment <span class="title function_">take</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="keyword">synchronized</span> (SegmentPool.class) &#123;</span><br><span class="line">    <span class="keyword">if</span> (next != <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="type">Segment</span> <span class="variable">result</span> <span class="operator">=</span> next;</span><br><span class="line">      next = result.next;</span><br><span class="line">      result.next = <span class="literal">null</span>;</span><br><span class="line">      byteCount -= Segment.SIZE;</span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Segment</span>(); <span class="comment">// Pool is empty. Don&#x27;t zero-fill while holding a lock.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>成员变量next，就是下一个可用Segment实例的引用，如果next为空，说明SegmentPool中没有任何实例，这时会new 一个Segment，并且直接返回。如果next不会空，会返回当前的next，并让next指针重新指向被返回实例的next（这里有点绕，都叫next），将这个实例的next指针置空，最后再减掉被移出SegmentPool的字节数。调用这个方法就可以获得一个pos &#x3D;&#x3D; limit &#x3D;&#x3D; 0的Segment实例了。</p>
 <p>接下来是recycle()方法：  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">recycle</span><span class="params">(Segment segment)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (segment.next != <span class="keyword">null</span> || segment.prev != <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">  <span class="keyword">if</span> (segment.shared) <span class="keyword">return</span>; <span class="comment">// This segment cannot be recycled.</span></span><br><span class="line">  <span class="keyword">synchronized</span> (SegmentPool.class) &#123;</span><br><span class="line">    <span class="keyword">if</span> (byteCount + Segment.SIZE &gt; MAX_SIZE) <span class="keyword">return</span>; <span class="comment">// Pool is full.</span></span><br><span class="line">    byteCount += Segment.SIZE;</span><br><span class="line">    segment.next = next;</span><br><span class="line">    segment.pos = segment.limit = <span class="number">0</span>;</span><br><span class="line">    next = segment;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>recycle()接收一个被回收的Segment实例，如果这个实例next或者prev指针不为空，或者shared字段为true，则证明这个Segment无法被SegmentPool回收。若可以被回收，还需要判断一下加入这个实例后，大小会不会超出SegmentPool的最大大小，没有超过的话，把这个被回收的实例插入到整个队列的最前面，然后让成员next指向他。这里会将limit和pos置为0，对okio的处理来说，不管data里有什么数据，只要pos == limit == 0，就可以认为这个实例为空并且可以在最开头写入数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">recycle</span><span class="params">(Segment segment)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (segment.next != <span class="literal">null</span> || segment.prev != <span class="literal">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>();</span><br><span class="line">  <span class="keyword">if</span> (segment.shared) <span class="keyword">return</span>; <span class="comment">// This segment cannot be recycled.</span></span><br><span class="line">  <span class="keyword">synchronized</span> (SegmentPool.class) &#123;</span><br><span class="line">    <span class="keyword">if</span> (byteCount + Segment.SIZE &gt; MAX_SIZE) <span class="keyword">return</span>; <span class="comment">// Pool is full.</span></span><br><span class="line">    byteCount += Segment.SIZE;</span><br><span class="line">    segment.next = next;</span><br><span class="line">    segment.pos = segment.limit = <span class="number">0</span>;</span><br><span class="line">    next = segment;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>recycle()接收一个被回收的Segment实例，如果这个实例next或者prev指针不为空，或者shared字段为true，则证明这个Segment无法被SegmentPool回收。若可以被回收，还需要判断一下加入这个实例后，大小会不会超出SegmentPool的最大大小，没有超过的话，把这个被回收的实例插入到整个队列的最前面，然后让成员next指向他。这里会将limit和pos置为0，对okio的处理来说，不管data里有什么数据，只要pos &#x3D;&#x3D; limit &#x3D;&#x3D; 0，就可以认为这个实例为空并且可以在最开头写入数据。</p>
 <h3 id="回到Buffer-read"><a href="#回到Buffer-read" class="headerlink" title="回到Buffer.read()"></a>回到Buffer.read()</h3><p>回到read()方法，这里放一下上面没有放出的完整代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">read</span><span class="params">(<span class="keyword">byte</span>[] sink, <span class="keyword">int</span> offset, <span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">  checkOffsetAndCount(sink.length, offset, byteCount);</span><br><span class="line"></span><br><span class="line">  Segment s = head;</span><br><span class="line">  <span class="keyword">if</span> (s == <span class="keyword">null</span>) <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">  <span class="keyword">int</span> toCopy = Math.min(byteCount, s.limit - s.pos);</span><br><span class="line">  System.arraycopy(s.data, s.pos, sink, offset, toCopy);</span><br><span class="line"></span><br><span class="line">  s.pos += toCopy;</span><br><span class="line">  size -= toCopy;<span class="comment">//这个size就是buffer中字节数组的总长</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (s.pos == s.limit) &#123;</span><br><span class="line">    head = s.pop();</span><br><span class="line">    SegmentPool.recycle(s);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> toCopy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结合之前的分析，可以大致猜测到，<code>Buffer</code>中的成员head就是存放数据的Segment链表中第一个有可读数据的Segment实例的引用。因此这里直接就是从head中取出数据，这时候就需要考虑一个情况，从前面的分析可知，每个Segment段都是有最大长度的，为8192，如果需要读取的长度大于这个数字呢？那就去链表的下一个节点去取。看一下<code>Buffer</code>这里是怎处理的。<br>获取到head的引用之后，判断当前可读数据长度(s.limit - s.pos)和需要读取的长度(btyeCount)哪个更大，如果前者更大，说明不是跨段读取，直接从当前段里读取即可；如果后者更大，那么说明当前段全部读完了，也无法达到满足要求，所以这里只能通过toCopy这个量记下已经读到的数据长度。通过<code>System.arraycopy</code>将内容从s.data中copy到sink中，然后调整pos指针。如果s.pos == s.limit了，说明这个段所有的数据都被读完了，调用<code>SegmentPool.recycle()</code>将其回收。最后通过返回toCopy，告诉方法的调用者此时读到了多少长度的字节数据。<br>还记得之前留下的问题吗，为什么在Buffer.readFully()中要多次调用Buffer.read()方法，是因为有可能遇到跨段数据存储的情况，如果一个segment的内容小于需要读取的内容byteCount，那将这些内容读完之后，得到已经读取到的toCopy长度，再用byteCount-toCopy，去下一个segment中读取数据，如此循环。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">read</span><span class="params">(<span class="type">byte</span>[] sink, <span class="type">int</span> offset, <span class="type">int</span> byteCount)</span> &#123;</span><br><span class="line">  checkOffsetAndCount(sink.length, offset, byteCount);</span><br><span class="line"></span><br><span class="line">  <span class="type">Segment</span> <span class="variable">s</span> <span class="operator">=</span> head;</span><br><span class="line">  <span class="keyword">if</span> (s == <span class="literal">null</span>) <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">  <span class="type">int</span> <span class="variable">toCopy</span> <span class="operator">=</span> Math.min(byteCount, s.limit - s.pos);</span><br><span class="line">  System.arraycopy(s.data, s.pos, sink, offset, toCopy);</span><br><span class="line"></span><br><span class="line">  s.pos += toCopy;</span><br><span class="line">  size -= toCopy;<span class="comment">//这个size就是buffer中字节数组的总长</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (s.pos == s.limit) &#123;</span><br><span class="line">    head = s.pop();</span><br><span class="line">    SegmentPool.recycle(s);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> toCopy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结合之前的分析，可以大致猜测到，<code>Buffer</code>中的成员head就是存放数据的Segment链表中第一个有可读数据的Segment实例的引用。因此这里直接就是从head中取出数据，这时候就需要考虑一个情况，从前面的分析可知，每个Segment段都是有最大长度的，为8192，如果需要读取的长度大于这个数字呢？那就去链表的下一个节点去取。看一下<code>Buffer</code>这里是怎处理的。<br>获取到head的引用之后，判断当前可读数据长度(s.limit - s.pos)和需要读取的长度(btyeCount)哪个更大，如果前者更大，说明不是跨段读取，直接从当前段里读取即可；如果后者更大，那么说明当前段全部读完了，也无法达到满足要求，所以这里只能通过toCopy这个量记下已经读到的数据长度。通过<code>System.arraycopy</code>将内容从s.data中copy到sink中，然后调整pos指针。如果s.pos &#x3D;&#x3D; s.limit了，说明这个段所有的数据都被读完了，调用<code>SegmentPool.recycle()</code>将其回收。最后通过返回toCopy，告诉方法的调用者此时读到了多少长度的字节数据。<br>还记得之前留下的问题吗，为什么在Buffer.readFully()中要多次调用Buffer.read()方法，是因为有可能遇到跨段数据存储的情况，如果一个segment的内容小于需要读取的内容byteCount，那将这些内容读完之后，得到已经读取到的toCopy长度，再用byteCount-toCopy，去下一个segment中读取数据，如此循环。</p>
 <h3 id="Buffer-write"><a href="#Buffer-write" class="headerlink" title="Buffer.write()"></a>Buffer.write()</h3><p>分析完<code>read(byte[] sink, int offset, int byteCount)</code>方法，顺势分析一下<code>write(byte[] source, int offset, int byteCount)</code>方法，以完善对Buffer操作<strong>字节数据</strong>的最基本认识。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Buffer <span class="title">write</span><span class="params">(<span class="keyword">byte</span>[] source, <span class="keyword">int</span> offset, <span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//删去参数判断代码</span></span><br><span class="line">  <span class="keyword">int</span> limit = offset + byteCount;</span><br><span class="line">  <span class="keyword">while</span> (offset &lt; limit) &#123;</span><br><span class="line">    Segment tail = writableSegment(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> toCopy = Math.min(limit - offset, Segment.SIZE - tail.limit);</span><br><span class="line">    System.arraycopy(source, offset, tail.data, tail.limit, toCopy);</span><br><span class="line"></span><br><span class="line">    offset += toCopy;</span><br><span class="line">    tail.limit += toCopy;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  size += byteCount;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> Buffer <span class="title function_">write</span><span class="params">(<span class="type">byte</span>[] source, <span class="type">int</span> offset, <span class="type">int</span> byteCount)</span> &#123;</span><br><span class="line">  <span class="comment">//删去参数判断代码</span></span><br><span class="line">  <span class="type">int</span> <span class="variable">limit</span> <span class="operator">=</span> offset + byteCount;</span><br><span class="line">  <span class="keyword">while</span> (offset &lt; limit) &#123;</span><br><span class="line">    <span class="type">Segment</span> <span class="variable">tail</span> <span class="operator">=</span> writableSegment(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> <span class="variable">toCopy</span> <span class="operator">=</span> Math.min(limit - offset, Segment.SIZE - tail.limit);</span><br><span class="line">    System.arraycopy(source, offset, tail.data, tail.limit, toCopy);</span><br><span class="line"></span><br><span class="line">    offset += toCopy;</span><br><span class="line">    tail.limit += toCopy;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  size += byteCount;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>其实大体思路和read()是一样的，需要考虑多个数据段的情况，当读取到的数据少于byteCount时，就会持续进行写入数据的操作。和<code>read()</code>不同之处就是，需要考虑Segment添加的问题，这个功能由<code>writableSegment()</code>方法来完成。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Segment <span class="title">writableSegment</span><span class="params">(<span class="keyword">int</span> minimumCapacity)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//删去参数判断代码</span></span><br><span class="line">  <span class="keyword">if</span> (head == <span class="keyword">null</span>) &#123;</span><br><span class="line">    head = SegmentPool.take(); <span class="comment">// Acquire a first segment.</span></span><br><span class="line">    <span class="keyword">return</span> head.next = head.prev = head;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  Segment tail = head.prev;</span><br><span class="line">  <span class="keyword">if</span> (tail.limit + minimumCapacity &gt; Segment.SIZE || !tail.owner) &#123;</span><br><span class="line">    tail = tail.push(SegmentPool.take()); <span class="comment">// Append a new empty segment to fill up.</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> tail;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Segment <span class="title function_">writableSegment</span><span class="params">(<span class="type">int</span> minimumCapacity)</span> &#123;</span><br><span class="line">  <span class="comment">//删去参数判断代码</span></span><br><span class="line">  <span class="keyword">if</span> (head == <span class="literal">null</span>) &#123;</span><br><span class="line">    head = SegmentPool.take(); <span class="comment">// Acquire a first segment.</span></span><br><span class="line">    <span class="keyword">return</span> head.next = head.prev = head;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">Segment</span> <span class="variable">tail</span> <span class="operator">=</span> head.prev;</span><br><span class="line">  <span class="keyword">if</span> (tail.limit + minimumCapacity &gt; Segment.SIZE || !tail.owner) &#123;</span><br><span class="line">    tail = tail.push(SegmentPool.take()); <span class="comment">// Append a new empty segment to fill up.</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> tail;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>如果head为空，说明当前buffer内还没有数据，调用SegmentPool.take()从SegmentPool中得到一个Segment对象，让head指向它，并将其前驱后继指针都指向自己，形成一个环。<br>如果不为空，说明head已有指向的实例。用tail指向整个环形链表的最后一个实例（环形链表中head.prev就是最末尾的实例），然后，如果需要写入的数据长度大于tail的可写长度，就向链表的末尾新增一个Segment实例，并返回它进行读写操作。为什么这里传入的参数是1？因为为了数据的连贯，就算当前的tail可写入数据的长度只有1了，也要在这次循环中为其写入一个字节，然后在下次循环中，新加入一个Segment实例。因此这个方法的作用就是分配给调用者一个可以写入指定字节数的<code>Segment</code>。<br>获得了Segment之后，就从<code>source</code>copy数据写入Segment，并改变segment的limit。</p>
 <h3 id="Buffer与Buffer之间的操作"><a href="#Buffer与Buffer之间的操作" class="headerlink" title="Buffer与Buffer之间的操作"></a>Buffer与Buffer之间的操作</h3><p>除了<code>Buffer</code>直接和字节数组进行交互，<code>Buffer</code>之间还可以进行交互，并且，<code>Buffer</code>之间的操作才是真正发挥<code>Segment</code>作用的地方。<br>先看一下<code>write(Buffer source, long byteCount)</code>方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(Buffer source, <span class="keyword">long</span> byteCount)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//删去判空代码</span></span><br><span class="line">  <span class="keyword">while</span> (byteCount &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// Is a prefix of the source's head segment all that we need to move?</span></span><br><span class="line">    <span class="keyword">if</span> (byteCount &lt; (source.head.limit - source.head.pos)) &#123;<span class="comment">//判断1</span></span><br><span class="line">      Segment tail = head != <span class="keyword">null</span> ? head.prev : <span class="keyword">null</span>;</span><br><span class="line">      <span class="keyword">if</span> (tail != <span class="keyword">null</span> &amp;&amp; tail.owner</span><br><span class="line">          &amp;&amp; (byteCount + tail.limit - (tail.shared ? <span class="number">0</span> : tail.pos) &lt;= Segment.SIZE)) &#123;<span class="comment">//判断2</span></span><br><span class="line">        <span class="comment">// Our existing segments are sufficient. Move bytes from source's head to our tail.</span></span><br><span class="line">        source.head.writeTo(tail, (<span class="keyword">int</span>) byteCount);</span><br><span class="line">        source.size -= byteCount;</span><br><span class="line">        size += byteCount;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// We're going to need another segment. Split the source's head</span></span><br><span class="line">        <span class="comment">// segment in two, then move the first of those two to this buffer.</span></span><br><span class="line">        source.head = source.head.split((<span class="keyword">int</span>) byteCount);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Remove the source's head segment and append it to our tail.</span></span><br><span class="line">    Segment segmentToMove = source.head;</span><br><span class="line">    <span class="keyword">long</span> movedByteCount = segmentToMove.limit - segmentToMove.pos;</span><br><span class="line">    source.head = segmentToMove.pop();</span><br><span class="line">    <span class="keyword">if</span> (head == <span class="keyword">null</span>) &#123;</span><br><span class="line">      head = segmentToMove;</span><br><span class="line">      head.next = head.prev = head;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      Segment tail = head.prev;</span><br><span class="line">      tail = tail.push(segmentToMove);</span><br><span class="line">      tail.compact();</span><br><span class="line">    &#125;</span><br><span class="line">    source.size -= movedByteCount;</span><br><span class="line">    size += movedByteCount;</span><br><span class="line">    byteCount -= movedByteCount;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个方法将source的数据读到当前的Buffer实例（this）。判断1：所读取的数据长度是完全在source.head内，如果在段内，判断1为true，则去获取this.tail。判断2：tail不为空，且有足够空间写入数据。判断2为true时，通过调用<code>writeTo()</code>方法，将数据写入当前实例的tail中，然后结束写入操作。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">writeTo</span><span class="params">(Segment sink, <span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!sink.owner) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">  <span class="keyword">if</span> (sink.limit + byteCount &gt; SIZE) &#123;</span><br><span class="line">    <span class="comment">// We can't fit byteCount bytes at the sink's current position. Shift sink first.</span></span><br><span class="line">    <span class="keyword">if</span> (sink.shared) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    <span class="keyword">if</span> (sink.limit + byteCount - sink.pos &gt; SIZE) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    System.arraycopy(sink.data, sink.pos, sink.data, <span class="number">0</span>, sink.limit - sink.pos);</span><br><span class="line">    sink.limit -= sink.pos;</span><br><span class="line">    sink.pos = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  System.arraycopy(data, pos, sink.data, sink.limit, byteCount);</span><br><span class="line">  sink.limit += byteCount;</span><br><span class="line">  pos += byteCount;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">write</span><span class="params">(Buffer source, <span class="type">long</span> byteCount)</span> &#123;</span><br><span class="line">  <span class="comment">//删去判空代码</span></span><br><span class="line">  <span class="keyword">while</span> (byteCount &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// Is a prefix of the source&#x27;s head segment all that we need to move?</span></span><br><span class="line">    <span class="keyword">if</span> (byteCount &lt; (source.head.limit - source.head.pos)) &#123;<span class="comment">//判断1</span></span><br><span class="line">      <span class="type">Segment</span> <span class="variable">tail</span> <span class="operator">=</span> head != <span class="literal">null</span> ? head.prev : <span class="literal">null</span>;</span><br><span class="line">      <span class="keyword">if</span> (tail != <span class="literal">null</span> &amp;&amp; tail.owner</span><br><span class="line">          &amp;&amp; (byteCount + tail.limit - (tail.shared ? <span class="number">0</span> : tail.pos) &lt;= Segment.SIZE)) &#123;<span class="comment">//判断2</span></span><br><span class="line">        <span class="comment">// Our existing segments are sufficient. Move bytes from source&#x27;s head to our tail.</span></span><br><span class="line">        source.head.writeTo(tail, (<span class="type">int</span>) byteCount);</span><br><span class="line">        source.size -= byteCount;</span><br><span class="line">        size += byteCount;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// We&#x27;re going to need another segment. Split the source&#x27;s head</span></span><br><span class="line">        <span class="comment">// segment in two, then move the first of those two to this buffer.</span></span><br><span class="line">        source.head = source.head.split((<span class="type">int</span>) byteCount);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Remove the source&#x27;s head segment and append it to our tail.</span></span><br><span class="line">    <span class="type">Segment</span> <span class="variable">segmentToMove</span> <span class="operator">=</span> source.head;</span><br><span class="line">    <span class="type">long</span> <span class="variable">movedByteCount</span> <span class="operator">=</span> segmentToMove.limit - segmentToMove.pos;</span><br><span class="line">    source.head = segmentToMove.pop();</span><br><span class="line">    <span class="keyword">if</span> (head == <span class="literal">null</span>) &#123;</span><br><span class="line">      head = segmentToMove;</span><br><span class="line">      head.next = head.prev = head;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="type">Segment</span> <span class="variable">tail</span> <span class="operator">=</span> head.prev;</span><br><span class="line">      tail = tail.push(segmentToMove);</span><br><span class="line">      tail.compact();</span><br><span class="line">    &#125;</span><br><span class="line">    source.size -= movedByteCount;</span><br><span class="line">    size += movedByteCount;</span><br><span class="line">    byteCount -= movedByteCount;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法将source的数据读到当前的Buffer实例（this）。判断1：所读取的数据长度是完全在source.head内，如果在段内，判断1为true，则去获取this.tail。判断2：tail不为空，且有足够空间写入数据。判断2为true时，通过调用<code>writeTo()</code>方法，将数据写入当前实例的tail中，然后结束写入操作。  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">writeTo</span><span class="params">(Segment sink, <span class="type">int</span> byteCount)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (!sink.owner) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>();</span><br><span class="line">  <span class="keyword">if</span> (sink.limit + byteCount &gt; SIZE) &#123;</span><br><span class="line">    <span class="comment">// We can&#x27;t fit byteCount bytes at the sink&#x27;s current position. Shift sink first.</span></span><br><span class="line">    <span class="keyword">if</span> (sink.shared) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>();</span><br><span class="line">    <span class="keyword">if</span> (sink.limit + byteCount - sink.pos &gt; SIZE) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>();</span><br><span class="line">    System.arraycopy(sink.data, sink.pos, sink.data, <span class="number">0</span>, sink.limit - sink.pos);</span><br><span class="line">    sink.limit -= sink.pos;</span><br><span class="line">    sink.pos = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  System.arraycopy(data, pos, sink.data, sink.limit, byteCount);</span><br><span class="line">  sink.limit += byteCount;</span><br><span class="line">  pos += byteCount;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>如果sink.limit + byteCount &gt; SIZE，则说明sink可供写入数据的位置不够了，如果要写入的话，必须将有效的数据向前平移一段，空出来足够的空间写入数据，具体平移多少？最好是直接将limit指向limit - pos的位置，然后将pos指向0，这样sink的有效数据段前就没有空余的位置了，很好利用了空间。如果这样，余下的空间依旧不足，则抛出<code>IllegalArgumentException</code>。如果足够，将数据平移之后，改动sink.limit和sink.pos。<br>接下来就是将当前实例的数据写入sink中了，通过<code>System.arraycopy()</code>写入数据，然后因为当前Segment实例的内容被读取了，pos位置要后移，sink写入了新内容，limit后移。这样就将一个Segment实例的数据写入到另一个Segment实例中了。<br>回到write()方法中，如果判断2为false，说明this.tail剩余的控件写不下这一段数据，因此需要一个新的Segment实例来存放这些数据。okio通过Segment.split()处理这种情况。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Segment <span class="title">split</span><span class="params">(<span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (byteCount &lt;= <span class="number">0</span> || byteCount &gt; limit - pos) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">  Segment prefix;</span><br><span class="line">  <span class="keyword">if</span> (byteCount &gt;= SHARE_MINIMUM) &#123;</span><br><span class="line">    prefix = <span class="keyword">new</span> Segment(<span class="keyword">this</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    prefix = SegmentPool.take();</span><br><span class="line">    System.arraycopy(data, pos, prefix.data, <span class="number">0</span>, byteCount);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  prefix.limit = prefix.pos + byteCount;</span><br><span class="line">  pos += byteCount;</span><br><span class="line">  prev.push(prefix);</span><br><span class="line">  <span class="keyword">return</span> prefix;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Segment <span class="title function_">split</span><span class="params">(<span class="type">int</span> byteCount)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (byteCount &lt;= <span class="number">0</span> || byteCount &gt; limit - pos) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>();</span><br><span class="line">  Segment prefix;</span><br><span class="line">  <span class="keyword">if</span> (byteCount &gt;= SHARE_MINIMUM) &#123;</span><br><span class="line">    prefix = <span class="keyword">new</span> <span class="title class_">Segment</span>(<span class="built_in">this</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    prefix = SegmentPool.take();</span><br><span class="line">    System.arraycopy(data, pos, prefix.data, <span class="number">0</span>, byteCount);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  prefix.limit = prefix.pos + byteCount;</span><br><span class="line">  pos += byteCount;</span><br><span class="line">  prev.push(prefix);</span><br><span class="line">  <span class="keyword">return</span> prefix;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这里的判断需要读取的字节长度是否大于等于SHARE_MINIMUM。这个SHARE_MINIMUM量涉及到了对Segment分段的处理策略。<code>Segment</code>性能提升较高的原因，就是在某些情况下用空间换时间，并且设定了阈值，在空间和时间的消耗上做了平衡。<br>split()方法中，如果<code>byteCount&gt;=SHARE_MINIMUM</code>为true，为了避免大数据量的copy，会通过<code>new Segment(this)</code>新建一个shared Segment，共享当前Segment的数据，并且shared Segment的shared字段为true，也就是说shared Segment只能被读取，不能写入数据。<code>byteCount&gt;=SHARE_MINIMUM</code>为false时，为了避免<code>Buffer</code>的数据链中有太多不可写入的，数据占比量非常小的<code>Segment</code>，在需要读取的数据量很小时，就直接从SegmentPool中拿一个Segment实例，并将这些少量数据copy到新的Segment中。最后，移动segment的pos和limit限定数据的操作范围，将其放到当前实例的prev上，返回segment的引用。</p>
 <p>再回到write()方法，<code>source.head = source.head.split((int) byteCount)</code>这一句调用了split，说明这一句是将原本的source.head从[pos..limit)分成了[pos..pos+byteCount)和[pos+byteCount..limit)两段，而前面一段正是需要写入this，并可以被移动的数据Segment。准备好source的数据之后，就需要通过将source的Segment直接链到this.tail上。代码中，记录了移动的Segment的数据大小，然后如果this.head为空，那么直接将source.head作为this.head，如果不为空，将source.head插入tail之后，并且调用Segment.compact()对数据进行压缩，减小空间浪费。能够被移动的数据段，只有以下几种情况</p>
 <ul>
@@ -404,377 +315,72 @@
 <li>通过split方法分割的数据段</li>
 </ul>
 <p>介绍完了Buffer之间的数据操作，接下来看一下数据如何进行压缩。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">compact</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (prev == <span class="keyword">this</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException();</span><br><span class="line">  <span class="keyword">if</span> (!prev.owner) <span class="keyword">return</span>; <span class="comment">// Cannot compact: prev isn't writable.</span></span><br><span class="line">  <span class="keyword">int</span> byteCount = limit - pos;</span><br><span class="line">  <span class="keyword">int</span> availableByteCount = SIZE - prev.limit + (prev.shared ? <span class="number">0</span> : prev.pos);</span><br><span class="line">  <span class="keyword">if</span> (byteCount &gt; availableByteCount) <span class="keyword">return</span>; <span class="comment">// Cannot compact: not enough writable space.</span></span><br><span class="line">  writeTo(prev, byteCount);</span><br><span class="line">  pop();</span><br><span class="line">  SegmentPool.recycle(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">compact</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (prev == <span class="built_in">this</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>();</span><br><span class="line">  <span class="keyword">if</span> (!prev.owner) <span class="keyword">return</span>; <span class="comment">// Cannot compact: prev isn&#x27;t writable.</span></span><br><span class="line">  <span class="type">int</span> <span class="variable">byteCount</span> <span class="operator">=</span> limit - pos;</span><br><span class="line">  <span class="type">int</span> <span class="variable">availableByteCount</span> <span class="operator">=</span> SIZE - prev.limit + (prev.shared ? <span class="number">0</span> : prev.pos);</span><br><span class="line">  <span class="keyword">if</span> (byteCount &gt; availableByteCount) <span class="keyword">return</span>; <span class="comment">// Cannot compact: not enough writable space.</span></span><br><span class="line">  writeTo(prev, byteCount);</span><br><span class="line">  pop();</span><br><span class="line">  SegmentPool.recycle(<span class="built_in">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>首先判断当前Segment是否可被压缩（当前Segment链表超过一个Segment、前一个Segment可以写入数据，前一个Segment的剩余空间足够写入当前Segment的所有数据）。如果可以压缩，调用writeTo()方法，将所有可用的数据写入prev中，然后将当前Segment放入SegmentPool中。<br>注意一下这里的剩余空间availableByteCount计算方法<code>SIZE - prev.limit + (prev.shared ? 0 : prev.pos)</code>。prev.shared为true时，说明prev为共享段（shared segment），prev.pos之前的数据都是无效的，可以被有效数据覆盖，因此prev.shared为treu时，prev.pos可以从0开始计算。</p>
 <h2 id="TimeOut"><a href="#TimeOut" class="headerlink" title="TimeOut"></a>TimeOut</h2><p>TimeOut是okio提供的新的功能，可以在流长时间未响应时结束操作。</p>
 
-      
     </div>
-    
-    
-    
 
     
-
     
-
     
 
     <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/Android/" rel="tag"># Android</a>
-          
-            <a href="/tags/Java/" rel="tag"># Java</a>
-          
-            <a href="/tags/网络/" rel="tag"># 网络</a>
-          
-            <a href="/tags/开源框架/" rel="tag"># 开源框架</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2017/12/30/Retrofit-source-code-analysis-Retrofit源码详细解析/" rel="next" title="Retrofit源码详细解析">
-                <i class="fa fa-chevron-left"></i> Retrofit源码详细解析
-              </a>
-            
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%BC%80%E6%BA%90%E6%A1%86%E6%9E%B6/" rel="tag"># 开源框架</a>
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"># 网络</a>
           </div>
 
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/02/16/2019年总结/" rel="prev" title="2019年总结">
-                2019年总结 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-
-    <div class="post-spread">
-      
-    </div>
-  </div>
-
-
-          </div>
-          
-
-
-          
-
-  
-  <div class="comments" id="comments">
-    <div id="gitalk-container"></div>
-  </div>
-
-  
-
-
-
-        </div>
         
-          
-  
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
-  </div>
 
-  <aside id="sidebar" class="sidebar">
-    
-    <div class="sidebar-inner">
-
-      
-
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
-
-      <section class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <img class="site-author-image" itemprop="image"
-                src="/images/ost封面.png"
-                alt="nebula" />
-            
-              <p class="site-author-name" itemprop="name">nebula</p>
-              <p class="site-description motion-element" itemprop="description">技术积累</p>
-          </div>
-
-          <nav class="site-state motion-element">
-
-            
-              <div class="site-state-item site-state-posts">
-              
-                <a href="/archives/">
-              
-                  <span class="site-state-item-count">16</span>
-                  <span class="site-state-item-name">日志</span>
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/12/30/Retrofit-source-code-analysis-Retrofit%E6%BA%90%E7%A0%81%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90/" rel="prev" title="Retrofit源码详细解析">
+                  <i class="fa fa-chevron-left"></i> Retrofit源码详细解析
                 </a>
-              </div>
-            
-
-            
-
-            
-              
-              
-              <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
-                  <span class="site-state-item-count">21</span>
-                  <span class="site-state-item-name">标签</span>
-                </a>
-              </div>
-            
-
-          </nav>
-
-          
-
-          <div class="links-of-author motion-element">
-            
-              
-                <span class="links-of-author-item">
-                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
-                    
-                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
-                </span>
-              
-            
-          </div>
-
-          
-          
-
-          
-          
-            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
-              <div class="links-of-blogroll-title">
-                <i class="fa  fa-fw fa-link"></i>
-                Links
-              </div>
-              <ul class="links-of-blogroll-list">
-                
-                  <li class="links-of-blogroll-item">
-                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
-                  </li>
-                
-              </ul>
             </div>
-          
-
-          
-
-        </div>
-      </section>
-
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ByteString"><span class="nav-number">2.</span> <span class="nav-text">ByteString</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Source-amp-amp-Sink"><span class="nav-number">3.</span> <span class="nav-text">Source &amp;&amp; Sink</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Buffer"><span class="nav-number">4.</span> <span class="nav-text">Buffer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#示例分析"><span class="nav-number">4.1.</span> <span class="nav-text">示例分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Segment"><span class="nav-number">4.1.1.</span> <span class="nav-text">Segment</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SegmentPool"><span class="nav-number">4.1.2.</span> <span class="nav-text">SegmentPool</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回到Buffer-read"><span class="nav-number">4.2.</span> <span class="nav-text">回到Buffer.read()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Buffer-write"><span class="nav-number">4.3.</span> <span class="nav-text">Buffer.write()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Buffer与Buffer之间的操作"><span class="nav-number">4.4.</span> <span class="nav-text">Buffer与Buffer之间的操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TimeOut"><span class="nav-number">5.</span> <span class="nav-text">TimeOut</span></a></li></ol></div>
-            
-
+            <div class="post-nav-item">
+                <a href="/2020/02/16/2019%E5%B9%B4%E6%80%BB%E7%BB%93/" rel="next" title="2019年总结">
+                  2019年总结 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
           </div>
-        </section>
-      <!--/noindex-->
-      
-
-      
-
-    </div>
-  </aside>
-
-
-        
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">nebula</span>
-
-  
+    </footer>
+  </article>
 </div>
 
 
-  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
-
-
-
-  <span class="post-meta-divider">|</span>
-
-
-
-  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
 
 
 
 
-        
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
 
 
-
-
-
-
-
-        
-      </div>
-    </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
-    
-
-    
-
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
 
-  
-
-<script type="text/javascript">
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
-
-
-
-
-
-
-
-
+    </div>
+  </footer>
 
   
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
-
-
-
-  
-  
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
-
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
-
-
-
-  
-
-
-  
-
-
-
-
-	
-
-
-
-
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
 
   
 
@@ -785,165 +391,14 @@
   
 
 
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz","app_key":"SEgjIpBn8x0IJgL4vXdWuyvB","server_url":null,"security":true}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
 
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
 
-
-
-
-
-
-
-
-
-  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
-  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-   <script type="text/javascript">
-        var gitalk = new Gitalk({
-          clientID: 'a9364cafdc67c1bd7840',
-          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
-          repo: 'nebulae-pan.github.io',
-          owner: 'nebulae-pan',
-          admin: ['nebulae-pan'],
-          id:'_20180118214820',
-          labels: 'gitalk'.split(',').filter(l => l),
-          perPage: parseInt(10),
-          pagerDirection: 'last',
-          createIssueManually: true,
-          distractionFreeMode: false
-        })
-
-        gitalk.render('gitalk-container')           
-       </script>
-
-  
-
-
-
-
-
-  
-
-  
-  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
-  <script>AV.initialize("2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz", "SEgjIpBn8x0IJgL4vXdWuyvB");</script>
-  <script>
-    function showTime(Counter) {
-      var query = new AV.Query(Counter);
-      var entries = [];
-      var $visitors = $(".leancloud_visitors");
-
-      $visitors.each(function () {
-        entries.push( $(this).attr("id").trim() );
-      });
-
-      query.containedIn('url', entries);
-      query.find()
-        .done(function (results) {
-          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
-
-          if (results.length === 0) {
-            $visitors.find(COUNT_CONTAINER_REF).text(0);
-            return;
-          }
-
-          for (var i = 0; i < results.length; i++) {
-            var item = results[i];
-            var url = item.get('url');
-            var time = item.get('time');
-            var element = document.getElementById(url);
-
-            $(element).find(COUNT_CONTAINER_REF).text(time);
-          }
-          for(var i = 0; i < entries.length; i++) {
-            var url = entries[i];
-            var element = document.getElementById(url);
-            var countSpan = $(element).find(COUNT_CONTAINER_REF);
-            if( countSpan.text() == '') {
-              countSpan.text(0);
-            }
-          }
-        })
-        .fail(function (object, error) {
-          console.log("Error: " + error.code + " " + error.message);
-        });
-    }
-
-    function addCount(Counter) {
-      var $visitors = $(".leancloud_visitors");
-      var url = $visitors.attr('id').trim();
-      var title = $visitors.attr('data-flag-title').trim();
-      var query = new AV.Query(Counter);
-
-      query.equalTo("url", url);
-      query.find({
-        success: function(results) {
-          if (results.length > 0) {
-            var counter = results[0];
-            counter.fetchWhenSave(true);
-            counter.increment("time");
-            counter.save(null, {
-              success: function(counter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(counter.get('time'));
-              },
-              error: function(counter, error) {
-                console.log('Failed to save Visitor num, with error message: ' + error.message);
-              }
-            });
-          } else {
-            var newcounter = new Counter();
-            /* Set ACL */
-            var acl = new AV.ACL();
-            acl.setPublicReadAccess(true);
-            acl.setPublicWriteAccess(true);
-            newcounter.setACL(acl);
-            /* End Set ACL */
-            newcounter.set("title", title);
-            newcounter.set("url", url);
-            newcounter.set("time", 1);
-            newcounter.save(null, {
-              success: function(newcounter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
-              },
-              error: function(newcounter, error) {
-                console.log('Failed to create');
-              }
-            });
-          }
-        },
-        error: function(error) {
-          console.log('Error:' + error.code + " " + error.message);
-        }
-      });
-    }
-
-    $(function() {
-      var Counter = AV.Object.extend("Counter");
-      if ($('.leancloud_visitors').length == 1) {
-        addCount(Counter);
-      } else if ($('.post-title-link').length > 1) {
-        showTime(Counter);
-      }
-    });
-  </script>
-
-
-
-  
-
-  
-
-  
-  
-
-  
-
-  
-
-  
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nebulae-pan","repo":"nebulae-pan.github.io","client_id":"a9364cafdc67c1bd7840","client_secret":"24a8098003fadc5970f7d244bd12e850dc09b3bb","admin_user":"nebulae-pan","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","js":{"url":"https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js","integrity":"sha256-Pmj85ojLaPOWwRtlMJwmezB/Qg8BzvJp5eTzvXaYAfA="},"path_md5":"816caa077cf988e8aeb4f01315e33b41"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
 
 </body>
 </html>

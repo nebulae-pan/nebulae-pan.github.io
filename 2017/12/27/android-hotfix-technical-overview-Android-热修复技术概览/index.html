@@ -1,336 +1,242 @@
 <!DOCTYPE html>
-
-
-
-  
-
-
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<meta name="theme-color" content="#222">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-
-
-
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
-
-
-
-
-
-
-
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost封面.png?v=5.1.3">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost封面.png?v=5.1.3">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
-
-
-
-
-
-  <meta name="keywords" content="Android,hotfix," />
-
-
-
-
-
-
-
-
-
-
-<meta name="description" content="hotfix比较成熟的原理热修复需要完成的功能：代码修复，资源修复，so修复代码修复大体分为两类，对Java层的修改，和对native层的修改。已有的方向： Dexposed在native层中找到需要修复的Java函数对应的mothed对象，修改为native方法，再将nativeFunc指向框架的native回调方法，再使用该方法回调Java层已经修复的方法。最大的问题：不支持ART虚拟机 Na">
-<meta name="keywords" content="Android,hotfix">
-<meta property="og:type" content="article">
+  <meta name="description" content="热修复技术概览、技术选项、优缺比较">
+<meta property="og:type" content="website">
 <meta property="og:title" content="Android热修复技术概览">
-<meta property="og:url" content="http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/index.html">
+<meta property="og:url" content="http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-%E7%83%AD%E4%BF%AE%E5%A4%8D%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/index.html">
 <meta property="og:site_name" content="nebula&#39;s nebulae">
-<meta property="og:description" content="hotfix比较成熟的原理热修复需要完成的功能：代码修复，资源修复，so修复代码修复大体分为两类，对Java层的修改，和对native层的修改。已有的方向： Dexposed在native层中找到需要修复的Java函数对应的mothed对象，修改为native方法，再将nativeFunc指向框架的native回调方法，再使用该方法回调Java层已经修复的方法。最大的问题：不支持ART虚拟机 Na">
-<meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-03T14:46:57.000Z">
+<meta property="og:description" content="热修复技术概览、技术选项、优缺比较">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-12-27T13:30:15.000Z">
+<meta property="article:modified_time" content="2022-03-20T08:29:40.905Z">
+<meta property="article:author" content="nebula">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="hotfix">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Android热修复技术概览">
-<meta name="twitter:description" content="hotfix比较成熟的原理热修复需要完成的功能：代码修复，资源修复，so修复代码修复大体分为两类，对Java层的修改，和对native层的修改。已有的方向： Dexposed在native层中找到需要修复的Java函数对应的mothed对象，修改为native方法，再将nativeFunc指向框架的native回调方法，再使用该方法回调Java层已经修复的方法。最大的问题：不支持ART虚拟机 Na">
+
+
+<link rel="canonical" href="http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-%E7%83%AD%E4%BF%AE%E5%A4%8D%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/">
 
 
 
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Mist',
-    version: '5.1.3',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: true,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-%E7%83%AD%E4%BF%AE%E5%A4%8D%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/","path":"2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/","title":"Android热修复技术概览"}</script>
 
-
-
-  <link rel="canonical" href="http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/"/>
-
-
-
-
-
-  <title>Android热修复技术概览 | nebula's nebulae</title>
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android热修复技术概览 | nebula's nebulae</title>
   
 
 
 
 
 
-
-
-
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
 
-  
-  
-    
-  
-
-  <div class="container sidebar-position-left page-post-detail">
-    <div class="headband"></div>
-
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">nebula's nebulae</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
     </div>
-      
-        <p class="site-subtitle">快来火炉旁边找个位子随便坐</p>
-      
   </div>
 
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">nebula's nebulae</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">快来火炉旁边找个位子随便坐</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
   </div>
 </div>
 
+
+
 <nav class="site-nav">
-  
-
-  
-    <ul id="menu" class="menu">
-      
-        
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
-
-      
-    </ul>
-  
-
-  
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
 </nav>
 
 
 
- </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#hotfix%E6%AF%94%E8%BE%83%E6%88%90%E7%86%9F%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">hotfix比较成熟的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dexposed"><span class="nav-number">1.1.</span> <span class="nav-text">Dexposed</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Native-Hook"><span class="nav-number">1.2.</span> <span class="nav-text">Native Hook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ClassLoader%E6%9B%BF%E6%8D%A2"><span class="nav-number">1.3.</span> <span class="nav-text">ClassLoader替换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E4%BC%BCInstant-run"><span class="nav-number">1.4.</span> <span class="nav-text">类似Instant run</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%85%B7%E4%BD%93%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">一些具体的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%BF%E9%87%8CAndFix"><span class="nav-number">2.1.</span> <span class="nav-text">阿里AndFix</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%85%BE%E8%AE%AFQQ%E7%A9%BA%E9%97%B4"><span class="nav-number">2.2.</span> <span class="nav-text">腾讯QQ空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E4%BF%A1Tinker"><span class="nav-number">2.3.</span> <span class="nav-text">微信Tinker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BE%8E%E5%9B%A2Robust"><span class="nav-number">2.4.</span> <span class="nav-text">美团Robust</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A5%BF%E4%BA%86%E4%B9%88Amigo"><span class="nav-number">2.5.</span> <span class="nav-text">饿了么Amigo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RocooFix-x2F-HotFix-x2F-Nuwa"><span class="nav-number">2.6.</span> <span class="nav-text">RocooFix&#x2F;HotFix&#x2F;Nuwa</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%BF%E9%87%8CSophix"><span class="nav-number">2.7.</span> <span class="nav-text">阿里Sophix</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">需要解决的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E6%8F%92%E5%85%A5dex-Element"><span class="nav-number">3.1.</span> <span class="nav-text">什么时候插入dex(Element)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dlavik-and-ART"><span class="nav-number">3.2.</span> <span class="nav-text">Dlavik and ART</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C%EF%BC%8C%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C"><span class="nav-number">3.3.</span> <span class="nav-text">完整性校验，签名校验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E8%A1%A5%E4%B8%81%E5%8C%85"><span class="nav-number">3.4.</span> <span class="nav-text">生成补丁包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-7-0-classtable-%E9%97%AE%E9%A2%98"><span class="nav-number">3.5.</span> <span class="nav-text">Android 7.0+ classtable 问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Instant-Run%E5%85%B7%E4%BD%93%E5%8E%9F%E7%90%86-gradle-2-0-0"><span class="nav-number">3.6.</span> <span class="nav-text">Instant Run具体原理(gradle 2.0.0)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E9%80%89%E6%8B%A9%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">方案选择：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%AFinstant-run"><span class="nav-number">4.1.</span> <span class="nav-text">纯instant run</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#native-hook-classLoader-replace"><span class="nav-number">4.2.</span> <span class="nav-text">native hook+classLoader replace</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">nebula</p>
+  <div class="site-description" itemprop="description">技术积累</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nebulae-pan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nebulae-pan" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
     </header>
 
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
-            
-
-  <div id="posts" class="posts-expand">
     
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
 
   
 
-  
+
+<div class="post-block">
   
   
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/27/android-hotfix-technical-overview-Android-%E7%83%AD%E4%BF%AE%E5%A4%8D%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="nebula">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/ost封面.png">
+      <meta itemprop="description" content="技术积累">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="nebula's nebulae">
     </span>
-
-    
       <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android热修复技术概览
+        </h1>
 
-        
-        
-          <h1 class="post-title" itemprop="name headline">Android热修复技术概览</h1>
-        
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
 
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-27T21:30:15+08:00">
-                2017-12-27
-              </time>
-            
+      <time title="创建时间：2017-12-27 21:30:15" itemprop="dateCreated datePublished" datetime="2017-12-27T21:30:15+08:00">2017-12-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-03-20 16:29:40" itemprop="dateModified" datetime="2022-03-20T16:29:40+08:00">2022-03-20</time>
+    </span>
 
-            
+  
+    <span id="/2017/12/27/android-hotfix-technical-overview-Android-%E7%83%AD%E4%BF%AE%E5%A4%8D%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/" class="post-meta-item leancloud_visitors" data-flag-title="Android热修复技术概览" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
 
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2017/12/27/android-hotfix-technical-overview-Android-热修复技术概览/" class="leancloud_visitors" data-flag-title="Android热修复技术概览">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
+            <div class="post-description">热修复技术概览、技术选项、优缺比较</div>
         </div>
       </header>
-    
 
     
     
     
     <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
         <h2 id="hotfix比较成熟的原理"><a href="#hotfix比较成熟的原理" class="headerlink" title="hotfix比较成熟的原理"></a>hotfix比较成熟的原理</h2><p>热修复需要完成的功能：代码修复，资源修复，so修复<br>代码修复大体分为两类，对Java层的修改，和对native层的修改。<br>已有的方向：</p>
 <h3 id="Dexposed"><a href="#Dexposed" class="headerlink" title="Dexposed"></a>Dexposed</h3><p>在native层中找到需要修复的Java函数对应的mothed对象，修改为native方法，再将nativeFunc指向框架的native回调方法，再使用该方法回调Java层已经修复的方法。<br>最大的问题：不支持ART虚拟机</p>
 <h3 id="Native-Hook"><a href="#Native-Hook" class="headerlink" title="Native Hook"></a>Native Hook</h3><p>在JNI层对方法进行替换<br>优点：即时生效<br>缺点：无法在类中替换和删减字段，无法增加方法  </p>
@@ -343,17 +249,18 @@
 <p>优点：</p>
 <ol>
 <li>正常使用ClassLoader，不涉及对系统API的反射调用，不需要针对每个版本和系统机型进行适配  </li>
-<li>补丁应用立即生效  </li>
+<li>补丁应用立即生效</li>
 </ol>
 <p>缺点：</p>
 <ol>
 <li>需要针对每一个修复的方法制作补丁，可以通过自动化制作补丁来完成，但是对开发不透明，需要通过注解或者方法调用告知自动化补丁插件，哪些方法需要添加。</li>
 </ol>
 <h3 id="饿了么Amigo"><a href="#饿了么Amigo" class="headerlink" title="饿了么Amigo"></a>饿了么Amigo</h3><p>在框架的Application中通过反射使用自己的ClassLoader替换掉LoadedApk类中的ClassLoader。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ActivityThread activityThread = ActivityThread.currentActivityThread();</span><br><span class="line">ArrayMap&lt;String, WeakReference&lt;LoadedApk&gt;&gt; packages = activity.mPackages;</span><br><span class="line">LoadedApk loadedApk = packages.get(s).get();<span class="comment">//获取第一个不为空对象</span></span><br><span class="line">loadedApk.mClassLoader = AmigoClassLoader.newInstance(<span class="comment">/*初始化参数*/</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ActivityThread</span> <span class="variable">activityThread</span> <span class="operator">=</span> ActivityThread.currentActivityThread();</span><br><span class="line">ArrayMap&lt;String, WeakReference&lt;LoadedApk&gt;&gt; packages = activity.mPackages;</span><br><span class="line"><span class="type">LoadedApk</span> <span class="variable">loadedApk</span> <span class="operator">=</span> packages.get(s).get();<span class="comment">//获取第一个不为空对象</span></span><br><span class="line">loadedApk.mClassLoader = AmigoClassLoader.newInstance(<span class="comment">/*初始化参数*/</span>);</span><br></pre></td></tr></table></figure>
+
 <p>初始化AmigoClassLoader(extends DexClassLoader)的参数为patch的路径，Amigo接受的patch文件一般为.apk，.dex和.jar也可以。<br>实际上也是一种全量替换，dex的加载完全交给ClassLoader，无需hook dexPathList插入Element</p>
 <p>优点：可以新增Activity，替换so和资源文件，无需插桩<br>缺点：全量加载，patch文件较大</p>
-<h3 id="RocooFix-HotFix-Nuwa"><a href="#RocooFix-HotFix-Nuwa" class="headerlink" title="RocooFix/HotFix/Nuwa"></a>RocooFix/HotFix/Nuwa</h3><p>类似QQ空间的解决方案，含有gradle生成补丁包的插件，生成补丁没有实现完全自动化。</p>
+<h3 id="RocooFix-x2F-HotFix-x2F-Nuwa"><a href="#RocooFix-x2F-HotFix-x2F-Nuwa" class="headerlink" title="RocooFix&#x2F;HotFix&#x2F;Nuwa"></a>RocooFix&#x2F;HotFix&#x2F;Nuwa</h3><p>类似QQ空间的解决方案，含有gradle生成补丁包的插件，生成补丁没有实现完全自动化。</p>
 <h3 id="阿里Sophix"><a href="#阿里Sophix" class="headerlink" title="阿里Sophix"></a>阿里Sophix</h3><p>可以使用两种修复方式：<br>热启动：<br>类似Andfix，在native层修改方法所有的变量，指向被fix的方法，并且加强了兼容性<br>冷启动：<br>类全量技术，通过对dex文件的处理，把dex文件中需要patch的类文件的classRef移除，使虚拟机在处理时找不到旧dex的类文件，被patch的类都在patch.dex中，解决了dalvik虚拟机的CLASS_ISPREVERIFY的问题。</p>
 <h2 id="需要解决的问题"><a href="#需要解决的问题" class="headerlink" title="需要解决的问题"></a>需要解决的问题</h2><h3 id="什么时候插入dex-Element"><a href="#什么时候插入dex-Element" class="headerlink" title="什么时候插入dex(Element)"></a>什么时候插入dex(Element)</h3><p><code>attachBaseContext</code>。Application是app进程运行时第一个被加载的类，在attachBaseContext中，Application才真正被接入AMS中，因此在这个方法中替换dex，可以最大程度减少其他类的加载</p>
 <h3 id="Dlavik-and-ART"><a href="#Dlavik-and-ART" class="headerlink" title="Dlavik and ART"></a>Dlavik and ART</h3><p>Dlavik虚拟机中的pre-verify</p>
@@ -365,7 +272,7 @@
 <li>使用注解标记改动或新增的类或方法，编译时使用注解解析器将被改动的类拿出并打包进patch中。</li>
 <li>(Nuwa)把被改动的类手动提取出来，由插件检测相关联的类，并一起打包进入patch</li>
 </ol>
-<h3 id="Android-7-0-classtable-问题"><a href="#Android-7-0-classtable-问题" class="headerlink" title="Android 7.0+ classtable 问题"></a>Android 7.0+ classtable 问题</h3><p>在ART虚拟机中执行的是经过dex2aot转换后的oat文件，但是dex转成oat的过程导致APP安装时间变长，转换后的oat文件比原来的dex文件大了很多，占用了太多储存空间。<br>因此Android7.0+引入了<a href="https://github.com/WeMobileDev/article/blob/master/Android_N%E6%B7%B7%E5%90%88%E7%BC%96%E8%AF%91%E4%B8%8E%E5%AF%B9%E7%83%AD%E8%A1%A5%E4%B8%81%E5%BD%B1%E5%93%8D%E8%A7%A3%E6%9E%90.md" target="_blank" rel="noopener">混合编译</a>，安装的时候没有全部转换为机器码，而是根据运行时分析热区代码，将热区代码转换成机器码并缓存起来。在Android7.0中，每个APP都会有自己的art文件，用来缓存一些热区代码。Android7.0的ClassLoader类相比之前多了classtable属性，APP启动的时候就会将缓存的类注入到ClassLoader的classtable中，而classtable的加载是在dex之前的，要解决该问题的一个思路是替换整个ClassLoader，不走原本的缓存逻辑。</p>
+<h3 id="Android-7-0-classtable-问题"><a href="#Android-7-0-classtable-问题" class="headerlink" title="Android 7.0+ classtable 问题"></a>Android 7.0+ classtable 问题</h3><p>在ART虚拟机中执行的是经过dex2aot转换后的oat文件，但是dex转成oat的过程导致APP安装时间变长，转换后的oat文件比原来的dex文件大了很多，占用了太多储存空间。<br>因此Android7.0+引入了<a target="_blank" rel="noopener" href="https://github.com/WeMobileDev/article/blob/master/Android_N%E6%B7%B7%E5%90%88%E7%BC%96%E8%AF%91%E4%B8%8E%E5%AF%B9%E7%83%AD%E8%A1%A5%E4%B8%81%E5%BD%B1%E5%93%8D%E8%A7%A3%E6%9E%90.md">混合编译</a>，安装的时候没有全部转换为机器码，而是根据运行时分析热区代码，将热区代码转换成机器码并缓存起来。在Android7.0中，每个APP都会有自己的art文件，用来缓存一些热区代码。Android7.0的ClassLoader类相比之前多了classtable属性，APP启动的时候就会将缓存的类注入到ClassLoader的classtable中，而classtable的加载是在dex之前的，要解决该问题的一个思路是替换整个ClassLoader，不走原本的缓存逻辑。</p>
 <h3 id="Instant-Run具体原理-gradle-2-0-0"><a href="#Instant-Run具体原理-gradle-2-0-0" class="headerlink" title="Instant Run具体原理(gradle 2.0.0)"></a>Instant Run具体原理(gradle 2.0.0)</h3><p>修改了AndroidMenifest.xml的字节码，将Application节点的android:name修改为Instant run相关的<code>BootstrapApplication</code>。<br>使用transform API修改类字节码，给所有的类加上$change字段，$change为IncrementalChange类型。如果$change不为空，则调用$change的access$dispatch方法，参数为方法签名字符串和方法参数数组。<br>在attachBaseContext中，通过反射，将现有ClassLoader的parent设置为<code>IncrementalClassLoader</code><br>在onCreate中，将realApplication替换回应用，并执行相应的生命周期。</p>
 <h2 id="方案选择："><a href="#方案选择：" class="headerlink" title="方案选择："></a>方案选择：</h2><h3 id="纯instant-run"><a href="#纯instant-run" class="headerlink" title="纯instant run"></a>纯instant run</h3><p>up: </p>
 <ul>
@@ -392,369 +299,66 @@
 <li>插入代码需要根据版本源码适配</li>
 </ul>
 
-      
     </div>
-    
-    
-    
 
     
-
     
-
     
 
     <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/Android/" rel="tag"># Android</a>
-          
-            <a href="/tags/hotfix/" rel="tag"># hotfix</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2017/12/20/webview-ssl-authenticate/" rel="next" title="WebView SSL双向认证">
-                <i class="fa fa-chevron-left"></i> WebView SSL双向认证
-              </a>
-            
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/hotfix/" rel="tag"># hotfix</a>
           </div>
 
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/30/Retrofit-source-code-analysis-Retrofit源码详细解析/" rel="prev" title="Retrofit源码详细解析">
-                Retrofit源码详细解析 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-
-    <div class="post-spread">
-      
-    </div>
-  </div>
-
-
-          </div>
-          
-
-
-          
-
-  
-  <div class="comments" id="comments">
-    <div id="gitalk-container"></div>
-  </div>
-
-  
-
-
-
-        </div>
         
-          
-  
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
-  </div>
 
-  <aside id="sidebar" class="sidebar">
-    
-    <div class="sidebar-inner">
-
-      
-
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
-
-      <section class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <img class="site-author-image" itemprop="image"
-                src="/images/ost封面.png"
-                alt="nebula" />
-            
-              <p class="site-author-name" itemprop="name">nebula</p>
-              <p class="site-description motion-element" itemprop="description">技术积累</p>
-          </div>
-
-          <nav class="site-state motion-element">
-
-            
-              <div class="site-state-item site-state-posts">
-              
-                <a href="/archives/">
-              
-                  <span class="site-state-item-count">16</span>
-                  <span class="site-state-item-name">日志</span>
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/12/20/webview-ssl-authenticate/" rel="prev" title="WebView SSL双向认证">
+                  <i class="fa fa-chevron-left"></i> WebView SSL双向认证
                 </a>
-              </div>
-            
-
-            
-
-            
-              
-              
-              <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
-                  <span class="site-state-item-count">21</span>
-                  <span class="site-state-item-name">标签</span>
-                </a>
-              </div>
-            
-
-          </nav>
-
-          
-
-          <div class="links-of-author motion-element">
-            
-              
-                <span class="links-of-author-item">
-                  <a href="https://github.com/nebulae-pan" target="_blank" title="GitHub">
-                    
-                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
-                </span>
-              
-            
-          </div>
-
-          
-          
-
-          
-          
-            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
-              <div class="links-of-blogroll-title">
-                <i class="fa  fa-fw fa-link"></i>
-                Links
-              </div>
-              <ul class="links-of-blogroll-list">
-                
-                  <li class="links-of-blogroll-item">
-                    <a href="https://claude-ray.github.io" title="Claudy-ray" target="_blank">Claudy-ray</a>
-                  </li>
-                
-              </ul>
             </div>
-          
-
-          
-
-        </div>
-      </section>
-
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#hotfix比较成熟的原理"><span class="nav-number">1.</span> <span class="nav-text">hotfix比较成熟的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dexposed"><span class="nav-number">1.1.</span> <span class="nav-text">Dexposed</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Native-Hook"><span class="nav-number">1.2.</span> <span class="nav-text">Native Hook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ClassLoader替换"><span class="nav-number">1.3.</span> <span class="nav-text">ClassLoader替换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类似Instant-run"><span class="nav-number">1.4.</span> <span class="nav-text">类似Instant run</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些具体的实现"><span class="nav-number">2.</span> <span class="nav-text">一些具体的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#阿里AndFix"><span class="nav-number">2.1.</span> <span class="nav-text">阿里AndFix</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#腾讯QQ空间"><span class="nav-number">2.2.</span> <span class="nav-text">腾讯QQ空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#微信Tinker"><span class="nav-number">2.3.</span> <span class="nav-text">微信Tinker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#美团Robust"><span class="nav-number">2.4.</span> <span class="nav-text">美团Robust</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#饿了么Amigo"><span class="nav-number">2.5.</span> <span class="nav-text">饿了么Amigo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RocooFix-HotFix-Nuwa"><span class="nav-number">2.6.</span> <span class="nav-text">RocooFix/HotFix/Nuwa</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阿里Sophix"><span class="nav-number">2.7.</span> <span class="nav-text">阿里Sophix</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#需要解决的问题"><span class="nav-number">3.</span> <span class="nav-text">需要解决的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候插入dex-Element"><span class="nav-number">3.1.</span> <span class="nav-text">什么时候插入dex(Element)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dlavik-and-ART"><span class="nav-number">3.2.</span> <span class="nav-text">Dlavik and ART</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#完整性校验，签名校验"><span class="nav-number">3.3.</span> <span class="nav-text">完整性校验，签名校验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成补丁包"><span class="nav-number">3.4.</span> <span class="nav-text">生成补丁包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-7-0-classtable-问题"><span class="nav-number">3.5.</span> <span class="nav-text">Android 7.0+ classtable 问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Instant-Run具体原理-gradle-2-0-0"><span class="nav-number">3.6.</span> <span class="nav-text">Instant Run具体原理(gradle 2.0.0)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方案选择："><span class="nav-number">4.</span> <span class="nav-text">方案选择：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#纯instant-run"><span class="nav-number">4.1.</span> <span class="nav-text">纯instant run</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#native-hook-classLoader-replace"><span class="nav-number">4.2.</span> <span class="nav-text">native hook+classLoader replace</span></a></li></ol></li></ol></div>
-            
-
+            <div class="post-nav-item">
+                <a href="/2017/12/30/Retrofit-source-code-analysis-Retrofit%E6%BA%90%E7%A0%81%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90/" rel="next" title="Retrofit源码详细解析">
+                  Retrofit源码详细解析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
           </div>
-        </section>
-      <!--/noindex-->
-      
-
-      
-
-    </div>
-  </aside>
-
-
-        
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">nebula</span>
-
-  
+    </footer>
+  </article>
 </div>
 
 
-  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
-
-
-
-  <span class="post-meta-divider">|</span>
-
-
-
-  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
 
 
 
 
-        
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
 
 
-
-
-
-
-
-        
-      </div>
-    </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
-    
-
-    
-
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
 
-  
-
-<script type="text/javascript">
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
-
-
-
-
-
-
-
-
+    </div>
+  </footer>
 
   
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
-
-
-
-  
-  
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
-
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
-
-
-
-  
-
-
-  
-
-
-
-
-	
-
-
-
-
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
 
   
 
@@ -765,165 +369,14 @@
   
 
 
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz","app_key":"SEgjIpBn8x0IJgL4vXdWuyvB","server_url":null,"security":true}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
 
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
 
-
-
-
-
-
-
-
-
-  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
-  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-   <script type="text/javascript">
-        var gitalk = new Gitalk({
-          clientID: 'a9364cafdc67c1bd7840',
-          clientSecret: '24a8098003fadc5970f7d244bd12e850dc09b3bb',
-          repo: 'nebulae-pan.github.io',
-          owner: 'nebulae-pan',
-          admin: ['nebulae-pan'],
-          id:'_20171227213015',
-          labels: 'gitalk'.split(',').filter(l => l),
-          perPage: parseInt(10),
-          pagerDirection: 'last',
-          createIssueManually: true,
-          distractionFreeMode: false
-        })
-
-        gitalk.render('gitalk-container')           
-       </script>
-
-  
-
-
-
-
-
-  
-
-  
-  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
-  <script>AV.initialize("2QUJFHhoAHtW0rtp1Lz6BdXy-gzGzoHsz", "SEgjIpBn8x0IJgL4vXdWuyvB");</script>
-  <script>
-    function showTime(Counter) {
-      var query = new AV.Query(Counter);
-      var entries = [];
-      var $visitors = $(".leancloud_visitors");
-
-      $visitors.each(function () {
-        entries.push( $(this).attr("id").trim() );
-      });
-
-      query.containedIn('url', entries);
-      query.find()
-        .done(function (results) {
-          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
-
-          if (results.length === 0) {
-            $visitors.find(COUNT_CONTAINER_REF).text(0);
-            return;
-          }
-
-          for (var i = 0; i < results.length; i++) {
-            var item = results[i];
-            var url = item.get('url');
-            var time = item.get('time');
-            var element = document.getElementById(url);
-
-            $(element).find(COUNT_CONTAINER_REF).text(time);
-          }
-          for(var i = 0; i < entries.length; i++) {
-            var url = entries[i];
-            var element = document.getElementById(url);
-            var countSpan = $(element).find(COUNT_CONTAINER_REF);
-            if( countSpan.text() == '') {
-              countSpan.text(0);
-            }
-          }
-        })
-        .fail(function (object, error) {
-          console.log("Error: " + error.code + " " + error.message);
-        });
-    }
-
-    function addCount(Counter) {
-      var $visitors = $(".leancloud_visitors");
-      var url = $visitors.attr('id').trim();
-      var title = $visitors.attr('data-flag-title').trim();
-      var query = new AV.Query(Counter);
-
-      query.equalTo("url", url);
-      query.find({
-        success: function(results) {
-          if (results.length > 0) {
-            var counter = results[0];
-            counter.fetchWhenSave(true);
-            counter.increment("time");
-            counter.save(null, {
-              success: function(counter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(counter.get('time'));
-              },
-              error: function(counter, error) {
-                console.log('Failed to save Visitor num, with error message: ' + error.message);
-              }
-            });
-          } else {
-            var newcounter = new Counter();
-            /* Set ACL */
-            var acl = new AV.ACL();
-            acl.setPublicReadAccess(true);
-            acl.setPublicWriteAccess(true);
-            newcounter.setACL(acl);
-            /* End Set ACL */
-            newcounter.set("title", title);
-            newcounter.set("url", url);
-            newcounter.set("time", 1);
-            newcounter.save(null, {
-              success: function(newcounter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
-              },
-              error: function(newcounter, error) {
-                console.log('Failed to create');
-              }
-            });
-          }
-        },
-        error: function(error) {
-          console.log('Error:' + error.code + " " + error.message);
-        }
-      });
-    }
-
-    $(function() {
-      var Counter = AV.Object.extend("Counter");
-      if ($('.leancloud_visitors').length == 1) {
-        addCount(Counter);
-      } else if ($('.post-title-link').length > 1) {
-        showTime(Counter);
-      }
-    });
-  </script>
-
-
-
-  
-
-  
-
-  
-  
-
-  
-
-  
-
-  
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nebulae-pan","repo":"nebulae-pan.github.io","client_id":"a9364cafdc67c1bd7840","client_secret":"24a8098003fadc5970f7d244bd12e850dc09b3bb","admin_user":"nebulae-pan","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","js":{"url":"https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js","integrity":"sha256-Pmj85ojLaPOWwRtlMJwmezB/Qg8BzvJp5eTzvXaYAfA="},"path_md5":"21713c6c292ec77a212e7e89b135ddf7"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
 
 </body>
 </html>
