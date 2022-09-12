@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ost%E5%B0%81%E9%9D%A2.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yoursite.com","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="业务代码问题频出，不知如何改进？重构导致旧功能丢三落四，不知怎么检查？快来了解下单元测试，把出问题补救耗费的精力拿一半来写单元测试吧。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Android平台单元测试流程实践">
+<meta property="og:url" content="http://yoursite.com/2022/09/12/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%9F%BA%E6%9C%AC%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="nebula&#39;s nebulae">
+<meta property="og:description" content="业务代码问题频出，不知如何改进？重构导致旧功能丢三落四，不知怎么检查？快来了解下单元测试，把出问题补救耗费的精力拿一半来写单元测试吧。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-09-12T10:04:43.708Z">
+<meta property="article:modified_time" content="2022-09-12T11:02:58.642Z">
+<meta property="article:author" content="nebula">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Unit Test">
+<meta property="article:tag" content="JUnit">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yoursite.com/2022/09/12/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%9F%BA%E6%9C%AC%E5%AE%9E%E8%B7%B5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yoursite.com/2022/09/12/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%9F%BA%E6%9C%AC%E5%AE%9E%E8%B7%B5/","path":"2022/09/12/单元测试基本实践/","title":"Android平台单元测试流程实践"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android平台单元测试流程实践 | nebula's nebulae</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">nebula's nebulae</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">快来火炉旁边找个位子随便坐</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#What"><span class="nav-number">1.</span> <span class="nav-text">What?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Why"><span class="nav-number">2.</span> <span class="nav-text">Why?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How"><span class="nav-number">3.</span> <span class="nav-text">How?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7"><span class="nav-number">3.1.</span> <span class="nav-text">工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JUnit"><span class="nav-number">3.1.1.</span> <span class="nav-text">JUnit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MockK"><span class="nav-number">3.1.2.</span> <span class="nav-text">MockK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Robolectric"><span class="nav-number">3.1.3.</span> <span class="nav-text">Robolectric</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Truth"><span class="nav-number">3.1.4.</span> <span class="nav-text">Truth</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FAQ"><span class="nav-number">3.1.5.</span> <span class="nav-text">FAQ</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E9%80%A0"><span class="nav-number">3.1.6.</span> <span class="nav-text">改造</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4"><span class="nav-number">3.1.7.</span> <span class="nav-text">范围</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5"><span class="nav-number">3.1.8.</span> <span class="nav-text">异步</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%8E%87"><span class="nav-number">3.2.</span> <span class="nav-text">覆盖率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E9%87%8F%E6%A3%80%E6%9F%A5"><span class="nav-number">3.3.</span> <span class="nav-text">增量检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%84%E8%8C%83-amp-%E5%8E%9F%E5%88%99"><span class="nav-number">3.4.</span> <span class="nav-text">规范 &amp; 原则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="nav-number">4.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">nebula</p>
+  <div class="site-description" itemprop="description">技术积累</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nebulae-pan" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nebulae-pan" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/09/12/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%9F%BA%E6%9C%AC%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nebula">
+      <meta itemprop="description" content="技术积累">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nebula's nebulae">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android平台单元测试流程实践
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-09-12 18:04:43 / 修改时间：19:02:58" itemprop="dateCreated datePublished" datetime="2022-09-12T18:04:43+08:00">2022-09-12</time>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">业务代码问题频出，不知如何改进？重构导致旧功能丢三落四，不知怎么检查？快来了解下单元测试，把出问题补救耗费的精力拿一半来写单元测试吧。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>有过实际工程经验的开发同学肯定都听说过单元测试，但是可能因为对其了解不够清晰，业务变更频繁，认为单元测试的投入没有那么明显的回报，所以从未有过具体的实践。但实际上，单元测试也并非要做到完全覆盖，再怎么频繁迭代的工程也有其稳定的部分，只要在适当的地方增加单测逻辑，覆盖足够的情况，就能在工程维护，开发效率，编码思维方面看到收益。<br>如果之前只是听过，但是从未做过单测，那便可以跟着本文一起往下，了解单测的概念以及如何为工程添加单测。</p>
+<h2 id="What"><a href="#What" class="headerlink" title="What?"></a>What?</h2><p>是针对程序模块（软件设计的最小单位）来进行正确性检验的测试工作。程序单元是应用的最小可测试部件（方法）。</p>
+<h2 id="Why"><a href="#Why" class="headerlink" title="Why?"></a>Why?</h2><p>单元测试的目标是隔离程序逻辑并证明某个方法逻辑是完全正确的。一个单元测试提供了代码逻辑需要满足的严密的书面规范。因此，单元测试带来了一些益处。 单元测试可以让软件开发在早期的过程中就能发现问题。</p>
+<p>从开发阶段来说，很多方法的测试都可以移到到单元测试中来做，而不需要经过超长的编译流程后跑在虚拟机&#x2F;真机上进行验证，这也一定程度上提升了开发效率。</p>
+<p>对于开发同学，在设计方法时，需要考虑并保证其可测试性，这样有助于降低方法逻辑间的耦合；编写单测时，也需要覆盖重点方法中所有可能出现的场景，一些特殊的case，也可以通过单测用例来记录体现，这也一定程度上降低了开发维护的成本。</p>
+<h2 id="How"><a href="#How" class="headerlink" title="How?"></a>How?</h2><h3 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h3><p>那么，应该怎么启动单元测试的覆盖呢？让我们先从工具入手，工具是“先驱者”们经验的总结，能够帮我们规避很多问题。首先，我们跑单测，需要用一个运行环境，能够让单测跑在我们的开发机器上，最合适的就是JUnit。</p>
+<h4 id="JUnit"><a href="#JUnit" class="headerlink" title="JUnit"></a>JUnit</h4><p>JUnit可以说是JVM语言单测的基石，IDEA对其有良好的支持，Android的编译环境下也可以很好发挥其作用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">class SumTest &#123;</span><br><span class="line">    @Test</span><br><span class="line">    fun test_sum() &#123;</span><br><span class="line">        assertEquals(2, Logic.sum(1, 1));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上例所示，只需要通过注解就可以很好的标识可执行的方法，一个类的Test一般和该类放在同一个包下，这样就可以访问到该类中package&#x2F;protected&#x2F;internal的成员。有了JUnit，很多逻辑独立的方法就可以进行单测覆盖了，比如工具方法、数据存取、网络请求。但是实际业务逻辑中，这些方法的比重并不高，绝大多数方法都会耦合业务逻辑，涉及到状态的改变，模块间的交互，这时候，想要去掉这些依赖，我们就需要用Mock。</p>
+<h4 id="MockK"><a href="#MockK" class="headerlink" title="MockK"></a>MockK</h4><p>Mock，可以理解为模拟，这种机制能够帮助我们在运行单测的时候模拟当前单元所依赖的其他模块的功能，这样，即使其他的模块没有加入当前单元的构建，不存于运行环境，也无妨，我们可以通过Mock来虚拟一个；而且在很多情况下Mock机制也能够帮助我们完成控制反转。如这一节标题所示，我们要使用的工具是<code>MockK</code>。</p>
+<p>举一个比较常见的的例子，论坛中的打开帖子详情，其中某些逻辑与用户的状态有关</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">fun openPost(postId: Long) &#123;</span><br><span class="line">    Tracker.trace(TraceId.POST_DETAIL, postId)</span><br><span class="line">    // ...</span><br><span class="line">    val isAdmin = AccountInfoManager.isAdmin()</span><br><span class="line">    if (isAdmin) &#123;</span><br><span class="line">    	ToastManager.show(&quot;admin mod!&quot;)</span><br><span class="line">    	showAdminOperations()</span><br><span class="line">    &#125;</span><br><span class="line">    val account = AccountInfoManager.getCurrentAccount();</span><br><span class="line">    if (!VerifyManager.instance.verifyAccount(account)) &#123;</span><br><span class="line">    	ToastManager.show(&quot;account error!&quot;)</span><br><span class="line">    	return</span><br><span class="line">    &#125;</span><br><span class="line">    PostService.requestContent(account, object : Callback() &#123;</span><br><span class="line">            override fun onResponse(detail: PostDetail) &#123;</span><br><span class="line">                renderViews(detail)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法里涉及到了一些其他的模块，比如埋点、网络请求、toast打印、AccountManager、Account验证。可是我们应该只验证也只关心获取帖子内容的逻辑，在<code>openPost</code>这个方法中，我们只有在认定其他模块没有问题的情况下，才能保证该方法去执行单测的正确性。这时候就可以用到MockK了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">@BeforeClass</span><br><span class="line">@JvmStatic</span><br><span class="line">fun setUp() &#123;</span><br><span class="line">    mockkStatic(Tracker::class)</span><br><span class="line">    // mock埋点，让符合传入任何参数的Tracker.trace()的调用，都转为执行这里设置的打印逻辑</span><br><span class="line">    // 因为下面mock的trace是static方法（@JvmStatic），所以上面是mockkStatic</span><br><span class="line">    every &#123; Tracker.trace(any(), any()) &#125;.answers &#123;</span><br><span class="line">        Printer.print(this)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	// mock VerifyManager，可以认为他的instance成员是companion object</span><br><span class="line">    val verifyManagerMocked = mockk&lt;VerifyManager&gt;()</span><br><span class="line">    // mockkObject可以用来mock object类和companion object</span><br><span class="line">    mockkObject(VerifyManager)</span><br><span class="line">    every &#123; VerifyManager.instance &#125; returns verifyManagerMocked</span><br><span class="line">    // 控制单测中的VerifyManager</span><br><span class="line">    every &#123; verifyManagerMocked.isAdmin() &#125;.answers &#123;</span><br><span class="line">    	// 可以一直返回true</span><br><span class="line">    	true</span><br><span class="line">    &#125;</span><br><span class="line">    mockkObject(ToastManager)</span><br><span class="line">    // mock ToastManager的show，直接打印</span><br><span class="line">    every &#123; ToastManager.show(any()) &#125;.answers &#123;</span><br><span class="line">        Printer.print(&quot;show toast&quot;, this)</span><br><span class="line">        showToastText = firstArg()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的逻辑中，@BeforeClass表示的是在实际开始执行单测前的逻辑，我们可以在这里进行Mock，这样就相当于准备好了我们的单测运行环境，这时，所有可能触发的其他模块的逻辑，都在我们的Mock中，我们可以通过对其他模块调用的监听来完成我们用例的验证。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">@test</span><br><span class="line">fun test_openPost() &#123;</span><br><span class="line">    // 构建我们执行用例的环境</span><br><span class="line">    val testOpenPostPresenter = TestOpenPostPresenter(&quot;&quot;)</span><br><span class="line">    testOpenPostPresenter.openPost(params)</span><br><span class="line">    // 传递参数和重置环境就不体现了，直接在注释中说明</span><br><span class="line">    </span><br><span class="line">    // case1: 账户校验不通过的情况，下面是验证是否符合预期的流程</span><br><span class="line">    // verify mockK提供的API，验证在之前运行的逻辑中有没有verify中能够匹配到的指令。</span><br><span class="line">    // 这里标识如果调用openPost，必须要有一个埋点，如果没有发现埋点调用，直接失败</span><br><span class="line">    verify &#123; </span><br><span class="line">        Tracker.trace(TraceId.POST_DETAIL, any())</span><br><span class="line">    &#125;</span><br><span class="line">    // 这里表示，如果账户校验不通过，预期为调用ToastManager展示一个Toast</span><br><span class="line">    verify &#123;</span><br><span class="line">        ToastManager.show(&quot;account error!&quot;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // case2: 正常流程</span><br><span class="line">    // 埋点一定要有</span><br><span class="line">    verify &#123; </span><br><span class="line">        Tracker.trace(TraceId.POST_DETAIL, any())</span><br><span class="line">    &#125;</span><br><span class="line">    // 正常拉取后一定会调用渲染view方法填充页面内容，如果我们调用了这个方法，并且使用了预期内的参数，那么就算流程成功</span><br><span class="line">    verify &#123;</span><br><span class="line">    	renderViews(any())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>先稍稍总结下使用mock的思路</p>
+<ul>
+<li>寻找需要mock的场景</li>
+<li>设置预期的表现</li>
+<li>验证结果</li>
+</ul>
+<p>按照这个思路，绝大多数场景我们都可以通过Mock来解除被测单元和其他单元间的耦合，这无疑是一个强大的功能。但，mock也不是万能的，“得益于”mock工具的使用方式，mock某些类时，单元测试也和这些类建立了直接引用和联系，这些外部模块的改动也需要让所有相关的mock都进行相应的修改，使用的mock越多，后续维护的成本就越大。并且，在逻辑特别错综复杂时，找到所有的mock点，为他们设置预期，并且去验证结果 ，这样的流程是非常繁琐的。因此，mock只建议作为处理依赖的“最终手段”，而不是通用手段。平常的编码，就应当在设计方法，拆分逻辑时减少他们和外部的耦合，这一思路会在后续展开讨论。</p>
+<p>现在我们掌握了mock大法，理应开始大展拳脚了，可是在跑关于Android的类时，又遇到了问题。在跑单测的JVM上并没有Android的类，难道需要mock所有Android的类吗？这显然并不现实。好在已经有工具支持——<code>Robolectric</code>，它可以在JVM环境中模拟Android的行为。</p>
+<h4 id="Robolectric"><a href="#Robolectric" class="headerlink" title="Robolectric"></a>Robolectric</h4><p>在JUnit中使用Robolectric也比较简单，指定对应的Runner即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@RunWith(RobolectricTestRunner::class)</span><br><span class="line">class SumTest &#123;</span><br><span class="line">    @Test</span><br><span class="line">    fun test_sum() &#123;</span><br><span class="line">        assertEquals(2, Logic.sum(1, 1));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好了，这样就已经OK了，像Handler，android.util.Log这种及其常用且和Android的UI体系没有太大关联的类，在Robolectric的帮助下运行单测时已经全部被Shadow替换了。也可以通过API做一些通用的替换，比如，我们可以重定向所有Log的输出到控制台</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ShadowLog.stream = System.out</span><br></pre></td></tr></table></figure>
+
+<h4 id="Truth"><a href="#Truth" class="headerlink" title="Truth"></a>Truth</h4><p>简化验证语句的编写，让控制台的日志更加易读，不赘述了。</p>
+<h4 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h4><p>JUnit版本？<br>JUnit使用JUnit4，JUnit5和Robolectric兼容不好。</p>
+<p>为什么不使用Mockito?<br>Mockito对Kotlin的支持实在说不上好，最常用的when方法和kotlin关键字冲突、又无法mock companion object field，诸多困难让我转向了MockK，目前几个case写下来还是很不错的。</p>
+<p>运行时报错：No tests found for given includes Error<br>可能有两种情况，1. test class\function名字改了， 2. class为internal，需要改为public（JUnit5可以使用internal）</p>
+<p>Roboletric在beforeClass时不生效<br>Robolectric的Runner只有在test case中生效，beforeClass不生效</p>
+<h4 id="改造"><a href="#改造" class="headerlink" title="改造"></a>改造</h4><p>在之前的讨论中，我们其实多次讨论到了可测试性，那么如何提高编写代码的可测试呢？直接抛结论很不直观，让我们从一些实际的例子入手</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fun openPost(postId: Long) &#123;</span><br><span class="line">    Tracker.trace(TraceId.POST_DETAIL, postId)</span><br><span class="line">    val isAdmin = AccountInfoManager.isAdmin()</span><br><span class="line">    if (isAdmin) &#123;</span><br><span class="line">    	ToastManager.show(&quot;admin mod!&quot;)</span><br><span class="line">    	showAdminOperations()</span><br><span class="line">    &#125;</span><br><span class="line">    // ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是个拉取帖子详情的流程，可以看到第3行去获取了用户的模式。这里其实相当于一个隐式输入，如果不去查看<code>isAdmin()</code>方法的源码话，它的的调用者并不会知道内部有这个逻辑。这里其实有两种方式去解决</p>
+<p>控制反转，修改获取协议的方式，比如通过抽象一个Provider来获取，测试时使用不同用例的Provider实现；或者通过Mock修改不同case下的check值<br>引入方法参数，将check值获取的逻辑移出，通过参数来获取这个值<br>由于在openPost()方法中，需要关注的应该是拉取，考虑到单一职责的设计原则，我们在这里更应该选择第二种方式。不过，选择第二种方式，也就意味着将依赖逻辑都抛给了调用方，这时就需要由调用方来处理对应的隐式输入了，这时候我们也应该判断，由底层抛出的逻辑是否是当前方法的职责，如果是，那么控制反转，若不是，就选择继续引入参数。</p>
+<p>以小见大，在这个case里我们讨论到了单一职责，控制反转，其实他们都是SOLID的一部分，一份参考与遵守SOLID原则的代码，他的可测试性是相对较高的。推荐大家在旧代码覆盖单测的过程中与开发新功能的过程中，参考SOLID进行代码的重构与设计。</p>
+<h4 id="范围"><a href="#范围" class="headerlink" title="范围"></a>范围</h4><p>那么，需要单测覆盖的范围呢？理想情况下，我们肯定会希望每个方法都进行单测，每一行代码都被覆盖到，保证100%的覆盖率，让任何改动都尽在我们的掌控之中，但这显然没什么必要，要达到全覆盖，这项工作的开销就远大于收益了。从目前的项目结构和迭代节奏来看，判断单测优先级可以按重要程度和迭代频率两个维度来考虑。如果重要程度非常高，且迭代频率很低，那么说明这个功能模块就是绝佳的单测覆盖场景，可以立马开始写用例了。相对的，如果迭代频率高，且是一些不重要的业务模块，那就完全没有必要去考虑为这些逻辑配上单测流程。剩下的迭代频率低、重要度低，和迭代频率高、重要度高的模块，根据经验来说，重要度的权重更高一些，可以先从后者开始覆盖。<br>另外，决定要做单测时，一个类中的方法也可以按访问级别做优先级的划分，比如一般情况下public方法相对private方法会更加稳定，可以优先做public方法的覆盖。</p>
+<p>以下方法可以不做单测</p>
+<ul>
+<li>非常简单的方法，能够在调用点验证的，比如getter&#x2F;setter&#x2F;toString等等</li>
+<li>构造方法，只做资源准备的话可以不验证</li>
+<li>wrapper方法，可以只验证被包装的逻辑</li>
+</ul>
+<p>需要做单测，但是容易被忽略的</p>
+<ul>
+<li>静态代理的方法，虽然逻辑不多，但是有可能需要验证转发的行为</li>
+<li>复写的方法，需要在子类验证逻辑</li>
+</ul>
+<h4 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h4><p>单元测试是同步的，异步执行的逻辑常常会在单测方法跑完之后，因此需要特别注意。如果，异步执行的是主要逻辑，那么可以考虑只验证异步中的逻辑，将其当作一个单独的单元来测试（比如网络请求）。如果一个方法中主要线程的逻辑和其异步执行的逻辑同样重要，那么就要借助工具了。Handler可以考虑使用Robolectric将异步逻辑立即执行，Thread、ThreadPool可以考虑通过mock，直接执行对应的Runnable，如果使用RxJava，也可以借助API切换进程。</p>
+<h3 id="覆盖率"><a href="#覆盖率" class="headerlink" title="覆盖率"></a>覆盖率</h3><p>覆盖率是一个比较重要的指标，覆盖率工具也能够可视化的从指令层面上展现代码测试的覆盖情况。目前主流的代码测试覆盖率框架为Jacoco，但是使用下来对Kotlin的支持有些问题。调研并使用了<code>Kover</code>后，发现效果也非常不错。<br><code>Kover</code>的使用非常简单，root gradle中引入并开启report，指定输出目录即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 同样还可以开启xml格式的报告输出</span><br><span class="line">task.koverMergedHtmlReport &#123;</span><br><span class="line">	enabled = true</span><br><span class="line">	htmlReportDir.set(layout.buildDirectory.dir(&quot;unit_test_cover_report&quot;/html-result))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">kover &#123;</span><br><span class="line">	disable = false</span><br><span class="line">	// 可以指定不想运行单测的模块</span><br><span class="line">	disabledProjects = [&quot;demo&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="增量检查"><a href="#增量检查" class="headerlink" title="增量检查"></a>增量检查</h3><p>可以期待后续文章</p>
+<h3 id="规范-amp-原则"><a href="#规范-amp-原则" class="headerlink" title="规范 &amp; 原则"></a>规范 &amp; 原则</h3><p>最后一部分，简单的定一些规范原则，在进行单测覆盖的初期先试行，会在开发过程中随时修改，有稳定版后会单独维护文章</p>
+<ul>
+<li>编写用例时注意错误&#x2F;边界条件，不要在测试方法中使用try-catch</li>
+<li>每个用例都应该有说明，或者你的用例名称足够说明他是什么场景下会出现的</li>
+<li>单元测试的逻辑也可能会有Bug或者遗漏用例的情况，在后续的开发、测试过程中如果发现错漏要及时修改</li>
+<li>一般来说，不需要专门测试private方法，可以通过覆盖调用该方法的其他高访问级别的方法来间接验证。如果private方法非常复杂且需要详细测试，就要考虑该方法能否放到单独的类中。如果不行的话，最终手段可以提高其访问级别，并通过@VisibleForTesting注解标记，告知编译器这个方法不应该被外部调用</li>
+<li>测试类最好和被测试类放在同一个包名下</li>
+<li>测试类的类名跟Test后缀</li>
+<li>测试方法的方法名要有test_前缀</li>
+<li>测试方法之间不能互相引用</li>
+</ul>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><p>google Android单测示例：<a target="_blank" rel="noopener" href="https://github.com/android/testing-samples">https://github.com/android/testing-samples</a><br>gradle单元测试官方指南：<a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/java_testing.html#sec:java_testing_basics">https://docs.gradle.org/current/userguide/java_testing.html#sec:java_testing_basics</a><br>mockK官方介绍文档：<a target="_blank" rel="noopener" href="https://mockk.io/#markdown-toc">https://mockk.io/#markdown-toc</a><br>robolectric文档：<a target="_blank" rel="noopener" href="http://robolectric.org/">http://robolectric.org/</a><br>Truth官方文档: <a target="_blank" rel="noopener" href="https://truth.dev/%C2%B7">https://truth.dev/·</a><br>kover github: <a target="_blank" rel="noopener" href="https://github.com/Kotlin/kotlinx-kover">https://github.com/Kotlin/kotlinx-kover</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/Unit-Test/" rel="tag"># Unit Test</a>
+              <a href="/tags/JUnit/" rel="tag"># JUnit</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/02/13/sammary-of-2021/" rel="prev" title="2021——迷茫中做出尝试的一年">
+                  <i class="fa fa-chevron-left"></i> 2021——迷茫中做出尝试的一年
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nebula</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nebulae-pan","repo":"nebulae-pan.github.io","client_id":"a9364cafdc67c1bd7840","client_secret":"24a8098003fadc5970f7d244bd12e850dc09b3bb","admin_user":"nebulae-pan","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","js":{"url":"https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js","integrity":"sha256-Pmj85ojLaPOWwRtlMJwmezB/Qg8BzvJp5eTzvXaYAfA="},"path_md5":"48743a65cab17a83db93ca2879cf405c"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>
